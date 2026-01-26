@@ -204,21 +204,18 @@ export async function processFile(fileMetadata, filePath) {
       return await processCSV(filePath);
     }
 
-    // Word documents
-    if (mime_type === 'application/msword' ||
-        mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+    // Word documents (.docx only)
+    if (mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       return await processWord(filePath);
     }
 
-    // Excel spreadsheets
-    if (mime_type === 'application/vnd.ms-excel' ||
-        mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+    // Excel spreadsheets (.xlsx only)
+    if (mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
       return await processExcel(filePath);
     }
 
-    // PowerPoint presentations
-    if (mime_type === 'application/vnd.ms-powerpoint' ||
-        mime_type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+    // PowerPoint presentations (.pptx only)
+    if (mime_type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
       return await processPowerPoint(filePath);
     }
 
