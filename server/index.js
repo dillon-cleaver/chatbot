@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { processFile } from './fileProcessor.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -88,7 +89,7 @@ const upload = multer({
 
 app.post('/chat', async (req, res) => {
   try {
-    const { messages } = req.body;
+    const { messages, fileIds } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'Messages array is required' });
@@ -98,9 +99,43 @@ app.post('/chat', async (req, res) => {
       return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
     }
 
+    // Process files if provided
+    if (fileIds && fileIds.length > 0) {
+      if (fileIds.length > 5) {
+        return res.status(400).json({ error: 'Maximum 5 files per message' });
+      }
+
+      const lastMessage = messages[messages.length - 1];
+      const contentBlocks = [{ type: 'text', text: lastMessage.content }];
+
+      for (const fileId of fileIds) {
+        const file = db.prepare('SELECT * FROM files WHERE id = ?').get(fileId);
+        if (!file) {
+          return res.status(400).json({ error: `File not found: ${fileId}` });
+        }
+
+        const filePath = path.join(__dirname, file.path);
+        if (!fs.existsSync(filePath)) {
+          return res.status(400).json({ error: `File not found on disk: ${file.original_name}` });
+        }
+
+        try {
+          const contentBlock = await processFile(file, filePath);
+          contentBlocks.push(contentBlock);
+        } catch (error) {
+          return res.status(400).json({
+            error: `Failed to process ${file.original_name}`,
+            details: error.message
+          });
+        }
+      }
+
+      messages[messages.length - 1].content = contentBlocks;
+    }
+
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1024,
+      max_tokens: 2048,
       messages: messages.map(msg => ({
         role: msg.role,
         content: msg.content,
@@ -111,9 +146,9 @@ app.post('/chat', async (req, res) => {
     res.json({ content });
   } catch (error) {
     console.error('Error calling Claude API:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to get response from Claude',
-      details: error.message 
+      details: error.message
     });
   }
 });
