@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import styles from './App.module.css';
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
   const [files, setFiles] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -83,6 +85,8 @@ function App() {
       }
 
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
+      // Remove from selected files if it was selected
+      setSelectedFiles((prev) => prev.filter((id) => id !== fileId));
     } catch (error) {
       console.error('Delete failed:', error);
       alert('Failed to delete file. Please try again.');
@@ -106,6 +110,22 @@ function App() {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
+  const toggleFileSelection = (fileId) => {
+    setSelectedFiles(prev =>
+      prev.includes(fileId)
+        ? prev.filter(id => id !== fileId)
+        : [...prev, fileId]
+    );
+  };
+
+  const removeSelectedFile = (fileId) => {
+    setSelectedFiles(prev => prev.filter(id => id !== fileId));
+  };
+
+  const clearSelectedFiles = () => {
+    setSelectedFiles([]);
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -121,20 +141,27 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messages: updatedMessages }),
+        body: JSON.stringify({
+          messages: updatedMessages,
+          fileIds: selectedFiles.length > 0 ? selectedFiles : undefined
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get response');
       }
 
       const data = await response.json();
       setMessages([...updatedMessages, { role: 'assistant', content: data.content }]);
+
+      // Clear selected files after successful send
+      clearSelectedFiles();
     } catch (error) {
       console.error('Error:', error);
       setMessages([
         ...updatedMessages,
-        { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' },
+        { role: 'assistant', content: `Sorry, I encountered an error: ${error.message}` },
       ]);
     } finally {
       setIsLoading(false);
@@ -155,13 +182,22 @@ function App() {
   return (
     <div className={styles.app}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Chatbot</h1>
-        <button className={styles.fileButton} onClick={() => setIsModalOpen(true)}>
-          📎 {files.length > 0 && <span className={styles.fileBadge}>{files.length}</span>}
-        </button>
-        <button className={styles.themeToggle} onClick={toggleTheme}>
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>Chatbot</h1>
+          {selectedFiles.length > 0 && (
+            <span className={styles.contextIndicator}>
+              Selected: {selectedFiles.length} {selectedFiles.length === 1 ? 'file' : 'files'}
+            </span>
+          )}
+        </div>
+        <div className={styles.headerRight}>
+          <button className={styles.fileButton} onClick={() => setIsModalOpen(true)}>
+            📎 {files.length > 0 && <span className={styles.fileBadge}>{files.length}</span>}
+          </button>
+          <button className={styles.themeToggle} onClick={toggleTheme}>
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
       </div>
       <div className={styles.chatContainer}>
         <div className={styles.messages}>
@@ -177,7 +213,9 @@ function App() {
                 msg.role === 'user' ? styles.userMessage : styles.assistantMessage
               }`}
             >
-              <div className={styles.messageContent}>{msg.content}</div>
+              <div className={styles.messageContent}>
+                <ReactMarkdown>{msg.content}</ReactMarkdown>
+              </div>
             </div>
           ))}
           {isLoading && (
@@ -188,22 +226,43 @@ function App() {
           <div ref={messagesEndRef} />
         </div>
         <div className={styles.inputContainer}>
-          <textarea
-            className={styles.input}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="Type your message..."
-            rows={1}
-            disabled={isLoading}
-          />
-          <button
-            className={styles.sendButton}
-            onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-          >
-            Send
-          </button>
+          {selectedFiles.length > 0 && (
+            <div className={styles.fileChipsContainer}>
+              {selectedFiles.map(fileId => {
+                const file = files.find(f => f.id === fileId);
+                return file ? (
+                  <div key={fileId} className={styles.fileChip}>
+                    <span className={styles.fileChipIcon}>{getFileIcon(file.mime_type)}</span>
+                    <span className={styles.fileChipName}>{file.original_name}</span>
+                    <button
+                      className={styles.fileChipRemove}
+                      onClick={() => removeSelectedFile(fileId)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : null;
+              })}
+            </div>
+          )}
+          <div className={styles.inputRow}>
+            <textarea
+              className={styles.input}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Type your message..."
+              rows={1}
+              disabled={isLoading}
+            />
+            <button
+              className={styles.sendButton}
+              onClick={sendMessage}
+              disabled={isLoading || !input.trim()}
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
 
@@ -240,6 +299,12 @@ function App() {
               ) : (
                 files.map((file) => (
                   <div key={file.id} className={styles.fileItem}>
+                    <input
+                      type="checkbox"
+                      checked={selectedFiles.includes(file.id)}
+                      onChange={() => toggleFileSelection(file.id)}
+                      className={styles.fileCheckbox}
+                    />
                     <span className={styles.fileIcon}>{getFileIcon(file.mime_type)}</span>
                     <span className={styles.fileName}>{file.original_name}</span>
                     <span className={styles.fileSize}>{formatBytes(file.size)}</span>
