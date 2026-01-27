@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
 import styles from './App.module.css';
-import { getFileIcon, formatBytes } from './utils/fileUtils';
-import { MAX_FILES_PER_MESSAGE, MAX_TOTAL_FILES } from './constants';
 import { useTheme } from './hooks/useTheme';
 import { useFileManager } from './hooks/useFileManager';
 import { useConversations } from './hooks/useConversations';
 import { useChat } from './hooks/useChat';
+import { Header } from './components/layout/Header/Header';
+import { ChatMessages } from './components/chat/ChatMessages/ChatMessages';
+import { ChatInput } from './components/chat/ChatInput/ChatInput';
+import { FileAttachModal } from './components/files/FileAttachModal/FileAttachModal';
+import { ChatHistoryModal } from './components/history/ChatHistoryModal/ChatHistoryModal';
+import { ConfirmDialog } from './components/ui/ConfirmDialog/ConfirmDialog';
 
 function App(): React.JSX.Element {
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState<boolean>(false);
@@ -57,10 +60,6 @@ function App(): React.JSX.Element {
     conversations.closeHistoryModal();
   };
 
-  const attachFilesAndClose = (): void => {
-    fileManager.closeModal();
-  };
-
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -73,325 +72,73 @@ function App(): React.JSX.Element {
     await conversations.refreshConversations();
   };
 
+  const selectedFiles = fileManager.files.filter(f =>
+    fileManager.selectedFileIds.includes(f.id)
+  );
+
   return (
     <div className={styles.app}>
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>Chatbot</h1>
-          {fileManager.selectedFileIds.length > 0 && (
-            <span className={styles.contextIndicator}>
-              Selected: {fileManager.selectedFileIds.length} {fileManager.selectedFileIds.length === 1 ? 'file' : 'files'}
-            </span>
-          )}
-        </div>
-        <div className={styles.headerRight}>
-          <button className={styles.historyButton} onClick={conversations.openHistoryModal}>
-            💬
-          </button>
-          <button className={styles.fileButton} onClick={fileManager.openModal}>
-            📁
-          </button>
-          <button className={styles.themeToggle} onClick={toggleTheme}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
-        </div>
-      </div>
+      <Header
+        selectedFilesCount={fileManager.selectedFileIds.length}
+        onHistoryClick={conversations.openHistoryModal}
+        onFilesClick={fileManager.openModal}
+        theme={theme}
+        onThemeToggle={toggleTheme}
+      />
+
       <div className={styles.chatContainer}>
-        <div className={styles.messages}>
-          {chat.messages.length === 0 && (
-            <div className={styles.emptyState}>
-              <p>Start a conversation with the chatbot!</p>
-            </div>
-          )}
-          {chat.messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`${styles.message} ${
-                msg.role === 'user' ? styles.userMessage : styles.assistantMessage
-              }`}
-            >
-              <div className={styles.messageContent}>
-                <ReactMarkdown>{msg.content}</ReactMarkdown>
-              </div>
-            </div>
-          ))}
-          {chat.isLoading && (
-            <div className={`${styles.message} ${styles.assistantMessage}`}>
-              <div className={styles.messageContent}>Thinking...</div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-        <div className={styles.inputContainer}>
-          {fileManager.selectedFileIds.length > 0 && (
-            <div className={styles.fileChipsContainer}>
-              {fileManager.selectedFileIds.map(fileId => {
-                const file = fileManager.files.find(f => f.id === fileId);
-                return file ? (
-                  <div key={fileId} className={styles.fileChip}>
-                    <span className={styles.fileChipIcon}>{getFileIcon(file.mime_type)}</span>
-                    <span className={styles.fileChipName}>{file.original_name}</span>
-                    <button
-                      className={styles.fileChipRemove}
-                      onClick={() => fileManager.removeSelectedFile(fileId)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ) : null;
-              })}
-            </div>
-          )}
-          <div className={styles.inputRow}>
-            <button
-              className={styles.attachButton}
-              onClick={fileManager.openModal}
-              title="Attach files"
-            >
-              📁
-            </button>
-            <textarea
-              className={styles.input}
-              value={chat.input}
-              onChange={(e) => chat.setInput(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="Type your message..."
-              rows={1}
-              disabled={chat.isLoading}
-            />
-            <button
-              className={styles.sendButton}
-              onClick={handleSendMessage}
-              disabled={chat.isLoading || !chat.input.trim()}
-            >
-              Send
-            </button>
-          </div>
-        </div>
+        <ChatMessages
+          messages={chat.messages}
+          isLoading={chat.isLoading}
+          messagesEndRef={messagesEndRef}
+        />
+
+        <ChatInput
+          value={chat.input}
+          onChange={chat.setInput}
+          onSend={handleSendMessage}
+          onKeyDown={handleKeyPress}
+          onAttachClick={fileManager.openModal}
+          isLoading={chat.isLoading}
+          selectedFiles={selectedFiles}
+          onRemoveFile={fileManager.removeSelectedFile}
+        />
       </div>
 
-      {fileManager.isModalOpen && (
-        <div className={styles.modalOverlay} onClick={fileManager.closeModal}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <div className={styles.modalHeaderText}>
-                <h2>Attach Files</h2>
-                <p className={styles.modalSubtitle}>
-                  {fileManager.files.length}/{MAX_TOTAL_FILES} files · {MAX_TOTAL_FILES - fileManager.files.length} {MAX_TOTAL_FILES - fileManager.files.length === 1 ? 'slot' : 'slots'} available · Select up to {MAX_FILES_PER_MESSAGE} to attach
-                </p>
-              </div>
-              <button className={styles.closeButton} onClick={fileManager.closeModal}>
-                ×
-              </button>
-            </div>
+      <FileAttachModal
+        isOpen={fileManager.isModalOpen}
+        onClose={fileManager.closeModal}
+        files={fileManager.files}
+        selectedFileIds={fileManager.selectedFileIds}
+        onToggleSelection={fileManager.toggleFileSelection}
+        onUpload={handleFileUpload}
+        onViewFile={fileManager.viewFile}
+        onDeleteFile={fileManager.deleteFile}
+        isUploading={fileManager.isUploading}
+        uploadError={fileManager.uploadError}
+        onClearSelection={fileManager.clearSelectedFiles}
+        fileInputRef={fileInputRef}
+      />
 
-            <div className={styles.uploadSection}>
-              <input
-                type="file"
-                multiple
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-                ref={fileInputRef}
-              />
-              <button
-                className={styles.uploadButton}
-                onClick={() => fileInputRef.current?.click()}
-                disabled={fileManager.isUploading}
-              >
-                {fileManager.isUploading ? 'Uploading...' : '+ Upload Files'}
-              </button>
+      <ChatHistoryModal
+        isOpen={conversations.isHistoryModalOpen}
+        onClose={conversations.closeHistoryModal}
+        conversations={conversations.conversations}
+        currentConversationId={currentConversationId}
+        onLoadConversation={conversations.loadConversation}
+        onDeleteConversation={conversations.deleteConversation}
+        onStartNewChat={conversations.startNewConversation}
+        onDeleteAllClick={() => setIsDeleteAllModalOpen(true)}
+        onUpdateTitle={conversations.updateConversationTitle}
+      />
 
-              {fileManager.uploadError && (
-                <div className={styles.uploadError}>
-                  <span className={styles.errorIcon}>⚠️</span>
-                  <span className={styles.errorMessage}>{fileManager.uploadError}</span>
-                </div>
-              )}
-
-              <div className={styles.fileTypeInfo}>
-                <p className={styles.fileTypeSupported}>
-                  <strong>Supported:</strong> PDF, DOCX, XLSX, PPTX, PNG, JPEG, GIF, WebP, TXT, CSV
-                </p>
-                <p className={styles.fileTypeUnsupported}>
-                  <strong>Not supported:</strong> Legacy formats (.doc, .xls, .ppt)
-                </p>
-              </div>
-            </div>
-
-            <div className={styles.fileListSection}>
-              <div className={`${styles.selectionCounterWrapper} ${fileManager.selectedFileIds.length > 0 ? styles.visible : ''}`}>
-                <div className={styles.selectionCounter}>
-                  {fileManager.selectedFileIds.length} {fileManager.selectedFileIds.length === 1 ? 'file' : 'files'} selected
-                </div>
-              </div>
-              <div className={styles.fileList}>
-                {fileManager.files.length === 0 ? (
-                  <p className={styles.emptyFiles}>Upload files to attach them to your messages</p>
-                ) : (
-                  fileManager.files.map((file) => (
-                    <div key={file.id} className={styles.fileItem}>
-                      <input
-                        type="checkbox"
-                        checked={fileManager.selectedFileIds.includes(file.id)}
-                        onChange={() => fileManager.toggleFileSelection(file.id)}
-                        className={styles.fileCheckbox}
-                      />
-                      <span className={styles.fileIcon}>{getFileIcon(file.mime_type)}</span>
-                      <span className={styles.fileName}>{file.original_name}</span>
-                      <span className={styles.fileSize}>{formatBytes(file.size)}</span>
-                      <button className={styles.viewButton} onClick={() => fileManager.viewFile(file.id)}>
-                        View
-                      </button>
-                      <button className={styles.deleteButton} onClick={() => fileManager.deleteFile(file.id)}>
-                        ×
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {fileManager.files.length > 0 && (
-              <div className={styles.modalFooter}>
-                <div className={styles.footerLeft}>
-                  {fileManager.selectedFileIds.length > 0 && (
-                    <button className={styles.clearSelectionButton} onClick={fileManager.clearSelectedFiles}>
-                      Clear Selection
-                    </button>
-                  )}
-                </div>
-                <button className={styles.attachCloseButton} onClick={attachFilesAndClose}>
-                  {fileManager.selectedFileIds.length > 0 ? `Attach ${fileManager.selectedFileIds.length} & Close` : 'Close'}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {conversations.isHistoryModalOpen && (
-        <div className={styles.modalOverlay} onClick={conversations.closeHistoryModal}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>Chat History</h2>
-              <button className={styles.closeButton} onClick={conversations.closeHistoryModal}>
-                ×
-              </button>
-            </div>
-
-            <div className={styles.historyActions}>
-              <button className={styles.newChatButton} onClick={conversations.startNewConversation}>
-                + New Chat
-              </button>
-              {conversations.conversations.length > 0 && (
-                <button
-                  className={styles.deleteAllButton}
-                  onClick={() => setIsDeleteAllModalOpen(true)}
-                >
-                  Delete All
-                </button>
-              )}
-            </div>
-
-            <div className={styles.conversationList}>
-              {conversations.conversations.length === 0 ? (
-                <p className={styles.emptyConversations}>No conversations yet</p>
-              ) : (
-                conversations.conversations.map((conversation) => (
-                  <div
-                    key={conversation.id}
-                    className={`${styles.conversationItem} ${
-                      conversation.id === currentConversationId ? styles.currentConversation : ''
-                    }`}
-                  >
-                    {conversations.editingTitleId === conversation.id ? (
-                      <div className={styles.titleEditContainer}>
-                        <input
-                          type="text"
-                          value={conversations.editingTitleValue}
-                          onChange={(e) => conversations.setEditingTitleValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              conversations.updateConversationTitle(conversation.id, conversations.editingTitleValue);
-                            } else if (e.key === 'Escape') {
-                              conversations.cancelEditingTitle();
-                            }
-                          }}
-                          className={styles.titleInput}
-                          autoFocus
-                        />
-                        <button
-                          className={styles.saveButton}
-                          onClick={() => conversations.updateConversationTitle(conversation.id, conversations.editingTitleValue)}
-                        >
-                          ✓
-                        </button>
-                        <button
-                          className={styles.cancelButton}
-                          onClick={conversations.cancelEditingTitle}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className={styles.conversationInfo}>
-                          <span
-                            className={styles.conversationTitle}
-                            onClick={() => conversations.loadConversation(conversation.id)}
-                          >
-                            {conversation.title}
-                          </span>
-                          <span className={styles.conversationMeta}>
-                            {conversation.message_count} messages · {new Date(conversation.updated_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className={styles.conversationActions}>
-                          <button
-                            className={styles.editButton}
-                            onClick={() => conversations.startEditingTitle(conversation)}
-                          >
-                            ✎
-                          </button>
-                          <button
-                            className={styles.deleteButton}
-                            onClick={() => conversations.deleteConversation(conversation.id)}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isDeleteAllModalOpen && (
-        <div className={styles.modalOverlay} onClick={() => setIsDeleteAllModalOpen(false)}>
-          <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
-            <h3>Delete All Conversations?</h3>
-            <p>This will permanently delete all your chat history. This action cannot be undone.</p>
-            <div className={styles.confirmActions}>
-              <button
-                className={styles.confirmDeleteButton}
-                onClick={handleDeleteAllConversations}
-              >
-                Delete All
-              </button>
-              <button
-                className={styles.cancelConfirmButton}
-                onClick={() => setIsDeleteAllModalOpen(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={isDeleteAllModalOpen}
+        onClose={() => setIsDeleteAllModalOpen(false)}
+        onConfirm={handleDeleteAllConversations}
+        title="Delete All Conversations?"
+        message="This will permanently delete all your chat history. This action cannot be undone."
+      />
     </div>
   );
 }

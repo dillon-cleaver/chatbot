@@ -334,23 +334,14 @@ app.post('/chat', async (req, res) => {
     // Determine conversation ID
     let convId = conversation_id;
 
-    // If no conversation ID, create new conversation
+    // Generate title from first user message before processing files
+    // (we need to do this before content is transformed to content blocks)
+    let conversationTitle = null;
     if (!convId) {
-      const id = uuidv4();
-      const now = new Date().toISOString();
-
-      // Generate title from first user message (truncate to 50 chars)
       const firstMessage = messages[messages.length - 1].content;
-      const title = firstMessage.length > 50
+      conversationTitle = typeof firstMessage === 'string' && firstMessage.length > 50
         ? firstMessage.substring(0, 47) + '...'
-        : firstMessage;
-
-      db.prepare(`
-        INSERT INTO conversations (id, title, created_at, updated_at, message_count)
-        VALUES (?, ?, ?, ?, 0)
-      `).run(id, title, now, now);
-
-      convId = id;
+        : (typeof firstMessage === 'string' ? firstMessage : 'New Conversation');
     }
 
     // Process files if provided
@@ -385,6 +376,19 @@ app.post('/chat', async (req, res) => {
       }
 
       messages[messages.length - 1].content = contentBlocks;
+    }
+
+    // If no conversation ID, create new conversation now
+    if (!convId) {
+      const id = uuidv4();
+      const now = new Date().toISOString();
+
+      db.prepare(`
+        INSERT INTO conversations (id, title, created_at, updated_at, message_count)
+        VALUES (?, ?, ?, ?, 0)
+      `).run(id, conversationTitle || 'New Conversation', now, now);
+
+      convId = id;
     }
 
     // Save user message to database

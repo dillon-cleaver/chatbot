@@ -1,0 +1,53 @@
+.historyActions {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.newChatButton {
+  flex: 1;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.newChatButton:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.deleteAllButton {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteAllButton:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.conversationList {
+  padding: 1rem;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.emptyConversations {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem;
+  margin: 0;
+}

@@ -1,0 +1,13 @@
+.fileList {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.emptyFiles {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  padding: 2rem;
+  margin: 0;
+}

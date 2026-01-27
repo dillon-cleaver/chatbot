@@ -1,0 +1,66 @@
+.fileListSection {
+  position: relative;
+}
+
+.selectionCounterWrapper {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.selectionCounter {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: var(--accent-transparent);
+  color: var(--accent);
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footerLeft {
+  flex: 1;
+}
+
+.clearSelectionButton {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clearSelectionButton:hover {
+  background: var(--surface-light);
+  color: var(--text-primary);
+}
+
+.attachCloseButton {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.attachCloseButton:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
