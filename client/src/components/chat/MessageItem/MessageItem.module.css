@@ -1,5 +1,5 @@
 .message {
-  display: flex;
+  display: inline-flex;
   max-width: 80%;
   animation: slideIn 0.3s ease-out;
 }
