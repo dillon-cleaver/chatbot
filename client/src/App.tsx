@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styles from './App.module.css';
-import type { Message } from './types';
 import { getFileIcon, formatBytes } from './utils/fileUtils';
 import { MAX_FILES_PER_MESSAGE, MAX_TOTAL_FILES } from './constants';
 import { useTheme } from './hooks/useTheme';
@@ -11,6 +10,7 @@ import { useChat } from './hooks/useChat';
 
 function App(): React.JSX.Element {
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState<boolean>(false);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -18,36 +18,24 @@ function App(): React.JSX.Element {
   const { theme, toggleTheme } = useTheme();
   const fileManager = useFileManager();
 
-  // Create a state to hold messages that will be shared
-  const [sharedMessages, setSharedMessages] = useState<Message[]>([]);
-
-  const conversations = useConversations({
-    onMessagesLoad: setSharedMessages,
-    onClearSelectedFiles: fileManager.clearSelectedFiles,
-    shouldAutoLoad: sharedMessages.length === 0,
-  });
-
+  // Initialize chat with conversation ID from App state
   const chat = useChat({
-    conversationId: conversations.currentConversationId,
+    conversationId: currentConversationId,
     selectedFileIds: fileManager.selectedFileIds,
-    onConversationCreated: conversations.setCurrentConversationId,
+    onConversationCreated: setCurrentConversationId,
     onClearSelectedFiles: fileManager.clearSelectedFiles,
   });
 
-  // Sync chat messages with shared messages
-  useEffect(() => {
-    if (sharedMessages !== chat.messages) {
-      chat.setMessages(sharedMessages);
-    }
-  }, [sharedMessages]);
+  // Initialize conversations with currentConversationId from App state
+  const conversations = useConversations({
+    currentConversationId,
+    setCurrentConversationId,
+    onMessagesLoad: chat.setMessages,
+    onClearSelectedFiles: fileManager.clearSelectedFiles,
+    shouldAutoLoad: chat.messages.length === 0,
+  });
 
-  // Sync shared messages when chat messages change
-  useEffect(() => {
-    if (chat.messages !== sharedMessages && chat.messages.length > 0) {
-      setSharedMessages(chat.messages);
-    }
-  }, [chat.messages]);
-
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat.messages]);
@@ -80,10 +68,10 @@ function App(): React.JSX.Element {
     }
   };
 
-  const handleSendMessage = useCallback(async (): Promise<void> => {
+  const handleSendMessage = async (): Promise<void> => {
     await chat.sendMessage();
     await conversations.refreshConversations();
-  }, [chat, conversations]);
+  };
 
   return (
     <div className={styles.app}>
@@ -313,7 +301,7 @@ function App(): React.JSX.Element {
                   <div
                     key={conversation.id}
                     className={`${styles.conversationItem} ${
-                      conversation.id === conversations.currentConversationId ? styles.currentConversation : ''
+                      conversation.id === currentConversationId ? styles.currentConversation : ''
                     }`}
                   >
                     {conversations.editingTitleId === conversation.id ? (

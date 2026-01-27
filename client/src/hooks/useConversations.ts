@@ -1,43 +1,47 @@
-import { useState, useCallback, useEffect } from 'react';
-import type { Conversation, Message } from '../types';
-import * as api from '../utils/api';
+import { useState, useCallback, useEffect } from "react";
+import type { Conversation, Message } from "../types";
+import * as api from "../utils/api";
 
 export interface UseConversationsReturn {
   conversations: Conversation[];
-  currentConversationId: string | null;
   isHistoryModalOpen: boolean;
   editingTitleId: string | null;
   editingTitleValue: string;
   loadConversation: (conversationId: string) => Promise<void>;
   deleteConversation: (conversationId: string) => Promise<void>;
   deleteAllConversations: () => Promise<void>;
-  updateConversationTitle: (conversationId: string, newTitle: string) => Promise<void>;
+  updateConversationTitle: (
+    conversationId: string,
+    newTitle: string,
+  ) => Promise<void>;
   startNewConversation: () => void;
   startEditingTitle: (conversation: Conversation) => void;
   cancelEditingTitle: () => void;
   setEditingTitleValue: (value: string) => void;
   openHistoryModal: () => void;
   closeHistoryModal: () => void;
-  setCurrentConversationId: (id: string | null) => void;
   refreshConversations: () => Promise<void>;
 }
 
 interface UseConversationsProps {
+  currentConversationId: string | null;
+  setCurrentConversationId: (id: string | null) => void;
   onMessagesLoad: (messages: Message[]) => void;
   onClearSelectedFiles: () => void;
   shouldAutoLoad: boolean;
 }
 
 export function useConversations({
+  currentConversationId,
+  setCurrentConversationId,
   onMessagesLoad,
   onClearSelectedFiles,
   shouldAutoLoad,
 }: UseConversationsProps): UseConversationsReturn {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
-  const [editingTitleValue, setEditingTitleValue] = useState<string>('');
+  const [editingTitleValue, setEditingTitleValue] = useState<string>("");
 
   const loadConversation = useCallback(
     async (conversationId: string): Promise<void> => {
@@ -54,10 +58,10 @@ export function useConversations({
             if (
               Array.isArray(parsed) &&
               parsed[0] &&
-              typeof parsed[0] === 'object' &&
-              'type' in parsed[0] &&
-              parsed[0].type === 'text' &&
-              'text' in parsed[0]
+              typeof parsed[0] === "object" &&
+              "type" in parsed[0] &&
+              parsed[0].type === "text" &&
+              "text" in parsed[0]
             ) {
               content = String(parsed[0].text);
             }
@@ -75,11 +79,11 @@ export function useConversations({
         setCurrentConversationId(conversationId);
         setIsHistoryModalOpen(false);
       } catch (error) {
-        console.error('Failed to load conversation:', error);
-        alert('Failed to load conversation. Please try again.');
+        console.error("Failed to load conversation:", error);
+        alert("Failed to load conversation. Please try again.");
       }
     },
-    [onMessagesLoad]
+    [onMessagesLoad, setCurrentConversationId],
   );
 
   const refreshConversations = useCallback(async (): Promise<void> => {
@@ -92,7 +96,7 @@ export function useConversations({
         loadConversation(data[0].id);
       }
     } catch (error) {
-      console.error('Failed to fetch conversations:', error);
+      console.error("Failed to fetch conversations:", error);
     }
   }, [shouldAutoLoad, loadConversation]);
 
@@ -110,10 +114,10 @@ export function useConversations({
     setCurrentConversationId(null);
     onClearSelectedFiles();
     setIsHistoryModalOpen(false);
-  }, [onMessagesLoad, onClearSelectedFiles]);
+  }, [onMessagesLoad, setCurrentConversationId, onClearSelectedFiles]);
 
   const deleteConversation = async (conversationId: string): Promise<void> => {
-    if (!confirm('Delete this conversation? This cannot be undone.')) return;
+    if (!confirm("Delete this conversation? This cannot be undone.")) return;
 
     try {
       await api.deleteConversation(conversationId);
@@ -124,8 +128,8 @@ export function useConversations({
         startNewConversation();
       }
     } catch (error) {
-      console.error('Failed to delete conversation:', error);
-      alert('Failed to delete conversation. Please try again.');
+      console.error("Failed to delete conversation:", error);
+      alert("Failed to delete conversation. Please try again.");
     }
   };
 
@@ -136,24 +140,31 @@ export function useConversations({
       setConversations([]);
       startNewConversation();
     } catch (error) {
-      console.error('Failed to delete all conversations:', error);
-      alert('Failed to delete conversations. Please try again.');
+      console.error("Failed to delete all conversations:", error);
+      alert("Failed to delete conversations. Please try again.");
     }
   };
 
-  const updateConversationTitle = async (conversationId: string, newTitle: string): Promise<void> => {
+  const updateConversationTitle = async (
+    conversationId: string,
+    newTitle: string,
+  ): Promise<void> => {
     if (!newTitle.trim()) return;
 
     try {
       await api.updateConversationTitle(conversationId, newTitle);
 
-      setConversations((prev) => prev.map((c) => (c.id === conversationId ? { ...c, title: newTitle } : c)));
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId ? { ...c, title: newTitle } : c,
+        ),
+      );
 
       setEditingTitleId(null);
-      setEditingTitleValue('');
+      setEditingTitleValue("");
     } catch (error) {
-      console.error('Failed to update title:', error);
-      alert('Failed to update title. Please try again.');
+      console.error("Failed to update title:", error);
+      alert("Failed to update title. Please try again.");
     }
   };
 
@@ -164,7 +175,7 @@ export function useConversations({
 
   const cancelEditingTitle = (): void => {
     setEditingTitleId(null);
-    setEditingTitleValue('');
+    setEditingTitleValue("");
   };
 
   const openHistoryModal = (): void => {
@@ -177,7 +188,6 @@ export function useConversations({
 
   return {
     conversations,
-    currentConversationId,
     isHistoryModalOpen,
     editingTitleId,
     editingTitleValue,
@@ -191,7 +201,6 @@ export function useConversations({
     setEditingTitleValue,
     openHistoryModal,
     closeHistoryModal,
-    setCurrentConversationId,
     refreshConversations,
   };
 }

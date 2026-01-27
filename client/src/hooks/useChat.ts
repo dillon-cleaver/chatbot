@@ -42,7 +42,7 @@ export function useChat({
       setMessages([...updatedMessages, { role: 'assistant', content: data.content }]);
 
       // Set conversation ID if it's a new conversation
-      if (!conversationId) {
+      if (!conversationId && onConversationCreated) {
         onConversationCreated(data.conversation_id);
       }
 
