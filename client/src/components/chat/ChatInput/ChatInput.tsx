@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import type { UploadedFile } from '../../../types';
 import { FileChip } from '../FileChip/FileChip';
 import styles from './ChatInput.module.css';
@@ -23,6 +24,17 @@ export function ChatInput({
   selectedFiles,
   onRemoveFile,
 }: ChatInputProps): React.JSX.Element {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea as content changes
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+    }
+  }, [value]);
+
   return (
     <div className={styles.inputContainer}>
       {selectedFiles.length > 0 && (
@@ -45,6 +57,7 @@ export function ChatInput({
           📁
         </button>
         <textarea
+          ref={textareaRef}
           className={styles.input}
           value={value}
           onChange={(e) => onChange(e.target.value)}

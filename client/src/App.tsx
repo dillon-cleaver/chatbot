@@ -81,7 +81,6 @@ function App(): React.JSX.Element {
       <Header
         selectedFilesCount={fileManager.selectedFileIds.length}
         onHistoryClick={conversations.openHistoryModal}
-        onFilesClick={fileManager.openModal}
         theme={theme}
         onThemeToggle={toggleTheme}
       />

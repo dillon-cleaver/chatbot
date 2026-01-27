@@ -1,24 +1,37 @@
 .uploadSection {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
+  padding: 1.5rem;
+  border-bottom: 3px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .uploadButton {
   width: 100%;
-  padding: 0.75rem;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
+  padding: 0.75rem 2rem;
+  border: 3px solid var(--border-color);
+  background-color: var(--button-bg);
+  color: var(--text-primary);
+  font-family: "Fraunces", serif;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+  box-shadow: 4px 4px 0px var(--shadow-color);
 }
 
 .uploadButton:hover:not(:disabled) {
-  background: var(--accent-dark);
-  transform: translateY(-1px);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--shadow-color);
+}
+
+.uploadButton:active:not(:disabled) {
+  transform: translate(0, 0);
+  box-shadow: 2px 2px 0px var(--shadow-color);
 }
 
 .uploadButton:disabled {
@@ -29,35 +42,75 @@
 .uploadError {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 0.5rem;
-  color: #ef4444;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #ffe6e6;
+  border: 3px solid #ff4444;
+  color: #cc0000;
+  font-family: "Roboto", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  animation: slideDown 0.3s ease-out;
+}
+
+[data-theme="dark"] .uploadError {
+  background-color: #4a1f1f;
+  border-color: #ff4444;
+  color: #ffcccc;
 }
 
 .errorIcon {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  flex-shrink: 0;
 }
 
 .errorMessage {
   flex: 1;
-  font-size: 0.875rem;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 200px;
+  }
 }
 
 .fileTypeInfo {
-  margin-top: 1rem;
-  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: var(--message-bg);
+  border: 2px solid var(--border-color);
+  font-family: "Roboto", sans-serif;
+  font-size: 0.85rem;
+}
+
+.fileTypeInfo p {
+  margin: 0;
+  line-height: 1.5;
 }
 
 .fileTypeSupported {
-  margin: 0 0 0.5rem 0;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+.fileTypeSupported strong {
+  color: #22c55e;
+  font-weight: 700;
 }
 
 .fileTypeUnsupported {
-  margin: 0;
   color: var(--text-secondary);
+}
+
+.fileTypeUnsupported strong {
+  color: #ef4444;
+  font-weight: 700;
 }

@@ -3,7 +3,6 @@ import styles from './Header.module.css';
 export interface HeaderProps {
   selectedFilesCount: number;
   onHistoryClick: () => void;
-  onFilesClick: () => void;
   theme: 'dark' | 'light';
   onThemeToggle: () => void;
 }
@@ -11,7 +10,6 @@ export interface HeaderProps {
 export function Header({
   selectedFilesCount,
   onHistoryClick,
-  onFilesClick,
   theme,
   onThemeToggle,
 }: HeaderProps): React.JSX.Element {
@@ -28,9 +26,6 @@ export function Header({
       <div className={styles.headerRight}>
         <button className={styles.historyButton} onClick={onHistoryClick}>
           💬
-        </button>
-        <button className={styles.fileButton} onClick={onFilesClick}>
-          📁
         </button>
         <button className={styles.themeToggle} onClick={onThemeToggle}>
           {theme === 'dark' ? '☀️' : '🌙'}
