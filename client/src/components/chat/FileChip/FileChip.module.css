@@ -1,0 +1,45 @@
+.fileChip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--message-bg);
+  border: 2px solid var(--border-color);
+  box-shadow: 2px 2px 0px var(--shadow-color);
+  font-size: 0.85rem;
+  max-width: 250px;
+}
+
+.fileChipIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.fileChipName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.fileChipRemove {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fileChipRemove:hover {
+  color: #ff4444;
+  transform: scale(1.2);
+}

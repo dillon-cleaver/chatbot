@@ -1,0 +1,87 @@
+.confirmModal {
+  background-color: var(--bg-primary);
+  border: 3px solid var(--border-color);
+  box-shadow: 4px 4px 0px var(--shadow-color);
+  max-width: 400px;
+  width: 90%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.confirmModal h3 {
+  margin: 0;
+  font-family: "Fraunces", serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.confirmModal p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.confirmDeleteButton {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: 3px solid var(--border-color);
+  background-color: #e74c3c;
+  color: white;
+  font-family: "Fraunces", serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+.confirmDeleteButton:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--shadow-color);
+}
+
+.confirmDeleteButton:active {
+  transform: translate(0, 0);
+  box-shadow: 2px 2px 0px var(--shadow-color);
+}
+
+.cancelConfirmButton {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: 3px solid var(--border-color);
+  background-color: var(--button-bg);
+  color: var(--text-primary);
+  font-family: "Fraunces", serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+.cancelConfirmButton:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--shadow-color);
+}
+
+.cancelConfirmButton:active {
+  transform: translate(0, 0);
+  box-shadow: 2px 2px 0px var(--shadow-color);
+}

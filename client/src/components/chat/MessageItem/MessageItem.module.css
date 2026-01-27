@@ -1,0 +1,99 @@
+.message {
+  display: flex;
+  max-width: 80%;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.userMessage {
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.assistantMessage {
+  align-self: flex-start;
+}
+
+.messageContent {
+  padding: 0.75rem 1.25rem;
+  border: 3px solid var(--border-color);
+  border-radius: 0;
+  background-color: var(--message-bg);
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+.userMessage .messageContent {
+  background-color: var(--user-message-bg);
+  border-color: var(--user-border-color);
+}
+
+.assistantMessage .messageContent {
+  background-color: var(--assistant-message-bg);
+  border-color: var(--assistant-border-color);
+}
+
+/* Markdown Formatting Styles */
+.messageContent ul,
+.messageContent ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.messageContent ul {
+  list-style-type: disc;
+}
+
+.messageContent ol {
+  list-style-type: decimal;
+}
+
+.messageContent li {
+  margin: 0.25rem 0;
+}
+
+.messageContent p {
+  margin: 0.5rem 0;
+}
+
+.messageContent p:first-child {
+  margin-top: 0;
+}
+
+.messageContent p:last-child {
+  margin-bottom: 0;
+}
+
+.messageContent code {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: "Courier New", monospace;
+  font-size: 0.9em;
+}
+
+.messageContent pre {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  border-radius: 3px;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.messageContent pre code {
+  background: none;
+  padding: 0;
+}

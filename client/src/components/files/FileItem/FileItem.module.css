@@ -1,0 +1,82 @@
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 3px solid var(--border-color);
+  background-color: var(--message-bg);
+  box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+.fileItem:has(.fileCheckbox:checked) {
+  background-color: var(--user-message-bg);
+  border-color: var(--user-border-color);
+}
+
+.fileCheckbox {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: #6c5ce7;
+}
+
+.fileIcon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.fileName {
+  flex: 1;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileSize {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.viewButton,
+.deleteButton {
+  padding: 0.5rem 1rem;
+  border: 3px solid var(--border-color);
+  background-color: var(--button-bg);
+  color: var(--text-primary);
+  font-family: "Fraunces", serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: transform 0.1s;
+  flex-shrink: 0;
+}
+
+.viewButton:hover {
+  transform: scale(1.05);
+}
+
+.viewButton:active {
+  transform: scale(0.95);
+}
+
+.deleteButton {
+  font-size: 1.5rem;
+  padding: 0.25rem 0.75rem;
+  line-height: 1;
+}
+
+.deleteButton:hover {
+  transform: scale(1.1);
+  background-color: #ff4444;
+  border-color: #cc0000;
+}
+
+.deleteButton:active {
+  transform: scale(0.9);
+}
