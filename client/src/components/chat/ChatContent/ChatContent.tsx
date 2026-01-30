@@ -1,17 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './ChatContent.module.css';
-import { useTheme } from '../../hooks/useTheme';
-import { useFileManager } from '../../hooks/useFileManager';
-import { useConversations } from '../../hooks/useConversations';
-import { useChat } from '../../hooks/useChat';
-import { Header } from '../layout/Header/Header';
-import { ChatMessages } from '../chat/ChatMessages/ChatMessages';
-import { ChatInput } from '../chat/ChatInput/ChatInput';
-import { ChatContainer } from '../chat/ChatContainer/ChatContainer';
-import { FileAttachModal } from '../files/FileAttachModal/FileAttachModal';
-import { ChatHistoryModal } from '../history/ChatHistoryModal/ChatHistoryModal';
-import { ConfirmDialog } from '../ui/ConfirmDialog/ConfirmDialog';
+import { useTheme } from '../../../hooks/useTheme';
+import { useFileManager } from '../../../hooks/useFileManager';
+import { useConversations } from '../../../hooks/useConversations';
+import { useChat } from '../../../hooks/useChat';
+import { Header } from '../../layout/Header/Header';
+import { ChatMessages } from '../ChatMessages/ChatMessages';
+import { ChatInput } from '../ChatInput/ChatInput';
+import { ChatContainer } from '../ChatContainer/ChatContainer';
+import { FileAttachModal } from '../../files/FileAttachModal/FileAttachModal';
+import { ChatHistoryModal } from '../../history/ChatHistoryModal/ChatHistoryModal';
+import { ConfirmDialog } from '../../ui/ConfirmDialog/ConfirmDialog';
 
 export function ChatContent(): React.JSX.Element {
   const { conversationId } = useParams<{ conversationId?: string }>();

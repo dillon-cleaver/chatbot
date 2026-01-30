@@ -6,7 +6,7 @@ export interface UseAutoResizeTextareaOptions {
 }
 
 export interface UseAutoResizeTextareaReturn {
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 export function useAutoResizeTextarea({
