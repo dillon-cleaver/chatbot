@@ -1,0 +1,14 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.emptyGreeting {
+  font-size: 1.75rem;
+  text-align: center;
+  color: var(--text-primary);
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+}

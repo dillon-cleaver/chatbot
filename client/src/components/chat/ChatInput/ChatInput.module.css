@@ -7,15 +7,6 @@
   padding-top: 1rem;
 }
 
-.fileChipsContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  max-height: 120px;
-  overflow-y: auto;
-}
-
 .inputRow {
   display: flex;
   gap: 0.5rem;

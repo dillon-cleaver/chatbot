@@ -23,31 +23,6 @@
   display: none;
 }
 
-/* Custom scrollbar track */
-.scrollTrack {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 12px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.scrollTrack.visible {
-  opacity: 1;
-}
-
-/* Custom scrollbar thumb */
-.scrollThumb {
-  position: absolute;
-  right: 0;
-  width: 12px;
-  background: var(--button-bg);
-  border: 2px solid var(--border-color);
-}
-
 .emptyState {
   display: flex;
   align-items: center;

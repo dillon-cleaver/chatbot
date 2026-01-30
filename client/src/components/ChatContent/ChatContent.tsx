@@ -1,0 +1,186 @@
+import { useState, useRef, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import styles from './ChatContent.module.css';
+import { useTheme } from '../../hooks/useTheme';
+import { useFileManager } from '../../hooks/useFileManager';
+import { useConversations } from '../../hooks/useConversations';
+import { useChat } from '../../hooks/useChat';
+import { Header } from '../layout/Header/Header';
+import { ChatMessages } from '../chat/ChatMessages/ChatMessages';
+import { ChatInput } from '../chat/ChatInput/ChatInput';
+import { ChatContainer } from '../chat/ChatContainer/ChatContainer';
+import { FileAttachModal } from '../files/FileAttachModal/FileAttachModal';
+import { ChatHistoryModal } from '../history/ChatHistoryModal/ChatHistoryModal';
+import { ConfirmDialog } from '../ui/ConfirmDialog/ConfirmDialog';
+
+export function ChatContent(): React.JSX.Element {
+  const { conversationId } = useParams<{ conversationId?: string }>();
+  const navigate = useNavigate();
+  const currentConversationId = conversationId ?? null;
+
+  const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState<boolean>(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize hooks
+  const { theme, toggleTheme } = useTheme();
+  const fileManager = useFileManager();
+
+  // Navigate to conversation when created
+  const handleConversationCreated = (id: string): void => {
+    navigate(`/chat/${id}`, { replace: true });
+  };
+
+  // Initialize chat with conversation ID from App state
+  const chat = useChat({
+    conversationId: currentConversationId,
+    selectedFileIds: fileManager.selectedFileIds,
+    onConversationCreated: handleConversationCreated,
+    onClearSelectedFiles: fileManager.clearSelectedFiles,
+  });
+
+  // Initialize conversations with navigation callback
+  const conversations = useConversations({
+    currentConversationId,
+    onMessagesLoad: chat.setMessages,
+    onClearSelectedFiles: fileManager.clearSelectedFiles,
+    onNewChat: () => navigate('/', { replace: true }),
+  });
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chat.messages]);
+
+  // Load conversation when URL param changes
+  useEffect(() => {
+    const loadFromUrl = async () => {
+      if (conversationId && chat.messages.length === 0) {
+        await conversations.loadConversation(conversationId);
+      } else if (!conversationId && chat.messages.length > 0) {
+        // At "/" route - clear messages for new chat
+        chat.setMessages([]);
+        fileManager.clearSelectedFiles();
+      }
+    };
+    loadFromUrl();
+  }, [conversationId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
+    if (selectedFiles.length === 0) return;
+
+    await fileManager.uploadFiles(selectedFiles);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeleteAllConversations = async (): Promise<void> => {
+    await conversations.deleteAllConversations();
+    setIsDeleteAllModalOpen(false);
+    conversations.closeHistoryModal();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleSendMessage = async (): Promise<void> => {
+    await chat.sendMessage();
+    await conversations.refreshConversations();
+  };
+
+  const selectedFiles = fileManager.files.filter(f =>
+    fileManager.selectedFileIds.includes(f.id)
+  );
+
+  const isEmpty = chat.messages.length === 0;
+
+  return (
+    <div className={styles.app}>
+      <Header
+        selectedFilesCount={fileManager.selectedFileIds.length}
+        onHistoryClick={conversations.openHistoryModal}
+        onTitleClick={() => navigate('/', { replace: true })}
+        theme={theme}
+        onThemeToggle={toggleTheme}
+      />
+
+      <ChatContainer
+        isEmpty={isEmpty}
+        emptyContent={
+          <>
+            <div className={styles.emptyGreeting}>
+              <p>Start a conversation with the chatbot!</p>
+            </div>
+            <ChatInput
+              value={chat.input}
+              onChange={chat.setInput}
+              onSend={handleSendMessage}
+              onKeyDown={handleKeyPress}
+              onAttachClick={fileManager.openModal}
+              isLoading={chat.isLoading}
+              selectedFiles={selectedFiles}
+              onRemoveFile={fileManager.removeSelectedFile}
+            />
+          </>
+        }
+      >
+        <ChatMessages
+          messages={chat.messages}
+          isLoading={chat.isLoading}
+          messagesEndRef={messagesEndRef}
+        />
+        <ChatInput
+          value={chat.input}
+          onChange={chat.setInput}
+          onSend={handleSendMessage}
+          onKeyDown={handleKeyPress}
+          onAttachClick={fileManager.openModal}
+          isLoading={chat.isLoading}
+          selectedFiles={selectedFiles}
+          onRemoveFile={fileManager.removeSelectedFile}
+        />
+      </ChatContainer>
+
+      <FileAttachModal
+        isOpen={fileManager.isModalOpen}
+        onClose={fileManager.closeModal}
+        files={fileManager.files}
+        selectedFileIds={fileManager.selectedFileIds}
+        onToggleSelection={fileManager.toggleFileSelection}
+        onUpload={handleFileUpload}
+        onViewFile={fileManager.viewFile}
+        onDeleteFile={fileManager.deleteFile}
+        isUploading={fileManager.isUploading}
+        uploadError={fileManager.uploadError}
+        onClearSelection={fileManager.clearSelectedFiles}
+        fileInputRef={fileInputRef}
+      />
+
+      <ChatHistoryModal
+        isOpen={conversations.isHistoryModalOpen}
+        onClose={conversations.closeHistoryModal}
+        conversations={conversations.conversations}
+        currentConversationId={currentConversationId}
+        onDeleteConversation={conversations.deleteConversation}
+        onStartNewChat={conversations.startNewConversation}
+        onDeleteAllClick={() => setIsDeleteAllModalOpen(true)}
+        onUpdateTitle={conversations.updateConversationTitle}
+      />
+
+      <ConfirmDialog
+        isOpen={isDeleteAllModalOpen}
+        onClose={() => setIsDeleteAllModalOpen(false)}
+        onConfirm={handleDeleteAllConversations}
+        title="Delete All Conversations?"
+        message="This will permanently delete all your chat history. This action cannot be undone."
+      />
+    </div>
+  );
+}
