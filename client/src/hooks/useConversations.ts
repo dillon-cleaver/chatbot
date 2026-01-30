@@ -25,18 +25,16 @@ export interface UseConversationsReturn {
 
 interface UseConversationsProps {
   currentConversationId: string | null;
-  setCurrentConversationId: (id: string | null) => void;
   onMessagesLoad: (messages: Message[]) => void;
   onClearSelectedFiles: () => void;
-  shouldAutoLoad: boolean;
+  onNewChat: () => void;
 }
 
 export function useConversations({
   currentConversationId,
-  setCurrentConversationId,
   onMessagesLoad,
   onClearSelectedFiles,
-  shouldAutoLoad,
+  onNewChat,
 }: UseConversationsProps): UseConversationsReturn {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
@@ -76,29 +74,28 @@ export function useConversations({
         });
 
         onMessagesLoad(messages);
-        setCurrentConversationId(conversationId);
         setIsHistoryModalOpen(false);
       } catch (error) {
         console.error("Failed to load conversation:", error);
-        alert("Failed to load conversation. Please try again.");
+        // Navigate to home if conversation not found
+        if (error instanceof Error && error.message.includes('404')) {
+          onNewChat();
+        } else {
+          alert("Failed to load conversation. Please try again.");
+        }
       }
     },
-    [onMessagesLoad, setCurrentConversationId],
+    [onMessagesLoad, onNewChat],
   );
 
   const refreshConversations = useCallback(async (): Promise<void> => {
     try {
       const data = await api.fetchConversations();
       setConversations(data);
-
-      // Auto-load the most recent conversation
-      if (data.length > 0 && shouldAutoLoad) {
-        loadConversation(data[0].id);
-      }
     } catch (error) {
       console.error("Failed to fetch conversations:", error);
     }
-  }, [shouldAutoLoad, loadConversation]);
+  }, []);
 
   useEffect(() => {
     // Only load conversations once on mount
@@ -111,10 +108,10 @@ export function useConversations({
 
   const startNewConversation = useCallback((): void => {
     onMessagesLoad([]);
-    setCurrentConversationId(null);
     onClearSelectedFiles();
     setIsHistoryModalOpen(false);
-  }, [onMessagesLoad, setCurrentConversationId, onClearSelectedFiles]);
+    onNewChat();
+  }, [onMessagesLoad, onClearSelectedFiles, onNewChat]);
 
   const deleteConversation = async (conversationId: string): Promise<void> => {
     if (!confirm("Delete this conversation? This cannot be undone.")) return;

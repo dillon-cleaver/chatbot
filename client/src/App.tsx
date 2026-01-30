@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 import styles from './App.module.css';
 import { useTheme } from './hooks/useTheme';
 import { useFileManager } from './hooks/useFileManager';
@@ -11,9 +12,12 @@ import { FileAttachModal } from './components/files/FileAttachModal/FileAttachMo
 import { ChatHistoryModal } from './components/history/ChatHistoryModal/ChatHistoryModal';
 import { ConfirmDialog } from './components/ui/ConfirmDialog/ConfirmDialog';
 
-function App(): React.JSX.Element {
+function ChatContent(): React.JSX.Element {
+  const { conversationId } = useParams<{ conversationId?: string }>();
+  const navigate = useNavigate();
+  const currentConversationId = conversationId ?? null;
+
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState<boolean>(false);
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -21,27 +25,45 @@ function App(): React.JSX.Element {
   const { theme, toggleTheme } = useTheme();
   const fileManager = useFileManager();
 
+  // Navigate to conversation when created
+  const handleConversationCreated = (id: string): void => {
+    navigate(`/chat/${id}`, { replace: true });
+  };
+
   // Initialize chat with conversation ID from App state
   const chat = useChat({
     conversationId: currentConversationId,
     selectedFileIds: fileManager.selectedFileIds,
-    onConversationCreated: setCurrentConversationId,
+    onConversationCreated: handleConversationCreated,
     onClearSelectedFiles: fileManager.clearSelectedFiles,
   });
 
-  // Initialize conversations with currentConversationId from App state
+  // Initialize conversations with navigation callback
   const conversations = useConversations({
     currentConversationId,
-    setCurrentConversationId,
     onMessagesLoad: chat.setMessages,
     onClearSelectedFiles: fileManager.clearSelectedFiles,
-    shouldAutoLoad: chat.messages.length === 0,
+    onNewChat: () => navigate('/', { replace: true }),
   });
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat.messages]);
+
+  // Load conversation when URL param changes
+  useEffect(() => {
+    const loadFromUrl = async () => {
+      if (conversationId && chat.messages.length === 0) {
+        await conversations.loadConversation(conversationId);
+      } else if (!conversationId && chat.messages.length > 0) {
+        // At "/" route - clear messages for new chat
+        chat.setMessages([]);
+        fileManager.clearSelectedFiles();
+      }
+    };
+    loadFromUrl();
+  }, [conversationId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
@@ -76,32 +98,54 @@ function App(): React.JSX.Element {
     fileManager.selectedFileIds.includes(f.id)
   );
 
+  const isEmpty = chat.messages.length === 0;
+
   return (
     <div className={styles.app}>
       <Header
         selectedFilesCount={fileManager.selectedFileIds.length}
         onHistoryClick={conversations.openHistoryModal}
+        onTitleClick={() => navigate('/', { replace: true })}
         theme={theme}
         onThemeToggle={toggleTheme}
       />
 
-      <div className={styles.chatContainer}>
-        <ChatMessages
-          messages={chat.messages}
-          isLoading={chat.isLoading}
-          messagesEndRef={messagesEndRef}
-        />
-
-        <ChatInput
-          value={chat.input}
-          onChange={chat.setInput}
-          onSend={handleSendMessage}
-          onKeyDown={handleKeyPress}
-          onAttachClick={fileManager.openModal}
-          isLoading={chat.isLoading}
-          selectedFiles={selectedFiles}
-          onRemoveFile={fileManager.removeSelectedFile}
-        />
+      <div className={isEmpty ? styles.chatContainerEmpty : styles.chatContainer}>
+        {isEmpty ? (
+          <div className={styles.emptyContent}>
+            <div className={styles.emptyGreeting}>
+              <p>Start a conversation with the chatbot!</p>
+            </div>
+            <ChatInput
+              value={chat.input}
+              onChange={chat.setInput}
+              onSend={handleSendMessage}
+              onKeyDown={handleKeyPress}
+              onAttachClick={fileManager.openModal}
+              isLoading={chat.isLoading}
+              selectedFiles={selectedFiles}
+              onRemoveFile={fileManager.removeSelectedFile}
+            />
+          </div>
+        ) : (
+          <>
+            <ChatMessages
+              messages={chat.messages}
+              isLoading={chat.isLoading}
+              messagesEndRef={messagesEndRef}
+            />
+            <ChatInput
+              value={chat.input}
+              onChange={chat.setInput}
+              onSend={handleSendMessage}
+              onKeyDown={handleKeyPress}
+              onAttachClick={fileManager.openModal}
+              isLoading={chat.isLoading}
+              selectedFiles={selectedFiles}
+              onRemoveFile={fileManager.removeSelectedFile}
+            />
+          </>
+        )}
       </div>
 
       <FileAttachModal
@@ -124,7 +168,6 @@ function App(): React.JSX.Element {
         onClose={conversations.closeHistoryModal}
         conversations={conversations.conversations}
         currentConversationId={currentConversationId}
-        onLoadConversation={conversations.loadConversation}
         onDeleteConversation={conversations.deleteConversation}
         onStartNewChat={conversations.startNewConversation}
         onDeleteAllClick={() => setIsDeleteAllModalOpen(true)}
@@ -139,6 +182,16 @@ function App(): React.JSX.Element {
         message="This will permanently delete all your chat history. This action cannot be undone."
       />
     </div>
+  );
+}
+
+function App(): React.JSX.Element {
+  return (
+    <Routes>
+      <Route path="/" element={<ChatContent />} />
+      <Route path="/chat/:conversationId" element={<ChatContent />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
