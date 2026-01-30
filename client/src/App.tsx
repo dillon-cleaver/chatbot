@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ChatContent } from './components/ChatContent/ChatContent';
+import { ChatContent } from './components/chat/ChatContent/ChatContent';
 
 function App(): React.JSX.Element {
   return (
