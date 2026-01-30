@@ -47,6 +47,51 @@
 }
 
 /* Markdown Formatting Styles */
+.messageContent h1,
+.messageContent h2,
+.messageContent h3,
+.messageContent h4,
+.messageContent h5,
+.messageContent h6 {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+  line-height: 1.3;
+}
+
+.messageContent h1 {
+  font-size: 1.75rem;
+}
+
+.messageContent h2 {
+  font-size: 1.5rem;
+}
+
+.messageContent h3 {
+  font-size: 1.25rem;
+}
+
+.messageContent h4 {
+  font-size: 1.125rem;
+}
+
+.messageContent h5 {
+  font-size: 1rem;
+}
+
+.messageContent h6 {
+  font-size: 0.875rem;
+}
+
+.messageContent h1:first-child,
+.messageContent h2:first-child,
+.messageContent h3:first-child,
+.messageContent h4:first-child,
+.messageContent h5:first-child,
+.messageContent h6:first-child {
+  margin-top: 0;
+}
+
 .messageContent ul,
 .messageContent ol {
   margin: 0.5rem 0;
