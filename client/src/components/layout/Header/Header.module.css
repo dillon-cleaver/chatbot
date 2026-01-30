@@ -31,7 +31,7 @@
   transform: translateY(0);
 }
 
-.titleButton:focus {
+.titleButton:focus-visible {
   outline: 2px solid var(--border-color);
   outline-offset: 4px;
 }
