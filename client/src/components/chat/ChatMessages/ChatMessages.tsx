@@ -67,11 +67,6 @@ export function ChatMessages({
         ref={containerRef}
         className={styles.messages}
       >
-        {messages.length === 0 && (
-          <div className={styles.emptyState}>
-            <p>Start a conversation with the chatbot!</p>
-          </div>
-        )}
         {messages.map((msg, idx) => (
           <MessageItem key={idx} message={msg} />
         ))}
