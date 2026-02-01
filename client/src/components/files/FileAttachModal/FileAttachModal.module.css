@@ -1,9 +1,47 @@
+.noScrollBody {
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalBodyContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .fileListSection {
   flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem 0.75rem 1.5rem;
+  border-bottom: 3px solid var(--border-color);
+}
+
+.sectionHeading {
+  font-family: "Fraunces", serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.fileSlotsInfo {
+  font-family: "Roboto", sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .selectionCounterWrapper {
@@ -59,51 +97,71 @@
   flex: 1;
 }
 
-.clearSelectionButton {
-  padding: 0.75rem 1.5rem;
-  border: 3px solid var(--border-color);
-  background-color: var(--message-bg);
-  color: var(--text-primary);
-  font-family: "Fraunces", serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: transform 0.1s;
-}
-
-.clearSelectionButton:hover {
-  transform: scale(1.05);
-}
-
-.clearSelectionButton:active {
-  transform: scale(0.95);
-}
-
+.clearSelectionButton,
 .attachCloseButton {
   padding: 0.75rem 1.5rem;
-  border: 3px solid var(--border-color);
-  background-color: var(--button-bg);
-  color: var(--text-primary);
   font-family: "Fraunces", serif;
   font-size: 1rem;
   font-weight: 600;
-  cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition:
-    transform 0.1s,
-    box-shadow 0.1s;
-  box-shadow: 4px 4px 0px var(--shadow-color);
 }
 
-.attachCloseButton:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--shadow-color);
+.clearSelectionButton {
+  font-size: 0.9rem;
 }
 
-.attachCloseButton:active {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0px var(--shadow-color);
+.detailsToggle {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: "Roboto", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  transition: color 0.2s;
+  margin-top: 0.25rem;
+  align-self: center;
+}
+
+.detailsToggle:hover {
+  color: var(--text-primary);
+}
+
+.detailsText {
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.chevron {
+  font-size: 0.75rem;
+  transition: transform 0.2s;
+  display: inline-block;
+  line-height: 1;
+}
+
+.chevronUp {
+  transform: rotate(180deg);
+}
+
+.detailsContent {
+  margin-top: 0.5rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
