@@ -1,0 +1,79 @@
+/**
+ * BUTTON STYLE SYSTEM
+ *
+ * This application uses TWO button styles:
+ *
+ * 1. CHUNKY (Primary actions)
+ *    - Large buttons, primary actions
+ *    - Hover: translate up-left with expanded shadow
+ *    - Examples: Send, Attach, Upload Files, New Chat
+ *
+ * 2. MESSAGE (Secondary actions)
+ *    - Small buttons, secondary actions
+ *    - Same border + shadow as messages
+ *    - Hover: scale up slightly
+ *    - Examples: Edit, Delete, Close, Remove
+ */
+
+.button {
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  border: 3px solid var(--border-color);
+  box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--border-color);
+  outline-offset: 2px;
+}
+
+/* CHUNKY STYLE - Primary actions */
+.buttonChunky {
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.buttonChunky:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--shadow-color);
+}
+
+.buttonChunky:active:not(:disabled) {
+  transform: translate(0, 0);
+  box-shadow: 2px 2px 0px var(--shadow-color);
+}
+
+/* MESSAGE STYLE - Secondary actions */
+.buttonMessage {
+  transition: transform 0.1s, background-color 0.1s, border-color 0.1s;
+}
+
+.buttonMessage:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.buttonMessage:active:not(:disabled) {
+  transform: scale(0.9);
+}
+
+/* STATIC STYLE - No animation (for buttons in animated containers) */
+.buttonStatic {
+  transition: background-color 0.1s, border-color 0.1s;
+}
+
+/* DESTRUCTIVE MODIFIER */
+.destructive:hover:not(:disabled) {
+  background-color: #ff4444;
+  border-color: #cc0000;
+  color: white;
+}
