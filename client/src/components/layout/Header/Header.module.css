@@ -47,15 +47,6 @@
   transition: opacity 0.1s, transform 0.1s;
 }
 
-.contextIndicator {
-  font-family: "Roboto", sans-serif;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  padding: 0.25rem 0.75rem;
-  border: 2px solid var(--border-color);
-  background-color: var(--message-bg);
-}
-
 .headerRight {
   display: flex;
   align-items: center;

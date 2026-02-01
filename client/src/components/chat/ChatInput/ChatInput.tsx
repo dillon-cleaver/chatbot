@@ -12,6 +12,7 @@ export interface ChatInputProps {
   isLoading: boolean;
   selectedFiles: UploadedFile[];
   onRemoveFile: (fileId: string) => void;
+  onClearAllFiles?: () => void;
   showTopBorder?: boolean;
 }
 
@@ -24,13 +25,14 @@ export function ChatInput({
   isLoading,
   selectedFiles,
   onRemoveFile,
+  onClearAllFiles,
   showTopBorder = true,
 }: ChatInputProps): React.JSX.Element {
   const { textareaRef } = useAutoResizeTextarea({ value });
 
   return (
     <div className={`${styles.inputContainer} ${showTopBorder ? styles.withBorder : ''}`}>
-      <FileChipsDisplay files={selectedFiles} onRemoveFile={onRemoveFile} />
+      <FileChipsDisplay files={selectedFiles} onRemoveFile={onRemoveFile} onClearAll={onClearAllFiles} />
       <div className={styles.inputRow}>
         <button
           className={styles.attachButton}
@@ -38,6 +40,9 @@ export function ChatInput({
           title="Attach files"
         >
           📁
+          {selectedFiles.length > 0 && (
+            <span className={styles.badge}>{selectedFiles.length}</span>
+          )}
         </button>
         <textarea
           ref={textareaRef}

@@ -1,6 +1,42 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.selectionBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--message-bg);
+  border: 3px solid #6c5ce7;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+.count {
+  font-family: "Fraunces", serif;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.clearButton {
+  padding: 0.5rem 0.75rem;
+  font-family: "Fraunces", serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
 .fileChipsContainer {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 8px;
 }

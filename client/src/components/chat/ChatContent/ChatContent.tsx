@@ -52,6 +52,18 @@ export function ChatContent(): React.JSX.Element {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat.messages]);
 
+  // Auto-scroll when modal closes to accommodate file selection UI
+  useEffect(() => {
+    // Only scroll when modal closes (transitions from true to false)
+    if (!fileManager.isModalOpen && fileManager.selectedFileIds.length > 0) {
+      // Delay to let modal close animation complete, then smooth scroll
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [fileManager.isModalOpen, fileManager.selectedFileIds.length]);
+
   // Load conversation when URL param changes
   useEffect(() => {
     const loadFromUrl = async () => {
@@ -104,7 +116,6 @@ export function ChatContent(): React.JSX.Element {
   return (
     <div className={styles.app}>
       <Header
-        selectedFilesCount={fileManager.selectedFileIds.length}
         onHistoryClick={conversations.openHistoryModal}
         onTitleClick={() => navigate('/', { replace: true })}
         theme={theme}
@@ -128,6 +139,7 @@ export function ChatContent(): React.JSX.Element {
               isLoading={chat.isLoading}
               selectedFiles={selectedFiles}
               onRemoveFile={fileManager.removeSelectedFile}
+              onClearAllFiles={fileManager.clearSelectedFiles}
               showTopBorder={false}
             />
           </>
@@ -147,6 +159,7 @@ export function ChatContent(): React.JSX.Element {
           isLoading={chat.isLoading}
           selectedFiles={selectedFiles}
           onRemoveFile={fileManager.removeSelectedFile}
+          onClearAllFiles={fileManager.clearSelectedFiles}
         />
       </ChatContainer>
 
