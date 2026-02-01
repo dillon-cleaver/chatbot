@@ -78,7 +78,14 @@ export function useConversations({
       } catch (error) {
         console.error("Failed to load conversation:", error);
         // Navigate to home if conversation not found
-        if (error instanceof Error && error.message.includes('404')) {
+        const err = error as Error & { status?: number; response?: { status?: number } };
+        const isNotFoundStatus = err?.status === 404 || err?.response?.status === 404;
+        const isNotFoundMessage =
+          error instanceof Error &&
+          typeof error.message === "string" &&
+          (error.message.toLowerCase().includes("404") ||
+            error.message.toLowerCase().includes("not found"));
+        if (isNotFoundStatus || isNotFoundMessage) {
           onNewChat();
         } else {
           alert("Failed to load conversation. Please try again.");

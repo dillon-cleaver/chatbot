@@ -18,7 +18,7 @@ export function Header({
   return (
     <div className={styles.header}>
       <div className={styles.headerLeft}>
-        <button className={styles.titleButton} onClick={onTitleClick}>
+        <button className={styles.titleButton} onClick={onTitleClick} aria-label="Return to home">
           <h1 className={styles.title}>Chatbot</h1>
         </button>
         {selectedFilesCount > 0 && (

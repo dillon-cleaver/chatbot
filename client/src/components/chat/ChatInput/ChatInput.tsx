@@ -12,6 +12,7 @@ export interface ChatInputProps {
   isLoading: boolean;
   selectedFiles: UploadedFile[];
   onRemoveFile: (fileId: string) => void;
+  showTopBorder?: boolean;
 }
 
 export function ChatInput({
@@ -23,11 +24,12 @@ export function ChatInput({
   isLoading,
   selectedFiles,
   onRemoveFile,
+  showTopBorder = true,
 }: ChatInputProps): React.JSX.Element {
   const { textareaRef } = useAutoResizeTextarea({ value });
 
   return (
-    <div className={styles.inputContainer}>
+    <div className={`${styles.inputContainer} ${showTopBorder ? styles.withBorder : ''}`}>
       <FileChipsDisplay files={selectedFiles} onRemoveFile={onRemoveFile} />
       <div className={styles.inputRow}>
         <button

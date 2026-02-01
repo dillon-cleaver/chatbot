@@ -71,6 +71,7 @@ export function ConversationItem({
             to={`/chat/${conversation.id}`}
             className={styles.conversationInfo}
             onClick={onClose}
+            aria-label={`Open conversation: ${conversation.title}`}
           >
             <span className={styles.conversationTitle}>
               {conversation.title}

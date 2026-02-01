@@ -28,7 +28,7 @@ export function ChatContent(): React.JSX.Element {
 
   // Navigate to conversation when created
   const handleConversationCreated = (id: string): void => {
-    navigate(`/chat/${id}`, { replace: true });
+    navigate(`/chat/${id}`);
   };
 
   // Initialize chat with conversation ID from App state
@@ -116,7 +116,8 @@ export function ChatContent(): React.JSX.Element {
         emptyContent={
           <>
             <div className={styles.emptyGreeting}>
-              <p>Start a conversation with the chatbot!</p>
+              <h1 className={styles.emptyTitle}>CHATBOT</h1>
+              <p className={styles.emptySubtitle}>type, type, type</p>
             </div>
             <ChatInput
               value={chat.input}
@@ -127,6 +128,7 @@ export function ChatContent(): React.JSX.Element {
               isLoading={chat.isLoading}
               selectedFiles={selectedFiles}
               onRemoveFile={fileManager.removeSelectedFile}
+              showTopBorder={false}
             />
           </>
         }

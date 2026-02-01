@@ -3,6 +3,9 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem 0;
+}
+
+.inputContainer.withBorder {
   border-top: 4px solid var(--border-color);
   padding-top: 1rem;
 }

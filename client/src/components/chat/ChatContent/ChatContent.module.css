@@ -6,9 +6,26 @@
 }
 
 .emptyGreeting {
-  font-size: 1.75rem;
   text-align: center;
   color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.emptyTitle {
   font-family: "Fraunces", serif;
-  font-weight: 600;
+  font-size: 4rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.emptySubtitle {
+  font-family: "Fraunces", serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin: 0;
+  color: var(--text-secondary);
 }
