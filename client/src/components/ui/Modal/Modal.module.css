@@ -27,14 +27,18 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 1.5rem;
-  border-bottom: 3px solid var(--border-color);
+  padding: 1.5rem 1.5rem 0.75rem 1.5rem;
+  border-bottom: 3px solid #000000;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 .modalHeaderText {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .modalHeader h2 {
@@ -53,31 +57,30 @@
   font-size: 0.9rem;
   color: var(--text-secondary);
   font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.modalSubtitle p {
+  margin: 0 0 0.5rem 0;
+}
+
+.modalSubtitle p:last-child {
+  margin-bottom: 0;
 }
 
 .closeButton {
-  background-color: var(--button-bg);
-  border: 3px solid var(--border-color);
-  color: var(--text-primary);
   font-size: 2rem;
   width: 40px;
   height: 40px;
-  cursor: pointer;
   font-family: "Fraunces", serif;
   font-weight: 600;
-  transition: transform 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
-}
-
-.closeButton:hover {
-  transform: scale(1.1);
-}
-
-.closeButton:active {
-  transform: scale(0.9);
+  padding: 0;
 }
 
 .modalBody {

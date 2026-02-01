@@ -1,3 +1,4 @@
+import { Button } from '../Button';
 import styles from './ConfirmDialog.module.css';
 
 export interface ConfirmDialogProps {
@@ -17,12 +18,21 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }: Co
         <h3>{title}</h3>
         <p>{message}</p>
         <div className={styles.confirmActions}>
-          <button className={styles.confirmDeleteButton} onClick={onConfirm}>
+          <Button
+            variant="chunky"
+            destructive
+            className={styles.confirmDeleteButton}
+            onClick={onConfirm}
+          >
             Delete All
-          </button>
-          <button className={styles.cancelConfirmButton} onClick={onClose}>
+          </Button>
+          <Button
+            variant="chunky"
+            className={styles.cancelConfirmButton}
+            onClick={onClose}
+          >
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>
