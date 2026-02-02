@@ -123,7 +123,8 @@ export function ChatContent(): React.JSX.Element {
     fileManager.selectedFileIds.includes(f.id)
   );
 
-  const isEmpty = chat.messages.length === 0;
+  // Show empty state only when truly at home with no conversation to load
+  const isEmpty = chat.messages.length === 0 && !conversationId && !conversations.isLoadingConversation;
 
   return (
     <div className={styles.app}>
