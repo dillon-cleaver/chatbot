@@ -22,6 +22,7 @@ export function ChatContent(): React.JSX.Element {
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const justCreatedConversationRef = useRef<boolean>(false);
 
   // Initialize hooks
   const { theme, toggleTheme } = useTheme();
@@ -29,6 +30,7 @@ export function ChatContent(): React.JSX.Element {
 
   // Navigate to conversation when created
   const handleConversationCreated = useCallback((id: string): void => {
+    justCreatedConversationRef.current = true;
     navigate(`/chat/${id}`);
   }, [navigate]);
 
@@ -37,10 +39,15 @@ export function ChatContent(): React.JSX.Element {
     navigate('/', { replace: true });
   }, [navigate]);
 
+  const selectedFiles = fileManager.files.filter(f =>
+    fileManager.selectedFileIds.includes(f.id)
+  );
+
   // Initialize chat with conversation ID from App state
   const chat = useChat({
     conversationId: currentConversationId,
     selectedFileIds: fileManager.selectedFileIds,
+    selectedFiles,
     onConversationCreated: handleConversationCreated,
     onClearSelectedFiles: fileManager.clearSelectedFiles,
   });
@@ -79,7 +86,12 @@ export function ChatContent(): React.JSX.Element {
   useEffect(() => {
     const loadFromUrl = async () => {
       if (conversationId) {
-        // Always load the conversation when conversationId is present
+        // Skip loading if we just created this conversation
+        if (justCreatedConversationRef.current) {
+          justCreatedConversationRef.current = false;
+          return;
+        }
+        // Load conversation from server
         await loadConversation(conversationId);
       } else {
         // At "/" route - always clear messages for new chat
@@ -118,10 +130,6 @@ export function ChatContent(): React.JSX.Element {
     await chat.sendMessage();
     await conversations.refreshConversations();
   };
-
-  const selectedFiles = fileManager.files.filter(f =>
-    fileManager.selectedFileIds.includes(f.id)
-  );
 
   // Show empty state only when truly at home with no conversation to load
   const isEmpty = chat.messages.length === 0 && !conversationId && !conversations.isLoadingConversation;
