@@ -97,6 +97,7 @@ export function useConversations({
           return {
             role: msg.role,
             content: content,
+            files: msg.files && msg.files.length > 0 ? msg.files : undefined,
           };
         });
 
