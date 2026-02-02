@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { Conversation, Message } from "../types";
 import * as api from "../utils/api";
 
@@ -43,8 +43,20 @@ export function useConversations({
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [editingTitleValue, setEditingTitleValue] = useState<string>("");
 
+  // Track the current conversation load request to prevent race conditions
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const loadConversation = useCallback(
     async (conversationId: string): Promise<void> => {
+      // Abort any pending conversation load
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create new abort controller for this request
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       setIsLoadingConversation(true);
 
       // Minimum display time for loading state (prevents flash)
@@ -52,9 +64,14 @@ export function useConversations({
 
       try {
         const [data] = await Promise.all([
-          api.fetchConversation(conversationId),
+          api.fetchConversation(conversationId, abortController.signal),
           minLoadingTime
         ]);
+
+        // Check if this request was aborted (user navigated away)
+        if (abortController.signal.aborted) {
+          return;
+        }
 
         // Set messages from conversation
         const messages = data.messages.map((msg) => {
@@ -86,6 +103,11 @@ export function useConversations({
         onMessagesLoad(messages);
         setIsHistoryModalOpen(false);
       } catch (error) {
+        // Ignore abort errors (user navigated away)
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+
         // Ensure minimum loading time even on error
         await minLoadingTime;
 
@@ -93,12 +115,16 @@ export function useConversations({
         // Navigate to home if conversation not found
         const err = error as Error & { status?: number };
         if (err?.status === 404) {
+          alert("Conversation not found. Redirecting to home.");
           onNewChat();
         } else {
           alert("Failed to load conversation. Please try again.");
         }
       } finally {
-        setIsLoadingConversation(false);
+        // Only clear loading if this request wasn't aborted
+        if (!abortController.signal.aborted) {
+          setIsLoadingConversation(false);
+        }
       }
     },
     [onMessagesLoad, onNewChat],

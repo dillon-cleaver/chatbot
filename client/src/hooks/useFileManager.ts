@@ -46,8 +46,22 @@ export function useFileManager(): UseFileManagerReturn {
   }, []);
 
   useEffect(() => {
-    fetchFiles();
+    const loadAndValidateFiles = async () => {
+      await fetchFiles();
+    };
+    loadAndValidateFiles();
   }, [fetchFiles]);
+
+  // Validate selected file IDs against actual files (remove orphaned selections)
+  useEffect(() => {
+    const validFileIds = new Set(files.map(f => f.id));
+    const orphanedIds = selectedFileIds.filter(id => !validFileIds.has(id));
+
+    if (orphanedIds.length > 0) {
+      console.warn(`Removing ${orphanedIds.length} orphaned file selections:`, orphanedIds);
+      setSelectedFileIds(prev => prev.filter(id => validFileIds.has(id)));
+    }
+  }, [files, selectedFileIds]);
 
   // Persist selected file IDs to localStorage
   useEffect(() => {
