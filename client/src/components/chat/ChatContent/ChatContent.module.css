@@ -1,0 +1,59 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.emptyGreeting {
+  text-align: center;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.emptyTitle {
+  font-family: "Fraunces", serif;
+  font-size: 4rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.emptySubtitle {
+  font-family: "Fraunces", serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.loadingConversation {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: fadeIn 0.2s ease-in;
+}
+
+.loadingConversation p {
+  margin: 0;
+  font-family: "Fraunces", serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

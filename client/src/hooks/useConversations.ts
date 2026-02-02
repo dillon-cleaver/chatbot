@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { Conversation, Message } from "../types";
 import * as api from "../utils/api";
 
 export interface UseConversationsReturn {
   conversations: Conversation[];
   isHistoryModalOpen: boolean;
+  isLoadingConversation: boolean;
   editingTitleId: string | null;
   editingTitleValue: string;
   loadConversation: (conversationId: string) => Promise<void>;
@@ -25,28 +26,52 @@ export interface UseConversationsReturn {
 
 interface UseConversationsProps {
   currentConversationId: string | null;
-  setCurrentConversationId: (id: string | null) => void;
   onMessagesLoad: (messages: Message[]) => void;
   onClearSelectedFiles: () => void;
-  shouldAutoLoad: boolean;
+  onNewChat: () => void;
 }
 
 export function useConversations({
   currentConversationId,
-  setCurrentConversationId,
   onMessagesLoad,
   onClearSelectedFiles,
-  shouldAutoLoad,
+  onNewChat,
 }: UseConversationsProps): UseConversationsReturn {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
+  const [isLoadingConversation, setIsLoadingConversation] = useState<boolean>(false);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [editingTitleValue, setEditingTitleValue] = useState<string>("");
 
+  // Track the current conversation load request to prevent race conditions
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const loadConversation = useCallback(
     async (conversationId: string): Promise<void> => {
+      // Abort any pending conversation load
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create new abort controller for this request
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
+      setIsLoadingConversation(true);
+
+      // Minimum display time for loading state (prevents flash)
+      const minLoadingTime = new Promise(resolve => setTimeout(resolve, 400));
+
       try {
-        const data = await api.fetchConversation(conversationId);
+        const [data] = await Promise.all([
+          api.fetchConversation(conversationId, abortController.signal),
+          minLoadingTime
+        ]);
+
+        // Check if this request was aborted (user navigated away)
+        if (abortController.signal.aborted) {
+          return;
+        }
 
         // Set messages from conversation
         const messages = data.messages.map((msg) => {
@@ -76,29 +101,43 @@ export function useConversations({
         });
 
         onMessagesLoad(messages);
-        setCurrentConversationId(conversationId);
         setIsHistoryModalOpen(false);
       } catch (error) {
+        // Ignore abort errors (user navigated away)
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+
+        // Ensure minimum loading time even on error
+        await minLoadingTime;
+
         console.error("Failed to load conversation:", error);
-        alert("Failed to load conversation. Please try again.");
+        // Navigate to home if conversation not found
+        const err = error as Error & { status?: number };
+        if (err?.status === 404) {
+          alert("Conversation not found. Redirecting to home.");
+          onNewChat();
+        } else {
+          alert("Failed to load conversation. Please try again.");
+        }
+      } finally {
+        // Only clear loading if this request wasn't aborted
+        if (!abortController.signal.aborted) {
+          setIsLoadingConversation(false);
+        }
       }
     },
-    [onMessagesLoad, setCurrentConversationId],
+    [onMessagesLoad, onNewChat],
   );
 
   const refreshConversations = useCallback(async (): Promise<void> => {
     try {
       const data = await api.fetchConversations();
       setConversations(data);
-
-      // Auto-load the most recent conversation
-      if (data.length > 0 && shouldAutoLoad) {
-        loadConversation(data[0].id);
-      }
     } catch (error) {
       console.error("Failed to fetch conversations:", error);
     }
-  }, [shouldAutoLoad, loadConversation]);
+  }, []);
 
   useEffect(() => {
     // Only load conversations once on mount
@@ -111,10 +150,10 @@ export function useConversations({
 
   const startNewConversation = useCallback((): void => {
     onMessagesLoad([]);
-    setCurrentConversationId(null);
     onClearSelectedFiles();
     setIsHistoryModalOpen(false);
-  }, [onMessagesLoad, setCurrentConversationId, onClearSelectedFiles]);
+    onNewChat();
+  }, [onMessagesLoad, onClearSelectedFiles, onNewChat]);
 
   const deleteConversation = async (conversationId: string): Promise<void> => {
     if (!confirm("Delete this conversation? This cannot be undone.")) return;
@@ -189,6 +228,7 @@ export function useConversations({
   return {
     conversations,
     isHistoryModalOpen,
+    isLoadingConversation,
     editingTitleId,
     editingTitleValue,
     loadConversation,

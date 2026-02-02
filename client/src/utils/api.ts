@@ -58,10 +58,15 @@ export async function fetchConversations(): Promise<Conversation[]> {
   return response.json();
 }
 
-export async function fetchConversation(conversationId: string): Promise<ConversationDetail> {
-  const response = await fetch(`${API_BASE_URL}/conversations/${conversationId}`);
+export async function fetchConversation(
+  conversationId: string,
+  signal?: AbortSignal
+): Promise<ConversationDetail> {
+  const response = await fetch(`${API_BASE_URL}/conversations/${conversationId}`, { signal });
   if (!response.ok) {
-    throw new Error('Failed to fetch conversation');
+    const error: Error & { status?: number } = new Error('Failed to fetch conversation');
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }

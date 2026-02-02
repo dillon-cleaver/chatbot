@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { Conversation } from '../../../types';
 import styles from './ConversationItem.module.css';
 
 export interface ConversationItemProps {
   conversation: Conversation;
   isCurrent: boolean;
-  onLoad: (conversationId: string) => void;
+  onClose: () => void;
   onDelete: (conversationId: string) => void;
   onUpdateTitle: (conversationId: string, newTitle: string) => void;
 }
@@ -13,7 +14,7 @@ export interface ConversationItemProps {
 export function ConversationItem({
   conversation,
   isCurrent,
-  onLoad,
+  onClose,
   onDelete,
   onUpdateTitle,
 }: ConversationItemProps): React.JSX.Element {
@@ -66,19 +67,32 @@ export function ConversationItem({
         </div>
       ) : (
         <>
-          <div className={styles.conversationInfo}>
-            <span className={styles.conversationTitle} onClick={() => onLoad(conversation.id)}>
+          <Link
+            to={`/chat/${conversation.id}`}
+            className={styles.conversationInfo}
+            onClick={onClose}
+            aria-label={`Open conversation: ${conversation.title}`}
+          >
+            <span className={styles.conversationTitle}>
               {conversation.title}
             </span>
             <span className={styles.conversationMeta}>
               {conversation.message_count} messages · {new Date(conversation.updated_at).toLocaleDateString()}
             </span>
-          </div>
+          </Link>
           <div className={styles.conversationActions}>
-            <button className={styles.editButton} onClick={startEditing}>
+            <button
+              className={styles.editButton}
+              onClick={startEditing}
+              aria-label="Edit conversation title"
+            >
               ✎
             </button>
-            <button className={styles.deleteButton} onClick={() => onDelete(conversation.id)}>
+            <button
+              className={styles.deleteButton}
+              onClick={() => onDelete(conversation.id)}
+              aria-label="Delete conversation"
+            >
               ×
             </button>
           </div>

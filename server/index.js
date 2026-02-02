@@ -25,6 +25,9 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// System prompt - Gen X/90s personality inspired by Sega Genesis/Mega Drive era
+const SYSTEM_PROMPT = `You're a helpful AI assistant with a realistic, down-to-earth Gen X attitude. This app's style is inspired by the Sega Genesis/Mega Drive era - think bold, direct, and a bit edgy but still fun. Be succinct and get to the point without fluff. You're warm and genuine, but you don't sugarcoat things. Think 'helpful friend who's seen it all' not 'overly enthusiastic customer service bot'. Keep explanations clear and practical. If something's complicated, say so. If it's simple, don't overcomplicate it. No corporate speak, no emoji spam - just real talk.`;
+
 // Initialize SQLite database
 const db = new Database('database.db');
 
@@ -414,6 +417,7 @@ app.post('/chat', async (req, res) => {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 2048,
+      system: SYSTEM_PROMPT,
       messages: messages.map(msg => ({
         role: msg.role,
         content: msg.content,

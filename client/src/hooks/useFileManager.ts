@@ -19,9 +19,19 @@ export interface UseFileManagerReturn {
   removeSelectedFile: (fileId: string) => void;
 }
 
+const SELECTED_FILES_KEY = 'chatbot_selected_files';
+
 export function useFileManager(): UseFileManagerReturn {
   const [files, setFiles] = useState<UploadedFile[]>([]);
-  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>(() => {
+    // Load selected files from localStorage on initialization
+    try {
+      const stored = localStorage.getItem(SELECTED_FILES_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -36,8 +46,31 @@ export function useFileManager(): UseFileManagerReturn {
   }, []);
 
   useEffect(() => {
-    fetchFiles();
+    const loadAndValidateFiles = async () => {
+      await fetchFiles();
+    };
+    loadAndValidateFiles();
   }, [fetchFiles]);
+
+  // Validate selected file IDs against actual files (remove orphaned selections)
+  useEffect(() => {
+    const validFileIds = new Set(files.map(f => f.id));
+    const orphanedIds = selectedFileIds.filter(id => !validFileIds.has(id));
+
+    if (orphanedIds.length > 0) {
+      console.warn(`Removing ${orphanedIds.length} orphaned file selections:`, orphanedIds);
+      setSelectedFileIds(prev => prev.filter(id => validFileIds.has(id)));
+    }
+  }, [files, selectedFileIds]);
+
+  // Persist selected file IDs to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(SELECTED_FILES_KEY, JSON.stringify(selectedFileIds));
+    } catch (error) {
+      console.error('Failed to save selected files to localStorage:', error);
+    }
+  }, [selectedFileIds]);
 
   const uploadFiles = async (filesToUpload: File[]): Promise<void> => {
     setIsUploading(true);
@@ -83,26 +116,26 @@ export function useFileManager(): UseFileManagerReturn {
     });
   };
 
-  const removeSelectedFile = (fileId: string): void => {
+  const removeSelectedFile = useCallback((fileId: string): void => {
     setSelectedFileIds((prev) => prev.filter((id) => id !== fileId));
-  };
+  }, []);
 
-  const clearSelectedFiles = (): void => {
+  const clearSelectedFiles = useCallback((): void => {
     setSelectedFileIds([]);
-  };
+  }, []);
 
-  const viewFile = (fileId: string): void => {
+  const viewFile = useCallback((fileId: string): void => {
     api.viewFile(fileId);
-  };
+  }, []);
 
-  const openModal = (): void => {
+  const openModal = useCallback((): void => {
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const closeModal = (): void => {
+  const closeModal = useCallback((): void => {
     setIsModalOpen(false);
     setUploadError(null);
-  };
+  }, []);
 
   return {
     files,

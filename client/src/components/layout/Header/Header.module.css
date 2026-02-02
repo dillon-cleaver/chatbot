@@ -13,6 +13,29 @@
   gap: 1rem;
 }
 
+.titleButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.1s;
+}
+
+.titleButton:hover .title {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.titleButton:active .title {
+  transform: translateY(0);
+}
+
+.titleButton:focus-visible {
+  outline: 2px solid var(--border-color);
+  outline-offset: 4px;
+}
+
 .title {
   margin: 0;
   font-family: "Fraunces", serif;
@@ -21,15 +44,7 @@
   color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 2px;
-}
-
-.contextIndicator {
-  font-family: "Roboto", sans-serif;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  padding: 0.25rem 0.75rem;
-  border: 2px solid var(--border-color);
-  background-color: var(--message-bg);
+  transition: opacity 0.1s, transform 0.1s;
 }
 
 .headerRight {

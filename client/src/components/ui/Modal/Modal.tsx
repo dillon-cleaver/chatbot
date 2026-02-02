@@ -1,16 +1,18 @@
 import { ReactNode } from 'react';
+import { Button } from '../Button';
 import styles from './Modal.module.css';
 
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  bodyClassName?: string;
 }
 
-export function Modal({ isOpen, onClose, title, subtitle, children, footer }: ModalProps): React.JSX.Element | null {
+export function Modal({ isOpen, onClose, title, subtitle, children, footer, bodyClassName }: ModalProps): React.JSX.Element | null {
   if (!isOpen) return null;
 
   return (
@@ -20,14 +22,19 @@ export function Modal({ isOpen, onClose, title, subtitle, children, footer }: Mo
           <div className={styles.modalHeader}>
             <div className={styles.modalHeaderText}>
               {title && <h2>{title}</h2>}
-              {subtitle && <p className={styles.modalSubtitle}>{subtitle}</p>}
+              {subtitle && <div className={styles.modalSubtitle}>{subtitle}</div>}
             </div>
-            <button className={styles.closeButton} onClick={onClose}>
+            <Button
+              variant="message"
+              className={styles.closeButton}
+              onClick={onClose}
+              aria-label="Close modal"
+            >
               ×
-            </button>
+            </Button>
           </div>
         )}
-        <div className={styles.modalBody}>{children}</div>
+        <div className={`${styles.modalBody}${bodyClassName ? ` ${bodyClassName}` : ''}`}>{children}</div>
         {footer && <div className={styles.modalFooter}>{footer}</div>}
       </div>
     </div>

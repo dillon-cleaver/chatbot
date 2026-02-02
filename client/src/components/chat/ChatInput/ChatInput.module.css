@@ -3,17 +3,11 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem 0;
-  border-top: 4px solid var(--border-color);
-  padding-top: 1rem;
 }
 
-.fileChipsContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  max-height: 120px;
-  overflow-y: auto;
+.inputContainer.withBorder {
+  border-top: 4px solid var(--border-color);
+  padding-top: 1rem;
 }
 
 .inputRow {
@@ -38,6 +32,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 4px 4px 0px var(--shadow-color);
+  position: relative;
 }
 
 .attachButton:hover {
@@ -47,6 +42,25 @@
 
 .attachButton:active {
   transform: translate(0, 0);
+  box-shadow: 2px 2px 0px var(--shadow-color);
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: #ff6b6b;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-family: "Roboto", sans-serif;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border-color);
   box-shadow: 2px 2px 0px var(--shadow-color);
 }
 

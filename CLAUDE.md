@@ -1,6 +1,6 @@
 # Chatbot
 
-Claude-powered chatbot with a React frontend and Express backend.
+Claude-powered chatbot with a React frontend and Express backend. Features a Gen X/90s personality inspired by the Sega Genesis/Mega Drive era.
 
 ## Structure
 

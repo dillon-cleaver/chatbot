@@ -1,5 +1,6 @@
 import type { UploadedFile } from '../../../types';
 import { getFileIcon, formatBytes } from '../../../utils/fileUtils';
+import { Button } from '../../ui/Button';
 import styles from './FileItem.module.css';
 
 export interface FileItemProps {
@@ -22,12 +23,12 @@ export function FileItem({ file, isSelected, onToggleSelection, onView, onDelete
       <span className={styles.fileIcon}>{getFileIcon(file.mime_type)}</span>
       <span className={styles.fileName}>{file.original_name}</span>
       <span className={styles.fileSize}>{formatBytes(file.size)}</span>
-      <button className={styles.viewButton} onClick={onView}>
+      <Button variant="message" className={styles.viewButton} onClick={onView}>
         View
-      </button>
-      <button className={styles.deleteButton} onClick={onDelete}>
+      </Button>
+      <Button variant="message" destructive className={styles.deleteButton} onClick={onDelete}>
         ×
-      </button>
+      </Button>
     </div>
   );
 }

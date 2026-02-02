@@ -8,7 +8,6 @@ export interface ChatHistoryModalProps {
   onClose: () => void;
   conversations: Conversation[];
   currentConversationId: string | null;
-  onLoadConversation: (conversationId: string) => void;
   onDeleteConversation: (conversationId: string) => void;
   onStartNewChat: () => void;
   onDeleteAllClick: () => void;
@@ -20,7 +19,6 @@ export function ChatHistoryModal({
   onClose,
   conversations,
   currentConversationId,
-  onLoadConversation,
   onDeleteConversation,
   onStartNewChat,
   onDeleteAllClick,
@@ -48,7 +46,7 @@ export function ChatHistoryModal({
               key={conversation.id}
               conversation={conversation}
               isCurrent={conversation.id === currentConversationId}
-              onLoad={onLoadConversation}
+              onClose={onClose}
               onDelete={onDeleteConversation}
               onUpdateTitle={onUpdateTitle}
             />

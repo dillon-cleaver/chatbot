@@ -1,0 +1,22 @@
+.scrollTrack {
+  position: absolute;
+  right: 4px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.scrollTrack.visible {
+  opacity: 1;
+}
+
+.scrollThumb {
+  position: absolute;
+  width: 100%;
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
