@@ -70,6 +70,7 @@
   margin-bottom: 0;
 }
 
+/* Close button - intentional overrides for large × symbol design */
 .closeButton {
   font-size: 2rem;
   width: 40px;

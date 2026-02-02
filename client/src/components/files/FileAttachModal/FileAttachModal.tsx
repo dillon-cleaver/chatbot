@@ -44,7 +44,12 @@ export function FileAttachModal({
         Attach files to analyze content across multiple documents, find patterns, search efficiently, and connect
         information.
       </p>
-      <button className={styles.detailsToggle} onClick={() => setShowDetails(!showDetails)}>
+      <button
+        className={styles.detailsToggle}
+        onClick={() => setShowDetails(!showDetails)}
+        aria-label={showDetails ? 'Hide details' : 'Show details'}
+        aria-expanded={showDetails}
+      >
         <span className={`${styles.chevron} ${showDetails ? styles.chevronUp : ''}`}>▼</span>
       </button>
       {showDetails && (

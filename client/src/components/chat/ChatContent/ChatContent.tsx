@@ -71,19 +71,24 @@ export function ChatContent(): React.JSX.Element {
   }, [fileManager.isModalOpen, fileManager.selectedFileIds.length]);
 
   // Load conversation when URL param changes
+  // Destructure to satisfy ESLint and make dependencies clearer
+  const { loadConversation } = conversations;
+  const { setMessages } = chat;
+  const { clearSelectedFiles } = fileManager;
+
   useEffect(() => {
     const loadFromUrl = async () => {
       if (conversationId) {
         // Always load the conversation when conversationId is present
-        await conversations.loadConversation(conversationId);
+        await loadConversation(conversationId);
       } else {
         // At "/" route - always clear messages for new chat
-        chat.setMessages([]);
-        fileManager.clearSelectedFiles();
+        setMessages([]);
+        clearSelectedFiles();
       }
     };
     loadFromUrl();
-  }, [conversationId, conversations.loadConversation, chat.setMessages, fileManager.clearSelectedFiles]);
+  }, [conversationId, loadConversation, setMessages, clearSelectedFiles]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const selectedFiles = e.target.files ? Array.from(e.target.files) : [];

@@ -24,7 +24,12 @@ export function Modal({ isOpen, onClose, title, subtitle, children, footer, body
               {title && <h2>{title}</h2>}
               {subtitle && <div className={styles.modalSubtitle}>{subtitle}</div>}
             </div>
-            <Button variant="message" className={styles.closeButton} onClick={onClose}>
+            <Button
+              variant="message"
+              className={styles.closeButton}
+              onClick={onClose}
+              aria-label="Close modal"
+            >
               ×
             </Button>
           </div>

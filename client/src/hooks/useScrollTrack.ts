@@ -5,7 +5,7 @@ export interface UseScrollTrackOptions {
 }
 
 export interface UseScrollTrackReturn {
-  containerRef: React.RefObject<HTMLDivElement | null>;
+  containerRef: React.RefObject<HTMLDivElement>;
   isScrolling: boolean;
   scrollThumbStyle: {
     top: number;
