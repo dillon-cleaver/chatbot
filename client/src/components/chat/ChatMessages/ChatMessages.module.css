@@ -16,23 +16,22 @@
   gap: 1rem;
   /* Hide native scrollbar */
   scrollbar-width: none;
+  animation: messagesAppear 0.3s ease-out;
+}
+
+@keyframes messagesAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .messages::-webkit-scrollbar {
   display: none;
-}
-
-.emptyState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-secondary);
-  font-size: 1.125rem;
-}
-
-.emptyState p {
-  margin: 0;
 }
 
 /* Loading message styles - match MessageItem neobrutalist design */

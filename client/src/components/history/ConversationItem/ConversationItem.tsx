@@ -81,10 +81,18 @@ export function ConversationItem({
             </span>
           </Link>
           <div className={styles.conversationActions}>
-            <button className={styles.editButton} onClick={startEditing}>
+            <button
+              className={styles.editButton}
+              onClick={startEditing}
+              aria-label="Edit conversation title"
+            >
               ✎
             </button>
-            <button className={styles.deleteButton} onClick={() => onDelete(conversation.id)}>
+            <button
+              className={styles.deleteButton}
+              onClick={() => onDelete(conversation.id)}
+              aria-label="Delete conversation"
+            >
               ×
             </button>
           </div>

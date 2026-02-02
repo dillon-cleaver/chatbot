@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './ChatContent.module.css';
 import { useTheme } from '../../../hooks/useTheme';
@@ -12,6 +12,7 @@ import { ChatContainer } from '../ChatContainer/ChatContainer';
 import { FileAttachModal } from '../../files/FileAttachModal/FileAttachModal';
 import { ChatHistoryModal } from '../../history/ChatHistoryModal/ChatHistoryModal';
 import { ConfirmDialog } from '../../ui/ConfirmDialog/ConfirmDialog';
+import { Spinner } from '../../ui/Spinner/Spinner';
 
 export function ChatContent(): React.JSX.Element {
   const { conversationId } = useParams<{ conversationId?: string }>();
@@ -27,9 +28,14 @@ export function ChatContent(): React.JSX.Element {
   const fileManager = useFileManager();
 
   // Navigate to conversation when created
-  const handleConversationCreated = (id: string): void => {
+  const handleConversationCreated = useCallback((id: string): void => {
     navigate(`/chat/${id}`);
-  };
+  }, [navigate]);
+
+  // Navigate to home for new chat
+  const handleNewChat = useCallback((): void => {
+    navigate('/', { replace: true });
+  }, [navigate]);
 
   // Initialize chat with conversation ID from App state
   const chat = useChat({
@@ -44,7 +50,7 @@ export function ChatContent(): React.JSX.Element {
     currentConversationId,
     onMessagesLoad: chat.setMessages,
     onClearSelectedFiles: fileManager.clearSelectedFiles,
-    onNewChat: () => navigate('/', { replace: true }),
+    onNewChat: handleNewChat,
   });
 
   // Auto-scroll to bottom when messages change
@@ -67,16 +73,17 @@ export function ChatContent(): React.JSX.Element {
   // Load conversation when URL param changes
   useEffect(() => {
     const loadFromUrl = async () => {
-      if (conversationId && chat.messages.length === 0) {
+      if (conversationId) {
+        // Always load the conversation when conversationId is present
         await conversations.loadConversation(conversationId);
-      } else if (!conversationId && chat.messages.length > 0) {
-        // At "/" route - clear messages for new chat
+      } else {
+        // At "/" route - always clear messages for new chat
         chat.setMessages([]);
         fileManager.clearSelectedFiles();
       }
     };
     loadFromUrl();
-  }, [conversationId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [conversationId, conversations.loadConversation, chat.setMessages, fileManager.clearSelectedFiles]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
@@ -145,22 +152,31 @@ export function ChatContent(): React.JSX.Element {
           </>
         }
       >
-        <ChatMessages
-          messages={chat.messages}
-          isLoading={chat.isLoading}
-          messagesEndRef={messagesEndRef}
-        />
-        <ChatInput
-          value={chat.input}
-          onChange={chat.setInput}
-          onSend={handleSendMessage}
-          onKeyDown={handleKeyPress}
-          onAttachClick={fileManager.openModal}
-          isLoading={chat.isLoading}
-          selectedFiles={selectedFiles}
-          onRemoveFile={fileManager.removeSelectedFile}
-          onClearAllFiles={fileManager.clearSelectedFiles}
-        />
+        {conversations.isLoadingConversation ? (
+          <div className={styles.loadingConversation}>
+            <Spinner />
+            <p>Loading conversation...</p>
+          </div>
+        ) : (
+          <>
+            <ChatMessages
+              messages={chat.messages}
+              isLoading={chat.isLoading}
+              messagesEndRef={messagesEndRef}
+            />
+            <ChatInput
+              value={chat.input}
+              onChange={chat.setInput}
+              onSend={handleSendMessage}
+              onKeyDown={handleKeyPress}
+              onAttachClick={fileManager.openModal}
+              isLoading={chat.isLoading}
+              selectedFiles={selectedFiles}
+              onRemoveFile={fileManager.removeSelectedFile}
+              onClearAllFiles={fileManager.clearSelectedFiles}
+            />
+          </>
+        )}
       </ChatContainer>
 
       <FileAttachModal

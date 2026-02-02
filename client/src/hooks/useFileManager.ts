@@ -102,26 +102,26 @@ export function useFileManager(): UseFileManagerReturn {
     });
   };
 
-  const removeSelectedFile = (fileId: string): void => {
+  const removeSelectedFile = useCallback((fileId: string): void => {
     setSelectedFileIds((prev) => prev.filter((id) => id !== fileId));
-  };
+  }, []);
 
-  const clearSelectedFiles = (): void => {
+  const clearSelectedFiles = useCallback((): void => {
     setSelectedFileIds([]);
-  };
+  }, []);
 
-  const viewFile = (fileId: string): void => {
+  const viewFile = useCallback((fileId: string): void => {
     api.viewFile(fileId);
-  };
+  }, []);
 
-  const openModal = (): void => {
+  const openModal = useCallback((): void => {
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const closeModal = (): void => {
+  const closeModal = useCallback((): void => {
     setIsModalOpen(false);
     setUploadError(null);
-  };
+  }, []);
 
   return {
     files,

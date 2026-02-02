@@ -5,6 +5,7 @@ import * as api from "../utils/api";
 export interface UseConversationsReturn {
   conversations: Conversation[];
   isHistoryModalOpen: boolean;
+  isLoadingConversation: boolean;
   editingTitleId: string | null;
   editingTitleValue: string;
   loadConversation: (conversationId: string) => Promise<void>;
@@ -38,13 +39,22 @@ export function useConversations({
 }: UseConversationsProps): UseConversationsReturn {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
+  const [isLoadingConversation, setIsLoadingConversation] = useState<boolean>(false);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [editingTitleValue, setEditingTitleValue] = useState<string>("");
 
   const loadConversation = useCallback(
     async (conversationId: string): Promise<void> => {
+      setIsLoadingConversation(true);
+
+      // Minimum display time for loading state (prevents flash)
+      const minLoadingTime = new Promise(resolve => setTimeout(resolve, 400));
+
       try {
-        const data = await api.fetchConversation(conversationId);
+        const [data] = await Promise.all([
+          api.fetchConversation(conversationId),
+          minLoadingTime
+        ]);
 
         // Set messages from conversation
         const messages = data.messages.map((msg) => {
@@ -76,6 +86,9 @@ export function useConversations({
         onMessagesLoad(messages);
         setIsHistoryModalOpen(false);
       } catch (error) {
+        // Ensure minimum loading time even on error
+        await minLoadingTime;
+
         console.error("Failed to load conversation:", error);
         // Navigate to home if conversation not found
         const err = error as Error & { status?: number; response?: { status?: number } };
@@ -90,6 +103,8 @@ export function useConversations({
         } else {
           alert("Failed to load conversation. Please try again.");
         }
+      } finally {
+        setIsLoadingConversation(false);
       }
     },
     [onMessagesLoad, onNewChat],
@@ -193,6 +208,7 @@ export function useConversations({
   return {
     conversations,
     isHistoryModalOpen,
+    isLoadingConversation,
     editingTitleId,
     editingTitleValue,
     loadConversation,
