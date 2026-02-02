@@ -5,17 +5,42 @@ import styles from './FileChip.module.css';
 
 export interface FileChipProps {
   file: UploadedFile;
-  onRemove: () => void;
+  onRemove?: () => void;
+  onClick?: () => void;
+  compact?: boolean;
 }
 
-export function FileChip({ file, onRemove }: FileChipProps): React.JSX.Element {
+export function FileChip({ file, onRemove, onClick, compact = false }: FileChipProps): React.JSX.Element {
+  const chipClassName = `${styles.fileChip} ${compact ? styles.compact : ''}`;
+  const nameClassName = `${styles.fileChipName} ${compact ? styles.compactName : ''}`;
+
+  const handleRemoveClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering onClick when removing
+    onRemove?.();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
-    <div className={styles.fileChip}>
+    <div
+      className={chipClassName}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
       <span className={styles.fileChipIcon}>{getFileIcon(file.mime_type)}</span>
-      <span className={styles.fileChipName}>{file.original_name}</span>
-      <Button variant="message" destructive className={styles.fileChipRemove} onClick={onRemove}>
-        ×
-      </Button>
+      <span className={nameClassName}>{file.original_name}</span>
+      {onRemove && (
+        <Button variant="message" destructive className={styles.fileChipRemove} onClick={handleRemoveClick}>
+          ×
+        </Button>
+      )}
     </div>
   );
 }
