@@ -65,9 +65,9 @@ export function FileAttachModal({
             <strong>{MAX_FILES_PER_MESSAGE}</strong> attachments per message sent.
           </p>
           <p>
-            <strong>How It Works:</strong> Once attached, files remain in the chat context until you remove them. Each
-            message you send includes the content of all attached files, allowing cross-file analysis and
-            pattern-finding.
+            <strong>How It Works:</strong> Attached files are sent with your next message only, then automatically
+            removed from selection. The AI retains conversation history for context in follow-up messages, allowing it
+            to reference previous discussions about those files.
           </p>
           <p>
             <strong>Best Practices:</strong> Attach relevant files before asking questions. Remove files when no longer
