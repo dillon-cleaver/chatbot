@@ -40,6 +40,7 @@
 
 .clearButton {
   padding: 0.5rem 0.75rem;
+  border-radius: 0;
   font-family: "Fraunces", serif;
   font-size: 0.85rem;
   font-weight: 600;

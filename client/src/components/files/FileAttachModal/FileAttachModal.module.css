@@ -45,25 +45,29 @@
 }
 
 .selectionCounterWrapper {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1.5rem;
   margin: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
 }
 
 .selectionCounterWrapper.visible {
   max-height: 100px;
   opacity: 1;
-  margin: 0 0 1rem 0;
+  padding: 1rem 1.5rem;
 }
 
 .selectionCounter {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem;
-  margin: 0 1.5rem;
+  padding: 0.75rem 1rem;
   background-color: #e6f2ff;
   border: 3px solid #6c5ce7;
   color: #1e40af;
@@ -86,27 +90,13 @@
   flex-shrink: 0;
 }
 
-.modalFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-.footerLeft {
-  flex: 1;
-}
-
-.clearSelectionButton,
-.attachCloseButton {
-  padding: 0.75rem 1.5rem;
+.clearSelectionButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0;
   font-family: "Fraunces", serif;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-}
-
-.clearSelectionButton {
-  font-size: 0.9rem;
+  flex-shrink: 0;
 }

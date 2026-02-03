@@ -26,6 +26,7 @@
 .fileChipRemove {
   font-size: 1.2rem;
   padding: 0.25rem;
+  border-radius: 0;
   line-height: 1;
   width: 28px;
   height: 28px;

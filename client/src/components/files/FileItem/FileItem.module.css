@@ -95,6 +95,7 @@
 .viewButton,
 .deleteButton {
   padding: 0.5rem 1rem;
+  border-radius: 0;
   font-family: "Fraunces", serif;
   font-size: 0.85rem;
   font-weight: 600;

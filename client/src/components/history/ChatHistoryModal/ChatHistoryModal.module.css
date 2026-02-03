@@ -54,8 +54,6 @@
 .deleteAllButton:hover {
   transform: translate(-2px, -2px);
   box-shadow: 6px 6px 0px var(--shadow-color);
-  background-color: #cc0000;
-  border-color: #cc0000;
 }
 
 .deleteAllButton:active {
