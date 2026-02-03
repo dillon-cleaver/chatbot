@@ -19,12 +19,11 @@ export function ChatMessages({
     dependencies: [messages],
   });
 
-  // TODO: Stop using the index as key
   return (
     <div className={styles.messagesWrapper}>
       <div ref={containerRef} className={styles.messages}>
-        {messages.map((msg, idx) => (
-          <MessageItem key={idx} message={msg} />
+        {messages.map((msg) => (
+          <MessageItem key={msg.id} message={msg} />
         ))}
         {isLoading && (
           <div className={`${styles.message} ${styles.assistantMessage}`}>

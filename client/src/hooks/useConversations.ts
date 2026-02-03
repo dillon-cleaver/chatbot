@@ -95,6 +95,7 @@ export function useConversations({
           }
 
           return {
+            id: msg.id || crypto.randomUUID(), // Generate ID if missing
             role: msg.role,
             content: content,
             files: msg.files && msg.files.length > 0 ? msg.files : undefined,

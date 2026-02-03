@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './ChatContent.module.css';
 import { useTheme } from '../../../hooks/useTheme';
@@ -39,8 +39,9 @@ export function ChatContent(): React.JSX.Element {
     navigate('/', { replace: true });
   }, [navigate]);
 
-  const selectedFiles = fileManager.files.filter(f =>
-    fileManager.selectedFileIds.includes(f.id)
+  const selectedFiles = useMemo(
+    () => fileManager.files.filter(f => fileManager.selectedFileIds.includes(f.id)),
+    [fileManager.files, fileManager.selectedFileIds]
   );
 
   // Initialize chat with conversation ID from App state
@@ -206,6 +207,8 @@ export function ChatContent(): React.JSX.Element {
         onDeleteFile={fileManager.deleteFile}
         isUploading={fileManager.isUploading}
         uploadError={fileManager.uploadError}
+        error={fileManager.error}
+        onClearError={fileManager.clearError}
         onClearSelection={fileManager.clearSelectedFiles}
         onCommitSelection={fileManager.commitPendingSelection}
         fileInputRef={fileInputRef}

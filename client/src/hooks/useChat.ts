@@ -34,6 +34,7 @@ export function useChat({
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
+      id: crypto.randomUUID(),
       role: 'user',
       content: input.trim(),
       files: selectedFiles.length > 0 ? selectedFiles : undefined
@@ -45,7 +46,7 @@ export function useChat({
 
     try {
       const data = await api.sendChatMessage(updatedMessages, conversationId, selectedFileIds);
-      setMessages([...updatedMessages, { role: 'assistant', content: data.content }]);
+      setMessages([...updatedMessages, { id: crypto.randomUUID(), role: 'assistant', content: data.content }]);
 
       // Set conversation ID if it's a new conversation
       if (!conversationId && onConversationCreated) {
@@ -59,7 +60,7 @@ export function useChat({
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setMessages([
         ...updatedMessages,
-        { role: 'assistant', content: `Sorry, I encountered an error: ${errorMessage}` },
+        { id: crypto.randomUUID(), role: 'assistant', content: `Sorry, I encountered an error: ${errorMessage}` },
       ]);
     } finally {
       setIsLoading(false);

@@ -36,6 +36,20 @@ pnpm start            # Run server only (port 3000)
 2. Run `pnpm install` from root
 3. Run `pnpm dev` to start both services
 
+## Recent Changes
+
+### Message IDs (2024-02)
+Messages now include unique IDs for proper React reconciliation. If you experience issues with existing conversations:
+
+1. Open browser console
+2. Run: `localStorage.clear()`
+3. Refresh the page
+
+This clears local conversation history. No data loss on server side.
+
+### File Attachment UX (2024-02)
+File selections in the modal now use pending state - changes only apply when you close the modal. This prevents jarring background updates while browsing files.
+
 ## Git Conventions
 
 Use [Conventional Commits](https://www.conventionalcommits.org/) format for all commit messages and PR titles:

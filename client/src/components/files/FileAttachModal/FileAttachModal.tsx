@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { AlertTriangle, X } from 'lucide-react';
 import type { UploadedFile } from '../../../types';
 import { MAX_TOTAL_FILES } from '../../../constants';
 import { Modal } from '../../ui/Modal/Modal';
@@ -18,6 +19,8 @@ export interface FileAttachModalProps {
   onDeleteFile: (fileId: string) => void;
   isUploading: boolean;
   uploadError: string | null;
+  error: string | null;
+  onClearError: () => void;
   onClearSelection: () => void;
   onCommitSelection: (fileIds: string[]) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -33,6 +36,8 @@ export function FileAttachModal({
   onDeleteFile,
   isUploading,
   uploadError,
+  error,
+  onClearError,
   onCommitSelection,
   fileInputRef,
 }: FileAttachModalProps): React.JSX.Element {
@@ -69,7 +74,10 @@ export function FileAttachModal({
   };
 
   // Get selected file objects for display
-  const selectedFiles = files.filter(f => pendingFileIds.includes(f.id));
+  const selectedFiles = useMemo(
+    () => files.filter(f => pendingFileIds.includes(f.id)),
+    [files, pendingFileIds]
+  );
 
   return (
     <Modal
@@ -79,6 +87,15 @@ export function FileAttachModal({
       bodyClassName={styles.noScrollBody}
     >
       <div className={styles.modalBodyContent}>
+        {error && (
+          <div className={styles.errorBanner}>
+            <AlertTriangle size={18} className={styles.errorIcon} />
+            <span className={styles.errorText}>{error}</span>
+            <button onClick={onClearError} className={styles.errorDismiss} aria-label="Dismiss error">
+              <X size={16} />
+            </button>
+          </div>
+        )}
         <UploadSection
           onUpload={onUpload}
           isUploading={isUploading}

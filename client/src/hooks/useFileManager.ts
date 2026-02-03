@@ -9,6 +9,8 @@ export interface UseFileManagerReturn {
   isModalOpen: boolean;
   isUploading: boolean;
   uploadError: string | null;
+  error: string | null;
+  clearError: () => void;
   uploadFiles: (files: File[]) => Promise<void>;
   deleteFile: (fileId: string) => Promise<void>;
   toggleFileSelection: (fileId: string) => void;
@@ -36,13 +38,16 @@ export function useFileManager(): UseFileManagerReturn {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchFiles = useCallback(async (): Promise<void> => {
+    setError(null);
     try {
       const data = await api.fetchFiles();
       setFiles(data);
     } catch (error) {
       console.error('Failed to fetch files:', error);
+      setError('Failed to load files. Please try again.');
     }
   }, []);
 
@@ -76,6 +81,7 @@ export function useFileManager(): UseFileManagerReturn {
   const uploadFiles = async (filesToUpload: File[]): Promise<void> => {
     setIsUploading(true);
     setUploadError(null);
+    setError(null);
 
     try {
       const newFiles = await api.uploadFiles(filesToUpload);
@@ -91,15 +97,16 @@ export function useFileManager(): UseFileManagerReturn {
   };
 
   const deleteFile = async (fileId: string): Promise<void> => {
-    if (!confirm('Delete this file?')) return;
+    if (!window.confirm('Delete this file?')) return;
 
+    setError(null);
     try {
       await api.deleteFile(fileId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       setSelectedFileIds((prev) => prev.filter((id) => id !== fileId));
     } catch (error) {
       console.error('Delete failed:', error);
-      alert('Failed to delete file. Please try again.');
+      setError('Failed to delete file. Please try again.');
     }
   };
 
@@ -109,7 +116,7 @@ export function useFileManager(): UseFileManagerReturn {
         return prev.filter((id) => id !== fileId);
       } else {
         if (prev.length >= MAX_FILES_PER_MESSAGE) {
-          alert(`Maximum ${MAX_FILES_PER_MESSAGE} files can be attached per message`);
+          setError(`Maximum ${MAX_FILES_PER_MESSAGE} files can be attached per message.`);
           return prev;
         }
         return [...prev, fileId];
@@ -127,7 +134,7 @@ export function useFileManager(): UseFileManagerReturn {
 
   const commitPendingSelection = useCallback((fileIds: string[]): void => {
     if (fileIds.length > MAX_FILES_PER_MESSAGE) {
-      alert(`Maximum ${MAX_FILES_PER_MESSAGE} files can be attached per message`);
+      setError(`Maximum ${MAX_FILES_PER_MESSAGE} files can be attached per message.`);
       return;
     }
     setSelectedFileIds(fileIds);
@@ -152,6 +159,8 @@ export function useFileManager(): UseFileManagerReturn {
     isModalOpen,
     isUploading,
     uploadError,
+    error,
+    clearError: () => setError(null),
     uploadFiles,
     deleteFile,
     toggleFileSelection,
