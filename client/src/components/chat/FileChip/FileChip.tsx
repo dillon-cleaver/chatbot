@@ -11,7 +11,7 @@ export interface FileChipProps {
 }
 
 export function FileChip({ file, onRemove, onClick, compact = false }: FileChipProps): React.JSX.Element {
-  const chipClassName = `${styles.fileChip} ${compact ? styles.compact : ''}`;
+  const chipClassName = `${styles.fileChip} ${compact ? styles.compact : ''} ${compact && onClick ? styles.clickable : ''}`;
   const nameClassName = `${styles.fileChipName} ${compact ? styles.compactName : ''}`;
 
   const handleRemoveClick = (e: React.MouseEvent) => {
