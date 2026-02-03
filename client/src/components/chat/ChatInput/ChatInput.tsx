@@ -1,3 +1,4 @@
+import { Paperclip } from 'lucide-react';
 import type { UploadedFile } from '../../../types';
 import { useAutoResizeTextarea } from '../../../hooks/useAutoResizeTextarea';
 import { FileChipsDisplay } from '../FileChipsDisplay/FileChipsDisplay';
@@ -39,7 +40,7 @@ export function ChatInput({
           onClick={onAttachClick}
           title="Attach files"
         >
-          📁
+          <Paperclip size={20} />
           {selectedFiles.length > 0 && (
             <span className={styles.badge}>{selectedFiles.length}</span>
           )}

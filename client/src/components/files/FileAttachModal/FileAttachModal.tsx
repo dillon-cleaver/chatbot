@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import type { UploadedFile } from '../../../types';
-import { MAX_FILES_PER_MESSAGE, MAX_TOTAL_FILES } from '../../../constants';
+import { MAX_TOTAL_FILES } from '../../../constants';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button';
 import { UploadSection } from '../UploadSection/UploadSection';
@@ -36,48 +35,6 @@ export function FileAttachModal({
   onClearSelection,
   fileInputRef,
 }: FileAttachModalProps): React.JSX.Element {
-  const [showDetails, setShowDetails] = useState(false);
-
-  const subtitle = (
-    <>
-      <p>
-        Attach files to analyze content across multiple documents, find patterns, search efficiently, and connect
-        information.
-      </p>
-      <button
-        className={styles.detailsToggle}
-        onClick={() => setShowDetails(!showDetails)}
-        aria-label={showDetails ? 'Hide details' : 'Show details'}
-        aria-expanded={showDetails}
-      >
-        <span className={`${styles.chevron} ${showDetails ? styles.chevronUp : ''}`}>▼</span>
-      </button>
-      {showDetails && (
-        <div className={styles.detailsContent}>
-          <p>
-            <strong>Storage & Privacy:</strong> Files are stored on your computer by the local server. File contents
-            are only sent to Anthropic's API when you submit messages. Anthropic retains requests for 30 days for
-            safety monitoring, then deletes them. Your data is not used for model training.
-          </p>
-          <p>
-            <strong>Context Window:</strong> The chatbot can process approximately 150,000 words at once (200K tokens,
-            roughly 500 pages of text). This includes all attached files plus conversation history. Max{' '}
-            <strong>{MAX_FILES_PER_MESSAGE}</strong> attachments per message sent.
-          </p>
-          <p>
-            <strong>How It Works:</strong> Attached files are sent with your next message only, then automatically
-            removed from selection. The AI retains conversation history for context in follow-up messages, allowing it
-            to reference previous discussions about those files.
-          </p>
-          <p>
-            <strong>Best Practices:</strong> Attach relevant files before asking questions. Remove files when no longer
-            needed to conserve context space. Larger files consume more context, leaving less room for conversation.
-          </p>
-        </div>
-      )}
-    </>
-  );
-
   const footer = files.length > 0 ? (
     <div className={styles.modalFooter}>
       <div className={styles.footerLeft}>
@@ -98,7 +55,6 @@ export function FileAttachModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Attach Files to Chat"
-      subtitle={subtitle}
       footer={footer}
       bodyClassName={styles.noScrollBody}
     >

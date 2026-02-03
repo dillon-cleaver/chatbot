@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { X } from 'lucide-react';
 import { Button } from '../Button';
 import styles from './Modal.module.css';
 
@@ -30,7 +31,7 @@ export function Modal({ isOpen, onClose, title, subtitle, children, footer, body
               onClick={onClose}
               aria-label="Close modal"
             >
-              ×
+              <X size={20} />
             </Button>
           </div>
         )}

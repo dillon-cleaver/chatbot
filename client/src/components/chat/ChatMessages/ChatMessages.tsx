@@ -1,8 +1,8 @@
-import type { Message } from '../../../types';
-import { MessageItem } from '../MessageItem/MessageItem';
-import { useScrollTrack } from '../../../hooks/useScrollTrack';
-import { ScrollBar } from '../../ui/ScrollBar/ScrollBar';
-import styles from './ChatMessages.module.css';
+import type { Message } from "../../../types";
+import { MessageItem } from "../MessageItem/MessageItem";
+import { useScrollTrack } from "../../../hooks/useScrollTrack";
+import { ScrollBar } from "../../ui/ScrollBar/ScrollBar";
+import styles from "./ChatMessages.module.css";
 
 export interface ChatMessagesProps {
   messages: Message[];
@@ -19,12 +19,10 @@ export function ChatMessages({
     dependencies: [messages],
   });
 
+  // TODO: Stop using the index as key
   return (
     <div className={styles.messagesWrapper}>
-      <div
-        ref={containerRef}
-        className={styles.messages}
-      >
+      <div ref={containerRef} className={styles.messages}>
         {messages.map((msg, idx) => (
           <MessageItem key={idx} message={msg} />
         ))}

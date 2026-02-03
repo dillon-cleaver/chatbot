@@ -1,5 +1,5 @@
 .uploadSection {
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
   border-bottom: 3px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -81,36 +81,14 @@
   }
 }
 
-.fileTypeInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background-color: var(--message-bg);
-  border: 2px solid var(--border-color);
-  font-family: "Roboto", sans-serif;
-  font-size: 0.85rem;
-}
-
-.fileTypeInfo p {
-  margin: 0;
-  line-height: 1.5;
+.fileTypes {
+  line-height: 1.6;
 }
 
 .fileTypeSupported {
-  color: var(--text-primary);
-}
-
-.fileTypeSupported strong {
   color: #22c55e;
-  font-weight: 700;
 }
 
 .fileTypeUnsupported {
-  color: var(--text-secondary);
-}
-
-.fileTypeUnsupported strong {
   color: #ef4444;
-  font-weight: 700;
 }

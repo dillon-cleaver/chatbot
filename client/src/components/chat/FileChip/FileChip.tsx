@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import type { UploadedFile } from '../../../types';
 import { getFileIcon } from '../../../utils/fileUtils';
 import { Button } from '../../ui/Button';
@@ -38,7 +39,7 @@ export function FileChip({ file, onRemove, onClick, compact = false }: FileChipP
       <span className={nameClassName}>{file.original_name}</span>
       {onRemove && (
         <Button variant="message" destructive className={styles.fileChipRemove} onClick={handleRemoveClick}>
-          ×
+          <X size={14} />
         </Button>
       )}
     </div>
