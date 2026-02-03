@@ -19,9 +19,14 @@ export function FileChipsDisplay({
   return (
     <div className={styles.wrapper}>
       <div className={styles.selectionBox}>
-        <span className={styles.count}>
-          {files.length} {files.length === 1 ? 'file' : 'files'} selected
-        </span>
+        <div className={styles.selectionInfo}>
+          <span className={styles.count}>
+            {files.length} {files.length === 1 ? 'file' : 'files'} selected
+          </span>
+          <span className={styles.helperText}>
+            Sent with next message only. Message history provides context for follow-ups.
+          </span>
+        </div>
         {onClearAll && (
           <Button variant="message" destructive className={styles.clearButton} onClick={onClearAll}>
             Clear

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { Message } from '../types';
+import type { Message, UploadedFile } from '../types';
 import * as api from '../utils/api';
 
 export interface UseChatReturn {
@@ -14,6 +14,7 @@ export interface UseChatReturn {
 interface UseChatProps {
   conversationId: string | null;
   selectedFileIds: string[];
+  selectedFiles: UploadedFile[];
   onConversationCreated: (conversationId: string) => void;
   onClearSelectedFiles: () => void;
 }
@@ -21,6 +22,7 @@ interface UseChatProps {
 export function useChat({
   conversationId,
   selectedFileIds,
+  selectedFiles,
   onConversationCreated,
   onClearSelectedFiles,
 }: UseChatProps): UseChatReturn {
@@ -31,7 +33,11 @@ export function useChat({
   const sendMessage = useCallback(async (): Promise<void> => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input.trim() };
+    const userMessage: Message = {
+      role: 'user',
+      content: input.trim(),
+      files: selectedFiles.length > 0 ? selectedFiles : undefined
+    };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setInput('');
@@ -58,7 +64,7 @@ export function useChat({
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages, conversationId, selectedFileIds, onConversationCreated, onClearSelectedFiles]);
+  }, [input, isLoading, messages, conversationId, selectedFileIds, selectedFiles, onConversationCreated, onClearSelectedFiles]);
 
   return {
     messages,

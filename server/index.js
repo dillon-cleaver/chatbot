@@ -124,6 +124,9 @@ const upload = multer({
   },
 });
 
+// Prepared statements for reuse across requests
+const getFile = db.prepare('SELECT * FROM files WHERE id = ?');
+
 // Conversation endpoints
 
 // Get all conversations
@@ -162,13 +165,21 @@ app.get('/conversations/:id', (req, res) => {
 
     res.json({
       ...conversation,
-      messages: messages.map(msg => ({
-        id: msg.id,
-        role: msg.role,
-        content: msg.content,
-        created_at: msg.created_at,
-        file_ids: msg.file_ids ? JSON.parse(msg.file_ids) : []
-      }))
+      messages: messages.map(msg => {
+        const fileIds = msg.file_ids ? JSON.parse(msg.file_ids) : [];
+        // TODO: Optimize N+1 query - collect all file IDs from all messages and fetch in single query with WHERE id IN (?)
+        const files = fileIds
+          .map(fileId => getFile.get(fileId))
+          .filter(Boolean); // Filter out deleted files
+
+        return {
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          created_at: msg.created_at,
+          files: files.length > 0 ? files : undefined
+        };
+      })
     });
   } catch (error) {
     console.error('Error fetching conversation:', error);

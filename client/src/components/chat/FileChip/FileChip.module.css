@@ -34,3 +34,31 @@
   justify-content: center;
   flex-shrink: 0;
 }
+
+/* Compact variant for message history */
+.fileChip.compact {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  opacity: 0.85;
+  max-width: 180px;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  border: 2px solid var(--border-color);
+  box-shadow: 2px 2px 0px var(--shadow-color);
+}
+
+.fileChip.compact.clickable {
+  cursor: pointer;
+}
+
+.fileChip.compact:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.fileChip.compact .fileChipIcon {
+  font-size: 0.85rem;
+}
+
+.compactName {
+  max-width: 120px;
+}
