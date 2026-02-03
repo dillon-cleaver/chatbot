@@ -30,7 +30,6 @@
 .fileCheckbox:hover {
   transform: scale(1.2);
   background-color: #6c5ce7;
-  border-color: #5b4bc4;
 }
 
 .fileCheckbox:hover::after {
@@ -48,7 +47,6 @@
 
 .fileCheckbox:checked {
   background-color: #6c5ce7;
-  border-color: #5b4bc4;
 }
 
 .fileCheckbox:checked::after {

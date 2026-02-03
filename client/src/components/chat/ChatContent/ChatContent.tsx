@@ -162,6 +162,7 @@ export function ChatContent(): React.JSX.Element {
               onRemoveFile={fileManager.removeSelectedFile}
               onClearAllFiles={fileManager.clearSelectedFiles}
               showTopBorder={false}
+              isModalOpen={fileManager.isModalOpen}
             />
           </>
         }
@@ -188,6 +189,7 @@ export function ChatContent(): React.JSX.Element {
               selectedFiles={selectedFiles}
               onRemoveFile={fileManager.removeSelectedFile}
               onClearAllFiles={fileManager.clearSelectedFiles}
+              isModalOpen={fileManager.isModalOpen}
             />
           </>
         )}
@@ -205,6 +207,7 @@ export function ChatContent(): React.JSX.Element {
         isUploading={fileManager.isUploading}
         uploadError={fileManager.uploadError}
         onClearSelection={fileManager.clearSelectedFiles}
+        onCommitSelection={fileManager.commitPendingSelection}
         fileInputRef={fileInputRef}
       />
 

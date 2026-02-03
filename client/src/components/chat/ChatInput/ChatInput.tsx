@@ -15,6 +15,7 @@ export interface ChatInputProps {
   onRemoveFile: (fileId: string) => void;
   onClearAllFiles?: () => void;
   showTopBorder?: boolean;
+  isModalOpen?: boolean;
 }
 
 export function ChatInput({
@@ -28,12 +29,13 @@ export function ChatInput({
   onRemoveFile,
   onClearAllFiles,
   showTopBorder = true,
+  isModalOpen = false,
 }: ChatInputProps): React.JSX.Element {
   const { textareaRef } = useAutoResizeTextarea({ value });
 
   return (
     <div className={`${styles.inputContainer} ${showTopBorder ? styles.withBorder : ''}`}>
-      <FileChipsDisplay files={selectedFiles} onRemoveFile={onRemoveFile} onClearAll={onClearAllFiles} />
+      {!isModalOpen && <FileChipsDisplay files={selectedFiles} onRemoveFile={onRemoveFile} onClearAll={onClearAllFiles} />}
       <div className={styles.inputRow}>
         <button
           className={styles.attachButton}

@@ -1,0 +1,37 @@
+.selectionInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: #e6f2ff;
+  border: 3px solid #6c5ce7;
+  color: #1e40af;
+  font-family: "Roboto", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .selectionInfo {
+  background-color: #1e3a5f;
+  border-color: #6c5ce7;
+  color: #93c5fd;
+}
+
+.selectionInfo::before {
+  content: "✓";
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Compact variant for reduced height */
+.selectionInfo.compact {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  gap: 0.5rem;
+}
+
+.selectionInfo.compact::before {
+  font-size: 1.2rem;
+}

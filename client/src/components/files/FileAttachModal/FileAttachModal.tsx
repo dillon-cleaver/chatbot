@@ -1,7 +1,8 @@
+import { useState, useEffect } from 'react';
 import type { UploadedFile } from '../../../types';
 import { MAX_TOTAL_FILES } from '../../../constants';
 import { Modal } from '../../ui/Modal/Modal';
-import { Button } from '../../ui/Button';
+import { FileChipsDisplay } from '../../chat/FileChipsDisplay/FileChipsDisplay';
 import { UploadSection } from '../UploadSection/UploadSection';
 import { FileList } from '../FileList/FileList';
 import styles from './FileAttachModal.module.css';
@@ -18,6 +19,7 @@ export interface FileAttachModalProps {
   isUploading: boolean;
   uploadError: string | null;
   onClearSelection: () => void;
+  onCommitSelection: (fileIds: string[]) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
@@ -26,19 +28,53 @@ export function FileAttachModal({
   onClose,
   files,
   selectedFileIds,
-  onToggleSelection,
   onUpload,
   onViewFile,
   onDeleteFile,
   isUploading,
   uploadError,
-  onClearSelection,
+  onCommitSelection,
   fileInputRef,
 }: FileAttachModalProps): React.JSX.Element {
+  // Local pending selection state
+  const [pendingFileIds, setPendingFileIds] = useState<string[]>(selectedFileIds);
+
+  // Initialize pending state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setPendingFileIds(selectedFileIds);
+    }
+  }, [isOpen, selectedFileIds]);
+
+  // Local toggle handler for pending selections
+  const handleTogglePending = (fileId: string): void => {
+    setPendingFileIds(prev => {
+      if (prev.includes(fileId)) {
+        return prev.filter(id => id !== fileId);
+      } else {
+        return [...prev, fileId];
+      }
+    });
+  };
+
+  // Clear pending selections
+  const handleClearPending = (): void => {
+    setPendingFileIds([]);
+  };
+
+  // Commit pending selections and close
+  const handleClose = (): void => {
+    onCommitSelection(pendingFileIds);
+    onClose();
+  };
+
+  // Get selected file objects for display
+  const selectedFiles = files.filter(f => pendingFileIds.includes(f.id));
+
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="Attach Files to Chat"
       bodyClassName={styles.noScrollBody}
     >
@@ -58,21 +94,25 @@ export function FileAttachModal({
               {files.length}/{MAX_TOTAL_FILES} file slots used
             </span>
           </div>
-          <div className={`${styles.selectionCounterWrapper} ${selectedFileIds.length > 0 ? styles.visible : ''}`}>
-            <div className={styles.selectionCounter}>
-              {selectedFileIds.length} {selectedFileIds.length === 1 ? 'file' : 'files'} selected
+          <div className={styles.scrollableContent}>
+            <div className={`${styles.selectionCounterWrapper} ${pendingFileIds.length > 0 ? styles.visible : ''}`}>
+              <FileChipsDisplay
+                files={selectedFiles}
+                onRemoveFile={handleTogglePending}
+                onClearAll={handleClearPending}
+                onAdd={handleClose}
+                showFileChips={false}
+                showHelperText={false}
+              />
             </div>
-            <Button variant="message" destructive className={styles.clearSelectionButton} onClick={onClearSelection}>
-              Clear Selection
-            </Button>
+            <FileList
+              files={files}
+              selectedFileIds={pendingFileIds}
+              onToggleSelection={handleTogglePending}
+              onViewFile={onViewFile}
+              onDeleteFile={onDeleteFile}
+            />
           </div>
-          <FileList
-            files={files}
-            selectedFileIds={selectedFileIds}
-            onToggleSelection={onToggleSelection}
-            onViewFile={onViewFile}
-            onDeleteFile={onDeleteFile}
-          />
         </div>
       </div>
     </Modal>

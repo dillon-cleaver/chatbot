@@ -13,6 +13,7 @@ export interface UseFileManagerReturn {
   deleteFile: (fileId: string) => Promise<void>;
   toggleFileSelection: (fileId: string) => void;
   clearSelectedFiles: () => void;
+  commitPendingSelection: (fileIds: string[]) => void;
   viewFile: (fileId: string) => void;
   openModal: () => void;
   closeModal: () => void;
@@ -124,6 +125,14 @@ export function useFileManager(): UseFileManagerReturn {
     setSelectedFileIds([]);
   }, []);
 
+  const commitPendingSelection = useCallback((fileIds: string[]): void => {
+    if (fileIds.length > MAX_FILES_PER_MESSAGE) {
+      alert(`Maximum ${MAX_FILES_PER_MESSAGE} files can be attached per message`);
+      return;
+    }
+    setSelectedFileIds(fileIds);
+  }, []);
+
   const viewFile = useCallback((fileId: string): void => {
     api.viewFile(fileId);
   }, []);
@@ -147,6 +156,7 @@ export function useFileManager(): UseFileManagerReturn {
     deleteFile,
     toggleFileSelection,
     clearSelectedFiles,
+    commitPendingSelection,
     viewFile,
     openModal,
     closeModal,
