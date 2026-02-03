@@ -124,6 +124,9 @@ const upload = multer({
   },
 });
 
+// Prepared statements for reuse across requests
+const getFile = db.prepare('SELECT * FROM files WHERE id = ?');
+
 // Conversation endpoints
 
 // Get all conversations
@@ -160,13 +163,11 @@ app.get('/conversations/:id', (req, res) => {
       ORDER BY created_at ASC
     `).all(id);
 
-    // Prepare statement for fetching files
-    const getFile = db.prepare('SELECT * FROM files WHERE id = ?');
-
     res.json({
       ...conversation,
       messages: messages.map(msg => {
         const fileIds = msg.file_ids ? JSON.parse(msg.file_ids) : [];
+        // TODO: Optimize N+1 query - collect all file IDs from all messages and fetch in single query with WHERE id IN (?)
         const files = fileIds
           .map(fileId => getFile.get(fileId))
           .filter(Boolean); // Filter out deleted files
