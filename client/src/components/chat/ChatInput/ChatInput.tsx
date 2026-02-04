@@ -42,11 +42,17 @@ export function ChatInput({
         <button
           className={styles.attachButton}
           onClick={onAttachClick}
-          title="Attach files"
+          aria-label={
+            selectedFiles.length > 0
+              ? `Attach files (${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''} selected)`
+              : 'Attach files'
+          }
         >
           <Paperclip size={20} />
           {selectedFiles.length > 0 && (
-            <span className={styles.badge}>{selectedFiles.length}</span>
+            <span className={styles.badge} aria-hidden="true">
+              {selectedFiles.length}
+            </span>
           )}
         </button>
         <textarea
@@ -64,6 +70,7 @@ export function ChatInput({
           className={styles.sendButton}
           onClick={onSend}
           disabled={isLoading || !value.trim()}
+          aria-label="Send message"
         >
           Send
         </button>

@@ -23,20 +23,22 @@ export function UploadSection({
         type="file"
         multiple
         onChange={onUpload}
-        style={{ display: "none" }}
+        className={styles.visuallyHidden}
         ref={fileInputRef}
+        aria-label="Upload files"
       />
       <button
         className={styles.uploadButton}
         onClick={() => fileInputRef.current?.click()}
         disabled={isUploading}
+        aria-label={isUploading ? "Uploading files" : "Upload files"}
       >
         {isUploading ? "Uploading..." : "+ Upload Files"}
       </button>
 
       {uploadError && (
-        <div className={styles.uploadError}>
-          <span className={styles.errorIcon}>
+        <div className={styles.uploadError} role="alert" aria-live="assertive">
+          <span className={styles.errorIcon} aria-hidden="true">
             <AlertTriangle size={16} />
           </span>
           <span className={styles.errorMessage}>{uploadError}</span>

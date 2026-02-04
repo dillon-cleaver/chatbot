@@ -27,12 +27,12 @@ export function FileChipsDisplay({
     <div className={styles.wrapper}>
       <div className={styles.selectionBox}>
         <div className={styles.selectionInfo}>
-          <div className={styles.count}>
-            <Check size={20} />
+          <div className={styles.count} role="status" aria-live="polite">
+            <Check size={20} aria-hidden="true" />
             {files.length} {files.length === 1 ? 'file' : 'files'} selected
           </div>
           {showHelperText && (
-            <span className={styles.helperText}>
+            <span className={styles.helperText} role="note">
               Sent with next message only. Message history provides context for follow-ups.
             </span>
           )}

@@ -22,10 +22,18 @@ export function Header({
         </button>
       </div>
       <div className={styles.headerRight}>
-        <button className={styles.historyButton} onClick={onHistoryClick}>
+        <button
+          className={styles.historyButton}
+          onClick={onHistoryClick}
+          aria-label="View conversation history"
+        >
           <MessageSquare size={20} />
         </button>
-        <button className={styles.themeToggle} onClick={onThemeToggle}>
+        <button
+          className={styles.themeToggle}
+          onClick={onThemeToggle}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
           {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
         </button>
       </div>

@@ -13,19 +13,25 @@ export function MessageItem({ message }: MessageItemProps): React.JSX.Element {
     api.viewFile(fileId);
   };
 
+  const messageLabel = message.role === 'user' ? 'User message' : 'Assistant message';
+
   return (
-    <div
+    <article
       className={`${styles.message} ${
         message.role === 'user' ? styles.userMessage : styles.assistantMessage
       }`}
+      role="article"
+      aria-label={messageLabel}
     >
       <div className={styles.messageContent}>
         <ReactMarkdown>{message.content}</ReactMarkdown>
       </div>
 
       {message.files && message.files.length > 0 && (
-        <div className={styles.attachedFiles}>
-          <div className={styles.attachedLabel}>Attached</div>
+        <div className={styles.attachedFiles} role="region" aria-label="Attached files">
+          <div className={styles.attachedLabel} aria-hidden="true">
+            Attached
+          </div>
           <div className={styles.fileChips}>
             {message.files.map((file) => (
               <FileChip
@@ -38,6 +44,6 @@ export function MessageItem({ message }: MessageItemProps): React.JSX.Element {
           </div>
         </div>
       )}
-    </div>
+    </article>
   );
 }

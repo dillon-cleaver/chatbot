@@ -91,8 +91,8 @@ export function FileAttachModal({
     >
       <div className={styles.modalBodyContent}>
         {error && (
-          <div className={styles.errorBanner}>
-            <AlertTriangle size={18} className={styles.errorIcon} />
+          <div className={styles.errorBanner} role="alert" aria-live="assertive">
+            <AlertTriangle size={18} className={styles.errorIcon} aria-hidden="true" />
             <span className={styles.errorText}>{error}</span>
             <button onClick={onClearError} className={styles.errorDismiss} aria-label="Dismiss error">
               <X size={16} />

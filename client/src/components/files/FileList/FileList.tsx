@@ -19,14 +19,14 @@ export function FileList({
 }: FileListProps): React.JSX.Element {
   if (files.length === 0) {
     return (
-      <div className={styles.fileList}>
+      <div className={styles.fileList} role="list" aria-label="Uploaded files">
         <p className={styles.emptyFiles}>Upload files to attach them to your messages</p>
       </div>
     );
   }
 
   return (
-    <div className={styles.fileList}>
+    <div className={styles.fileList} role="list" aria-label="Uploaded files">
       {files.map((file) => (
         <FileItem
           key={file.id}

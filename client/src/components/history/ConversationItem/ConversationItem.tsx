@@ -60,12 +60,14 @@ export function ConversationItem({
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             className={styles.titleInput}
+            aria-label="Edit conversation title"
             autoFocus
           />
           <Button
             variant="message"
             className={styles.saveButton}
             onClick={saveTitle}
+            aria-label="Save title"
           >
             <Check size={16} />
           </Button>
@@ -73,6 +75,7 @@ export function ConversationItem({
             variant="message"
             className={styles.cancelButton}
             onClick={cancelEditing}
+            aria-label="Cancel editing"
           >
             <X size={16} />
           </Button>

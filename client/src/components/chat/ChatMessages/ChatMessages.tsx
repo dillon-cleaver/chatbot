@@ -1,13 +1,13 @@
-import { useMemo } from 'react';
-import type { Message } from '../../../types';
-import { MessageItem } from '../MessageItem/MessageItem';
-import styles from './ChatMessages.module.css';
+import { useState } from "react";
+import type { Message } from "../../../types";
+import { MessageItem } from "../MessageItem/MessageItem";
+import styles from "./ChatMessages.module.css";
 
 const LOADING_MESSAGES = [
-  'PROCESSING...',
-  'LOADING...',
-  'CALCULATING...',
-  'HOLD ON...',
+  "PROCESSING...",
+  "LOADING...",
+  "CALCULATING...",
+  "HOLD ON...",
 ];
 
 export interface ChatMessagesProps {
@@ -22,19 +22,29 @@ export function ChatMessages({
   messagesEndRef,
 }: ChatMessagesProps): React.JSX.Element {
   // Pick a random loading message when loading starts
-  const loadingMessage = useMemo(
-    () => LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)],
-    [isLoading] // New random message each time loading state changes
-  );
+  const [loadingMessage] = useState(() => {
+    return LOADING_MESSAGES[
+      Math.floor(Math.random() * LOADING_MESSAGES.length)
+    ];
+  });
 
   return (
     <div className={styles.messagesWrapper}>
-      <div className={styles.messages}>
+      <div
+        className={styles.messages}
+        role="log"
+        aria-live="polite"
+        aria-label="Chat messages"
+      >
         {messages.map((msg) => (
           <MessageItem key={msg.id} message={msg} />
         ))}
         {isLoading && (
-          <div className={`${styles.message} ${styles.assistantMessage}`}>
+          <div
+            className={`${styles.message} ${styles.assistantMessage}`}
+            role="status"
+            aria-live="polite"
+          >
             <div className={styles.messageContent}>{loadingMessage}</div>
           </div>
         )}

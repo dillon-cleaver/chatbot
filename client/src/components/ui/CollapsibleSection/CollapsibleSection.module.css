@@ -39,12 +39,13 @@
 .content {
   padding: 0 1rem 0.75rem 1rem;
   font-family: "Roboto", sans-serif;
-  font-size: 0.85rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-primary);
 }
 
 .content p {
-  margin: 0.5rem 0;
+  margin: 0.75rem 0;
 }
 
 .content p:first-child {
@@ -53,6 +54,11 @@
 
 .content p:last-child {
   margin-bottom: 0;
+}
+
+.content strong {
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 @media (max-width: 768px) {
