@@ -134,7 +134,10 @@ export function useFileManager(): UseFileManagerReturn {
 
   const commitPendingSelection = useCallback((fileIds: string[]): void => {
     if (fileIds.length > MAX_FILES_PER_MESSAGE) {
-      setError(`Maximum ${MAX_FILES_PER_MESSAGE} files can be attached per message.`);
+      // Truncate to max and provide user feedback
+      const truncated = fileIds.slice(0, MAX_FILES_PER_MESSAGE);
+      setError(`Maximum ${MAX_FILES_PER_MESSAGE} files allowed. Keeping first ${MAX_FILES_PER_MESSAGE}.`);
+      setSelectedFileIds(truncated);
       return;
     }
     setSelectedFileIds(fileIds);

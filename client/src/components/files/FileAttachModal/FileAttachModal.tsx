@@ -45,11 +45,14 @@ export function FileAttachModal({
   const [pendingFileIds, setPendingFileIds] = useState<string[]>(selectedFileIds);
 
   // Initialize pending state when modal opens
+  // Note: We only sync when modal opens, not when selectedFileIds changes externally.
+  // This implements the "pending state" pattern where changes are isolated until commit.
   useEffect(() => {
     if (isOpen) {
       setPendingFileIds(selectedFileIds);
     }
-  }, [isOpen, selectedFileIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Local toggle handler for pending selections
   const handleTogglePending = (fileId: string): void => {

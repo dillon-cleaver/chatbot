@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { Message, UploadedFile } from '../types';
 import * as api from '../utils/api';
+import { generateUUID } from '../utils/uuid';
 
 export interface UseChatReturn {
   messages: Message[];
@@ -34,7 +35,7 @@ export function useChat({
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       role: 'user',
       content: input.trim(),
       files: selectedFiles.length > 0 ? selectedFiles : undefined

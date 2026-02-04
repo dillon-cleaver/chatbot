@@ -1,8 +1,8 @@
-import type { Message } from "../../../types";
-import { MessageItem } from "../MessageItem/MessageItem";
-import { useScrollTrack } from "../../../hooks/useScrollTrack";
-import { ScrollBar } from "../../ui/ScrollBar/ScrollBar";
-import styles from "./ChatMessages.module.css";
+import type { Message } from '../../../types';
+import { MessageItem } from '../MessageItem/MessageItem';
+import { useScrollTrack } from '../../../hooks/useScrollTrack';
+import { ScrollBar } from '../../ui/ScrollBar/ScrollBar';
+import styles from './ChatMessages.module.css';
 
 export interface ChatMessagesProps {
   messages: Message[];

@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import type { Conversation, Message } from "../types";
-import * as api from "../utils/api";
+import { useState, useCallback, useEffect, useRef } from 'react';
+import type { Conversation, Message } from '../types';
+import * as api from '../utils/api';
+import { generateUUID } from '../utils/uuid';
 
 export interface UseConversationsReturn {
   conversations: Conversation[];
@@ -95,7 +96,9 @@ export function useConversations({
           }
 
           return {
-            id: msg.id || crypto.randomUUID(), // Generate ID if missing
+            id: msg.id && typeof msg.id === 'string' && msg.id.length > 0
+              ? msg.id
+              : generateUUID(),
             role: msg.role,
             content: content,
             files: msg.files && msg.files.length > 0 ? msg.files : undefined,

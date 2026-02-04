@@ -3,31 +3,34 @@ import { Image, FileText, BarChart, Presentation, Paperclip } from 'lucide-react
 
 export const FILE_ICON_SIZE = 16;
 
-export const FILE_ICON_MAP: Record<string, React.JSX.Element> = {
+type IconFactory = () => React.JSX.Element;
+
+export const FILE_ICON_MAP: Record<string, IconFactory> = {
   // Images
-  'image/png': <Image size={FILE_ICON_SIZE} />,
-  'image/jpeg': <Image size={FILE_ICON_SIZE} />,
-  'image/jpg': <Image size={FILE_ICON_SIZE} />,
-  'image/gif': <Image size={FILE_ICON_SIZE} />,
-  'image/webp': <Image size={FILE_ICON_SIZE} />,
+  'image/png': () => <Image size={FILE_ICON_SIZE} />,
+  'image/jpeg': () => <Image size={FILE_ICON_SIZE} />,
+  'image/jpg': () => <Image size={FILE_ICON_SIZE} />,
+  'image/gif': () => <Image size={FILE_ICON_SIZE} />,
+  'image/webp': () => <Image size={FILE_ICON_SIZE} />,
   // Documents
-  'application/pdf': <FileText size={FILE_ICON_SIZE} />,
-  'application/msword': <FileText size={FILE_ICON_SIZE} />,
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': <FileText size={FILE_ICON_SIZE} />,
+  'application/pdf': () => <FileText size={FILE_ICON_SIZE} />,
+  'application/msword': () => <FileText size={FILE_ICON_SIZE} />,
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': () => <FileText size={FILE_ICON_SIZE} />,
   // Spreadsheets
-  'application/vnd.ms-excel': <BarChart size={FILE_ICON_SIZE} />,
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': <BarChart size={FILE_ICON_SIZE} />,
+  'application/vnd.ms-excel': () => <BarChart size={FILE_ICON_SIZE} />,
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': () => <BarChart size={FILE_ICON_SIZE} />,
   // Presentations
-  'application/vnd.ms-powerpoint': <Presentation size={FILE_ICON_SIZE} />,
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation': <Presentation size={FILE_ICON_SIZE} />,
+  'application/vnd.ms-powerpoint': () => <Presentation size={FILE_ICON_SIZE} />,
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': () => <Presentation size={FILE_ICON_SIZE} />,
 };
 
-export const DEFAULT_FILE_ICON = <Paperclip size={FILE_ICON_SIZE} />;
+export const DEFAULT_FILE_ICON: IconFactory = () => <Paperclip size={FILE_ICON_SIZE} />;
 
 export function getFileIcon(mimeType: string): React.JSX.Element {
   // Check exact match
-  if (FILE_ICON_MAP[mimeType]) {
-    return FILE_ICON_MAP[mimeType];
+  const iconFactory = FILE_ICON_MAP[mimeType];
+  if (iconFactory) {
+    return iconFactory();
   }
 
   // Check prefix matches
@@ -37,7 +40,7 @@ export function getFileIcon(mimeType: string): React.JSX.Element {
   if (mimeType.includes('sheet') || mimeType.includes('excel')) return <BarChart size={FILE_ICON_SIZE} />;
   if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return <Presentation size={FILE_ICON_SIZE} />;
 
-  return DEFAULT_FILE_ICON;
+  return DEFAULT_FILE_ICON();
 }
 
 export const FILE_TYPE_LABELS: Record<string, string> = {
