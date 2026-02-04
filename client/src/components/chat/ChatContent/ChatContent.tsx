@@ -1,25 +1,26 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import styles from './ChatContent.module.css';
-import { useTheme } from '../../../hooks/useTheme';
-import { useFileManager } from '../../../hooks/useFileManager';
-import { useConversations } from '../../../hooks/useConversations';
-import { useChat } from '../../../hooks/useChat';
-import { Header } from '../../layout/Header/Header';
-import { ChatMessages } from '../ChatMessages/ChatMessages';
-import { ChatInput } from '../ChatInput/ChatInput';
-import { ChatContainer } from '../ChatContainer/ChatContainer';
-import { FileAttachModal } from '../../files/FileAttachModal/FileAttachModal';
-import { ChatHistoryModal } from '../../history/ChatHistoryModal/ChatHistoryModal';
-import { ConfirmDialog } from '../../ui/ConfirmDialog/ConfirmDialog';
-import { Spinner } from '../../ui/Spinner/Spinner';
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import styles from "./ChatContent.module.css";
+import { useTheme } from "../../../hooks/useTheme";
+import { useFileManager } from "../../../hooks/useFileManager";
+import { useConversations } from "../../../hooks/useConversations";
+import { useChat } from "../../../hooks/useChat";
+import { Header } from "../../layout/Header/Header";
+import { ChatMessages } from "../ChatMessages/ChatMessages";
+import { ChatInput } from "../ChatInput/ChatInput";
+import { ChatContainer } from "../ChatContainer/ChatContainer";
+import { FileAttachModal } from "../../files/FileAttachModal/FileAttachModal";
+import { ChatHistoryModal } from "../../history/ChatHistoryModal/ChatHistoryModal";
+import { ConfirmDialog } from "../../ui/ConfirmDialog/ConfirmDialog";
+import { Spinner } from "../../ui/Spinner/Spinner";
 
 export function ChatContent(): React.JSX.Element {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const navigate = useNavigate();
   const currentConversationId = conversationId ?? null;
 
-  const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState<boolean>(false);
+  const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] =
+    useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const justCreatedConversationRef = useRef<boolean>(false);
@@ -29,19 +30,25 @@ export function ChatContent(): React.JSX.Element {
   const fileManager = useFileManager({ conversationId: currentConversationId });
 
   // Navigate to conversation when created
-  const handleConversationCreated = useCallback((id: string): void => {
-    justCreatedConversationRef.current = true;
-    navigate(`/chat/${id}`);
-  }, [navigate]);
+  const handleConversationCreated = useCallback(
+    (id: string): void => {
+      justCreatedConversationRef.current = true;
+      navigate(`/chat/${id}`);
+    },
+    [navigate],
+  );
 
   // Navigate to home for new chat
   const handleNewChat = useCallback((): void => {
-    navigate('/', { replace: true });
+    navigate("/", { replace: true });
   }, [navigate]);
 
   const selectedFiles = useMemo(
-    () => fileManager.files.filter(f => fileManager.selectedFileIds.includes(f.id)),
-    [fileManager.files, fileManager.selectedFileIds]
+    () =>
+      fileManager.files.filter((f) =>
+        fileManager.selectedFileIds.includes(f.id),
+      ),
+    [fileManager.files, fileManager.selectedFileIds],
   );
 
   // Initialize chat with conversation ID from App state
@@ -63,7 +70,7 @@ export function ChatContent(): React.JSX.Element {
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat.messages]);
 
   // Auto-scroll when modal closes to accommodate file selection UI
@@ -72,7 +79,7 @@ export function ChatContent(): React.JSX.Element {
     if (!fileManager.isModalOpen && fileManager.selectedFileIds.length > 0) {
       // Delay to let modal close animation complete, then smooth scroll
       const timer = setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 150);
       return () => clearTimeout(timer);
     }
@@ -102,14 +109,16 @@ export function ChatContent(): React.JSX.Element {
     loadFromUrl();
   }, [conversationId, loadConversation, setMessages]);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+  const handleFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ): Promise<void> => {
     const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
     if (selectedFiles.length === 0) return;
 
     await fileManager.uploadFiles(selectedFiles);
 
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -119,8 +128,10 @@ export function ChatContent(): React.JSX.Element {
     conversations.closeHistoryModal();
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const handleKeyPress = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+  ): void => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -132,13 +143,16 @@ export function ChatContent(): React.JSX.Element {
   };
 
   // Show empty state only when truly at home with no conversation to load
-  const isEmpty = chat.messages.length === 0 && !conversationId && !conversations.isLoadingConversation;
+  const isEmpty =
+    chat.messages.length === 0 &&
+    !conversationId &&
+    !conversations.isLoadingConversation;
 
   return (
     <div className={styles.app}>
       <Header
         onHistoryClick={conversations.openHistoryModal}
-        onTitleClick={() => navigate('/', { replace: true })}
+        onTitleClick={() => navigate("/", { replace: true })}
         theme={theme}
         onThemeToggle={toggleTheme}
       />
@@ -207,8 +221,6 @@ export function ChatContent(): React.JSX.Element {
         onDeleteFile={fileManager.deleteFile}
         isUploading={fileManager.isUploading}
         uploadError={fileManager.uploadError}
-        error={fileManager.error}
-        onClearError={fileManager.clearError}
         onClearSelection={fileManager.clearSelectedFiles}
         onCommitSelection={fileManager.commitPendingSelection}
         fileInputRef={fileInputRef}

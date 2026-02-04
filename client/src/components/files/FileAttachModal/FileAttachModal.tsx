@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
-import { AlertTriangle, X } from 'lucide-react';
-import type { UploadedFile } from '../../../types';
-import { MAX_TOTAL_FILES } from '../../../constants';
-import { Modal } from '../../ui/Modal/Modal';
-import { FileChipsDisplay } from '../../chat/FileChipsDisplay/FileChipsDisplay';
-import { UploadSection } from '../UploadSection/UploadSection';
-import { FileList } from '../FileList/FileList';
-import styles from './FileAttachModal.module.css';
+import { useState, useEffect, useMemo } from "react";
+import type { UploadedFile } from "../../../types";
+import { MAX_TOTAL_FILES, MAX_FILES_PER_MESSAGE } from "../../../constants";
+import { Modal } from "../../ui/Modal/Modal";
+import { FileChipsDisplay } from "../../chat/FileChipsDisplay/FileChipsDisplay";
+import { UploadSection } from "../UploadSection/UploadSection";
+import { FileList } from "../FileList/FileList";
+import { AlertDialog } from "../../ui/AlertDialog/AlertDialog";
+import styles from "./FileAttachModal.module.css";
 
 export interface FileAttachModalProps {
   isOpen: boolean;
@@ -19,8 +19,6 @@ export interface FileAttachModalProps {
   onDeleteFile: (fileId: string) => void;
   isUploading: boolean;
   uploadError: string | null;
-  error: string | null;
-  onClearError: () => void;
   onClearSelection: () => void;
   onCommitSelection: (fileIds: string[]) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -36,13 +34,13 @@ export function FileAttachModal({
   onDeleteFile,
   isUploading,
   uploadError,
-  error,
-  onClearError,
   onCommitSelection,
   fileInputRef,
 }: FileAttachModalProps): React.JSX.Element {
   // Local pending selection state
-  const [pendingFileIds, setPendingFileIds] = useState<string[]>(selectedFileIds);
+  const [pendingFileIds, setPendingFileIds] =
+    useState<string[]>(selectedFileIds);
+  const [showLimitWarning, setShowLimitWarning] = useState<boolean>(false);
 
   // Initialize pending state when modal opens
   // Note: We only sync when modal opens, not when selectedFileIds changes externally.
@@ -56,10 +54,15 @@ export function FileAttachModal({
 
   // Local toggle handler for pending selections
   const handleTogglePending = (fileId: string): void => {
-    setPendingFileIds(prev => {
+    setPendingFileIds((prev) => {
       if (prev.includes(fileId)) {
-        return prev.filter(id => id !== fileId);
+        return prev.filter((id) => id !== fileId);
       } else {
+        // Prevent adding more than MAX_FILES_PER_MESSAGE
+        if (prev.length >= MAX_FILES_PER_MESSAGE) {
+          setShowLimitWarning(true);
+          return prev;
+        }
         return [...prev, fileId];
       }
     });
@@ -78,8 +81,8 @@ export function FileAttachModal({
 
   // Get selected file objects for display
   const selectedFiles = useMemo(
-    () => files.filter(f => pendingFileIds.includes(f.id)),
-    [files, pendingFileIds]
+    () => files.filter((f) => pendingFileIds.includes(f.id)),
+    [files, pendingFileIds],
   );
 
   return (
@@ -90,15 +93,6 @@ export function FileAttachModal({
       bodyClassName={styles.noScrollBody}
     >
       <div className={styles.modalBodyContent}>
-        {error && (
-          <div className={styles.errorBanner} role="alert" aria-live="assertive">
-            <AlertTriangle size={18} className={styles.errorIcon} aria-hidden="true" />
-            <span className={styles.errorText}>{error}</span>
-            <button onClick={onClearError} className={styles.errorDismiss} aria-label="Dismiss error">
-              <X size={16} />
-            </button>
-          </div>
-        )}
         <UploadSection
           onUpload={onUpload}
           isUploading={isUploading}
@@ -115,7 +109,9 @@ export function FileAttachModal({
             </span>
           </div>
           <div className={styles.scrollableContent}>
-            <div className={`${styles.selectionCounterWrapper} ${pendingFileIds.length > 0 ? styles.visible : ''}`}>
+            <div
+              className={`${styles.selectionCounterWrapper} ${pendingFileIds.length > 0 ? styles.visible : ""}`}
+            >
               <FileChipsDisplay
                 files={selectedFiles}
                 onRemoveFile={handleTogglePending}
@@ -135,6 +131,13 @@ export function FileAttachModal({
           </div>
         </div>
       </div>
+
+      <AlertDialog
+        isOpen={showLimitWarning}
+        onClose={() => setShowLimitWarning(false)}
+        title="File Limit Reached"
+        message={`You can attach a maximum of ${MAX_FILES_PER_MESSAGE} files per message. Please deselect a file before adding another.`}
+      />
     </Modal>
   );
 }
