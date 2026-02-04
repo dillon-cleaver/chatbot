@@ -78,3 +78,34 @@
   transform: translate(0, 0);
   box-shadow: 2px 2px 0px var(--shadow-color);
 }
+
+@media (max-width: 768px) {
+  .header {
+    position: fixed; /* Fixed positioning to stay visible when keyboard opens */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* High z-index to ensure it's above all content */
+    background-color: var(--header-bg); /* Explicit background for fixed positioning */
+    padding: 0.75rem 1rem; /* Reduce from 1rem 2rem */
+    padding-top: max(0.75rem, env(safe-area-inset-top)); /* Add safe area padding for notch */
+  }
+
+  .title {
+    font-size: 1.5rem; /* Reduce from 2rem */
+    letter-spacing: 1px; /* Reduce from 2px */
+  }
+
+  .historyButton,
+  .themeToggle {
+    font-size: 1.25rem; /* Reduce from 1.5rem */
+    padding: 0.5rem 0.75rem; /* Slightly smaller */
+  }
+}
+
+/* Very small mobile devices */
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.25rem;
+  }
+}

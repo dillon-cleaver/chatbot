@@ -54,3 +54,20 @@
 .content p:last-child {
   margin-bottom: 0;
 }
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0.875rem 0.875rem; /* Slightly larger touch target */
+    min-height: 48px; /* Ensure comfortable touch target */
+  }
+
+  .label {
+    font-size: 0.65rem; /* Slightly reduce from 0.7rem */
+  }
+
+  .content {
+    padding: 0 0.875rem 0.75rem 0.875rem; /* Reduce from 1rem */
+    font-size: 0.8rem; /* Reduce from 0.85rem */
+    line-height: 1.6; /* Improve readability */
+  }
+}

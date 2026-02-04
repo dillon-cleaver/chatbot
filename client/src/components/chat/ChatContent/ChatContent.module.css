@@ -3,6 +3,7 @@
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
+  overflow: hidden; /* Prevent page scrolling */
 }
 
 .emptyGreeting {
@@ -55,5 +56,32 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .emptyGreeting {
+    gap: 0.25rem; /* Tighten spacing between title and subtitle */
+  }
+
+  .emptyTitle {
+    font-size: 2rem; /* Reduce from 2.5rem to fit with keyboard */
+    letter-spacing: 2px; /* Reduce from 4px */
+    margin-bottom: 0.25rem; /* Tighten spacing */
+  }
+
+  .emptySubtitle {
+    font-size: 0.95rem; /* Slightly reduce from 1rem */
+  }
+}
+
+@media (max-width: 480px) {
+  .emptyTitle {
+    font-size: 1.75rem; /* Further reduce for very small screens */
+    letter-spacing: 1px;
+  }
+
+  .emptySubtitle {
+    font-size: 0.9rem;
   }
 }

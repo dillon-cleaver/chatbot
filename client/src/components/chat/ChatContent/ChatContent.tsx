@@ -26,7 +26,7 @@ export function ChatContent(): React.JSX.Element {
 
   // Initialize hooks
   const { theme, toggleTheme } = useTheme();
-  const fileManager = useFileManager();
+  const fileManager = useFileManager({ conversationId: currentConversationId });
 
   // Navigate to conversation when created
   const handleConversationCreated = useCallback((id: string): void => {
@@ -82,7 +82,6 @@ export function ChatContent(): React.JSX.Element {
   // Destructure to satisfy ESLint and make dependencies clearer
   const { loadConversation } = conversations;
   const { setMessages } = chat;
-  const { clearSelectedFiles } = fileManager;
 
   useEffect(() => {
     const loadFromUrl = async () => {
@@ -95,13 +94,13 @@ export function ChatContent(): React.JSX.Element {
         // Load conversation from server
         await loadConversation(conversationId);
       } else {
-        // At "/" route - always clear messages for new chat
+        // At "/" route - clear messages for new chat
+        // Note: Don't clear files - let useFileManager handle per-conversation state
         setMessages([]);
-        clearSelectedFiles();
       }
     };
     loadFromUrl();
-  }, [conversationId, loadConversation, setMessages, clearSelectedFiles]);
+  }, [conversationId, loadConversation, setMessages]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
@@ -164,6 +163,7 @@ export function ChatContent(): React.JSX.Element {
               onClearAllFiles={fileManager.clearSelectedFiles}
               showTopBorder={false}
               isModalOpen={fileManager.isModalOpen}
+              autoFocus={true}
             />
           </>
         }

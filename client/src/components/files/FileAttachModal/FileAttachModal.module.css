@@ -1,5 +1,4 @@
 .noScrollBody {
-  overflow: hidden !important;
   display: flex;
   flex-direction: column;
 }
@@ -16,7 +15,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .sectionHeader {
@@ -142,5 +141,26 @@
     opacity: 1;
     transform: translateY(0);
     max-height: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sectionHeader {
+    padding: 0.75rem 1rem 0.5rem 1rem; /* Reduce from 1rem 1.5rem 0.75rem */
+  }
+
+  .sectionHeading {
+    font-size: 1rem; /* Reduce from 1.25rem */
+    letter-spacing: 1px; /* Reduce from 1.5px */
+  }
+
+  .fileSlotsInfo {
+    font-size: 0.75rem; /* Reduce from 0.85rem */
+  }
+
+  .selectionCounter {
+    margin: 0 1rem; /* Reduce from 1.5rem */
+    padding: 0.75rem; /* Reduce from 1rem */
+    font-size: 0.85rem; /* Reduce from 0.95rem */
   }
 }

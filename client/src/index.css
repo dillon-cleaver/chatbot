@@ -49,7 +49,7 @@ body {
   font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--bg-primary);
+  background-color: var(--header-bg); /* Changed from --bg-primary to match header in safe area */
   color: var(--text-primary);
   overflow: hidden;
 }
@@ -98,4 +98,16 @@ body,
   height: 100vh;
   height: 100dvh;
   width: 100vw;
+}
+
+/* Mobile breakpoint: 768px */
+@media (max-width: 768px) {
+  :root {
+    --mobile-header-font-size: 1.25rem;
+    --mobile-title-font-size: 2.5rem;
+    --mobile-modal-title-size: 1.25rem;
+    --mobile-input-font-size: 1rem;
+    --mobile-padding: 1rem;
+    --mobile-padding-sm: 0.75rem;
+  }
 }

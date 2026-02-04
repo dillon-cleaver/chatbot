@@ -92,3 +92,14 @@
 .fileTypeUnsupported {
   color: #ef4444;
 }
+
+@media (max-width: 768px) {
+  .uploadSection {
+    padding: 0.75rem 1rem; /* Reduce from 1rem 1.5rem */
+  }
+
+  .uploadButton {
+    padding: 0.625rem 1.5rem; /* Reduce from 0.75rem 2rem */
+    font-size: 0.9rem; /* Reduce from 1rem */
+  }
+}

@@ -123,3 +123,25 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+  .inputContainer {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); /* Add safe area padding for iOS home indicator */
+  }
+
+  .input {
+    font-size: 1rem; /* Ensure 16px minimum to prevent iOS zoom */
+    padding: 0.75rem 1rem; /* Increase vertical padding from 0.625rem */
+    line-height: 1.6; /* Better readability */
+  }
+
+  .attachButton,
+  .sendButton {
+    min-height: 48px; /* Improved touch target */
+  }
+
+  .sendButton {
+    padding: 0 1.25rem; /* Slightly more padding */
+    font-size: 0.9rem; /* Slightly smaller to fit better */
+  }
+}

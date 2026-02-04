@@ -97,3 +97,33 @@
   justify-content: space-between;
   align-items: center;
 }
+
+@media (max-width: 768px) {
+  .modalContent {
+    width: 95%; /* Increase from 90% for more space */
+    max-height: 85vh; /* Increase from 80vh */
+  }
+
+  .modalHeader {
+    padding: 1rem 1rem 0.5rem 1rem; /* Reduce from 1.5rem */
+  }
+
+  .modalHeader h2 {
+    font-size: 1.25rem; /* Reduce from 1.75rem */
+    letter-spacing: 1px; /* Reduce from 2px */
+  }
+
+  .modalSubtitle {
+    font-size: 0.8rem; /* Reduce from 0.9rem */
+  }
+
+  .closeButton {
+    width: 36px; /* Reduce from 40px */
+    height: 36px;
+    font-size: 1.5rem; /* Reduce from 2rem */
+  }
+
+  .modalFooter {
+    padding: 1rem; /* Reduce from 1.5rem */
+  }
+}

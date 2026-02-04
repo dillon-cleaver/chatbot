@@ -16,6 +16,7 @@ export interface ChatInputProps {
   onClearAllFiles?: () => void;
   showTopBorder?: boolean;
   isModalOpen?: boolean;
+  autoFocus?: boolean;
 }
 
 export function ChatInput({
@@ -30,6 +31,7 @@ export function ChatInput({
   onClearAllFiles,
   showTopBorder = true,
   isModalOpen = false,
+  autoFocus = false,
 }: ChatInputProps): React.JSX.Element {
   const { textareaRef } = useAutoResizeTextarea({ value });
 
@@ -56,6 +58,7 @@ export function ChatInput({
           placeholder="Type your message..."
           rows={1}
           disabled={isLoading}
+          autoFocus={autoFocus}
         />
         <button
           className={styles.sendButton}

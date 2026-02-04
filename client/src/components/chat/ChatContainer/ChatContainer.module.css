@@ -30,3 +30,55 @@
   width: 100%;
   max-width: 800px;
 }
+
+@media (max-width: 768px) {
+  .chatContainer {
+    padding: 0 0.5rem 0.5rem 0.5rem; /* Reduce from 0 1rem 1rem 1rem */
+    padding-top: calc(60px + 0.5rem); /* Compensate for fixed header + spacing */
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); /* Add safe area padding */
+  }
+
+  .chatContainerEmpty {
+    padding: 0.5rem 0.5rem; /* Reduce from 2rem */
+    padding-top: calc(60px + 0.5rem); /* Compensate for fixed header + spacing */
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); /* Add safe area padding */
+    /* No justify-content - let children control their positioning */
+  }
+
+  .emptyContent {
+    flex: 1; /* Fill available height */
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* Remove gap, handle spacing with flex */
+  }
+
+  /* Center greeting in available space above input */
+  .emptyContent > :first-child {
+    flex: 1; /* Take up available space */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically in its flex space */
+    gap: 0.25rem; /* Spacing between CHATBOT and subtitle */
+  }
+
+  /* Keep input at bottom */
+  .emptyContent > :last-child {
+    flex-shrink: 0; /* Don't shrink */
+  }
+}
+
+/* Very small screens - maximize width */
+@media (max-width: 480px) {
+  .chatContainer {
+    padding: 0 0.25rem 0.5rem 0.25rem; /* Further reduce */
+    padding-top: calc(52px + 0.5rem); /* Compensate for smaller fixed header + spacing */
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); /* Add safe area padding */
+  }
+
+  .chatContainerEmpty {
+    padding: 0.5rem 0.25rem; /* Further reduce */
+    padding-top: calc(52px + 0.5rem); /* Compensate for smaller fixed header + spacing */
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); /* Add safe area padding */
+  }
+}
