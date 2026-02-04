@@ -1,5 +1,6 @@
 import type { Conversation } from '../../../types';
 import { Modal } from '../../ui/Modal/Modal';
+import { Button } from '../../ui/Button';
 import { ConversationItem } from '../ConversationItem/ConversationItem';
 import styles from './ChatHistoryModal.module.css';
 
@@ -27,13 +28,13 @@ export function ChatHistoryModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Chat History">
       <div className={styles.historyActions}>
-        <button className={styles.newChatButton} onClick={onStartNewChat}>
+        <Button variant="chunky" className={styles.newChatButton} onClick={onStartNewChat}>
           + New Chat
-        </button>
+        </Button>
         {conversations.length > 0 && (
-          <button className={styles.deleteAllButton} onClick={onDeleteAllClick}>
+          <Button variant="chunky" destructive className={styles.deleteAllButton} onClick={onDeleteAllClick}>
             Delete All
-          </button>
+          </Button>
         )}
       </div>
 

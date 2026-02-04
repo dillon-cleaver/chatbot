@@ -21,12 +21,9 @@ export function ChatMessages({
 
   return (
     <div className={styles.messagesWrapper}>
-      <div
-        ref={containerRef}
-        className={styles.messages}
-      >
-        {messages.map((msg, idx) => (
-          <MessageItem key={idx} message={msg} />
+      <div ref={containerRef} className={styles.messages}>
+        {messages.map((msg) => (
+          <MessageItem key={msg.id} message={msg} />
         ))}
         {isLoading && (
           <div className={`${styles.message} ${styles.assistantMessage}`}>

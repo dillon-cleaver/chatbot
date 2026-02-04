@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import type { Conversation } from '../../../types';
-import styles from './ConversationItem.module.css';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Check, X, Pencil } from "lucide-react";
+import type { Conversation } from "../../../types";
+import { Button } from "../../ui/Button";
+import styles from "./ConversationItem.module.css";
 
 export interface ConversationItemProps {
   conversation: Conversation;
@@ -39,15 +41,17 @@ export function ConversationItem({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       saveTitle();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       cancelEditing();
     }
   };
 
   return (
-    <div className={`${styles.conversationItem} ${isCurrent ? styles.currentConversation : ''}`}>
+    <div
+      className={`${styles.conversationItem} ${isCurrent ? styles.currentConversation : ""}`}
+    >
       {isEditing ? (
         <div className={styles.titleEditContainer}>
           <input
@@ -58,12 +62,20 @@ export function ConversationItem({
             className={styles.titleInput}
             autoFocus
           />
-          <button className={styles.saveButton} onClick={saveTitle}>
-            ✓
-          </button>
-          <button className={styles.cancelButton} onClick={cancelEditing}>
-            ×
-          </button>
+          <Button
+            variant="message"
+            className={styles.saveButton}
+            onClick={saveTitle}
+          >
+            <Check size={16} />
+          </Button>
+          <Button
+            variant="message"
+            className={styles.cancelButton}
+            onClick={cancelEditing}
+          >
+            <X size={16} />
+          </Button>
         </div>
       ) : (
         <>
@@ -77,24 +89,28 @@ export function ConversationItem({
               {conversation.title}
             </span>
             <span className={styles.conversationMeta}>
-              {conversation.message_count} messages · {new Date(conversation.updated_at).toLocaleDateString()}
+              {conversation.message_count} messages ·{" "}
+              {new Date(conversation.updated_at).toLocaleDateString()}
             </span>
           </Link>
           <div className={styles.conversationActions}>
-            <button
+            <Button
+              variant="message"
               className={styles.editButton}
               onClick={startEditing}
               aria-label="Edit conversation title"
             >
-              ✎
-            </button>
-            <button
+              <Pencil size={16} />
+            </Button>
+            <Button
+              variant="message"
+              destructive
               className={styles.deleteButton}
               onClick={() => onDelete(conversation.id)}
               aria-label="Delete conversation"
             >
-              ×
-            </button>
+              <X size={16} />
+            </Button>
           </div>
         </>
       )}

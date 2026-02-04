@@ -27,8 +27,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 1.5rem 1.5rem 0.75rem 1.5rem;
-  border-bottom: 3px solid #000000;
+  padding: 1.5rem 1.5rem 0.5rem 1.5rem;
   gap: 1rem;
   flex-shrink: 0;
 }
@@ -75,6 +74,7 @@
   font-size: 2rem;
   width: 40px;
   height: 40px;
+  border-radius: 0;
   font-family: "Fraunces", serif;
   font-weight: 600;
   display: flex;

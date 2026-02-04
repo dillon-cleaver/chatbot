@@ -1,3 +1,4 @@
+import { MessageSquare, Sun, Moon } from 'lucide-react';
 import styles from './Header.module.css';
 
 export interface HeaderProps {
@@ -22,10 +23,10 @@ export function Header({
       </div>
       <div className={styles.headerRight}>
         <button className={styles.historyButton} onClick={onHistoryClick}>
-          💬
+          <MessageSquare size={20} />
         </button>
         <button className={styles.themeToggle} onClick={onThemeToggle}>
-          {theme === 'dark' ? '☀️' : '🌙'}
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
         </button>
       </div>
     </div>
