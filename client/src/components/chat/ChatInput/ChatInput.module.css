@@ -66,7 +66,7 @@
 
 .input {
   flex: 1;
-  padding: 0.625rem 1rem;
+  padding: 0.75rem 1rem; /* Increased from 0.625rem for better vertical centering */
   border: 3px solid var(--border-color);
   background-color: var(--input-bg);
   color: var(--text-primary);
@@ -126,22 +126,29 @@
 
 @media (max-width: 768px) {
   .inputContainer {
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); /* Add safe area padding for iOS home indicator */
+    padding: 0.375rem 0.75rem 0.375rem 0.75rem; /* Minimal padding */
+  }
+
+  .inputRow {
+    gap: 0.375rem;
   }
 
   .input {
     font-size: 1rem; /* Ensure 16px minimum to prevent iOS zoom */
-    padding: 0.75rem 1rem; /* Increase vertical padding from 0.625rem */
-    line-height: 1.6; /* Better readability */
+    line-height: 1.4;
+    min-height: 40px; /* Compact height */
+    padding: 0.5rem 0.75rem; /* Minimal padding */
   }
 
-  .attachButton,
-  .sendButton {
-    min-height: 48px; /* Improved touch target */
+  .attachButton {
+    height: 40px; /* Compact size */
+    width: 40px;
+    font-size: 1.125rem;
   }
 
   .sendButton {
-    padding: 0 1.25rem; /* Slightly more padding */
-    font-size: 0.9rem; /* Slightly smaller to fit better */
+    height: 40px; /* Compact size */
+    padding: 0 0.875rem;
+    font-size: 0.8rem;
   }
 }

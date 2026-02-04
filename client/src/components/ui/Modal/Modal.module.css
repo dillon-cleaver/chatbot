@@ -100,7 +100,7 @@
 
 @media (max-width: 768px) {
   .modalContent {
-    width: 95%; /* Increase from 90% for more space */
+    width: 98%; /* Increase from 95% to use screen space more efficiently */
     max-height: 85vh; /* Increase from 80vh */
   }
 

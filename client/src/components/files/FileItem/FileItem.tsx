@@ -16,7 +16,7 @@ export function FileItem({ file, isSelected, onToggleSelection, onView, onDelete
   const fileTypeAndSize = `${getFileTypeLabel(file.mime_type)} • ${formatBytes(file.size)}`;
 
   return (
-    <div className={styles.fileItem}>
+    <div className={`${styles.fileItem} ${isSelected ? styles.selected : ''}`}>
       <input
         type="checkbox"
         checked={isSelected}

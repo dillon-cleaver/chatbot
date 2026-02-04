@@ -71,6 +71,11 @@
   flex-shrink: 0;
 }
 
+.addButton {
+  background-color: var(--button-bg); /* Purple like Upload Files button */
+  color: white;
+}
+
 .addButton:hover {
   background-color: #6c5ce7;
   color: white;
@@ -80,4 +85,27 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .selectionBox {
+    gap: 0.5rem; /* Reduce from 1rem */
+    padding: 0.5rem; /* Reduce from 0.5rem 0.75rem */
+  }
+
+  .count {
+    font-size: 0.8rem; /* Reduce from 0.95rem */
+    letter-spacing: 0.5px; /* Reduce from 1px */
+  }
+
+  .buttonGroup {
+    gap: 0.4rem; /* Reduce from 0.5rem */
+  }
+
+  .addButton,
+  .clearButton {
+    padding: 0.4rem 0.6rem; /* Reduce from 0.5rem 0.75rem */
+    font-size: 0.75rem; /* Reduce from 0.85rem */
+    letter-spacing: 0.5px; /* Reduce from 1px */
+  }
 }

@@ -33,9 +33,9 @@
 
 @media (max-width: 768px) {
   .chatContainer {
-    padding: 0 0.5rem 0.5rem 0.5rem; /* Reduce from 0 1rem 1rem 1rem */
-    padding-top: calc(60px + 0.5rem); /* Compensate for fixed header + spacing */
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); /* Add safe area padding */
+    padding: 0 0.5rem 0.25rem 0.5rem; /* Reduce bottom padding */
+    padding-top: calc(60px + 0.25rem); /* Reduce spacing from 0.5rem to 0.25rem */
+    padding-bottom: max(0.25rem, env(safe-area-inset-bottom)); /* Reduce from 0.5rem */
   }
 
   .chatContainerEmpty {
