@@ -19,7 +19,9 @@
   padding: 0;
   margin: 0;
   cursor: pointer;
-  transition: transform 0.1s, opacity 0.1s;
+  transition:
+    transform 0.1s,
+    opacity 0.1s;
 }
 
 .titleButton:hover .title {
@@ -44,7 +46,9 @@
   color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 2px;
-  transition: opacity 0.1s, transform 0.1s;
+  transition:
+    opacity 0.1s,
+    transform 0.1s;
 }
 
 .headerRight {
@@ -66,7 +70,9 @@
   cursor: pointer;
   font-family: "Fraunces", serif;
   font-weight: 600;
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
   box-shadow: 4px 4px 0px var(--shadow-color);
 }
 
@@ -89,13 +95,18 @@
     left: 0;
     right: 0;
     z-index: 1000; /* High z-index to ensure it's above all content */
-    background-color: var(--header-bg); /* Explicit background for fixed positioning */
+    background-color: var(
+      --header-bg
+    ); /* Explicit background for fixed positioning */
     padding: 0.75rem 1rem; /* Reduce from 1rem 2rem */
-    padding-top: max(0.75rem, env(safe-area-inset-top)); /* Add safe area padding for notch */
+    padding-top: max(
+      0.75rem,
+      env(safe-area-inset-top)
+    ); /* Add safe area padding for notch */
   }
 
   .title {
-    font-size: 1.5rem; /* Reduce from 2rem */
+    font-size: 1.75rem; /* Larger for mobile readability */
     letter-spacing: 1px; /* Reduce from 2px */
   }
 
@@ -103,12 +114,5 @@
   .themeToggle {
     font-size: 1.25rem; /* Reduce from 1.5rem */
     padding: 0.625rem; /* Equal padding for centered icons */
-  }
-}
-
-/* Very small mobile devices */
-@media (max-width: 480px) {
-  .title {
-    font-size: 1.25rem;
   }
 }

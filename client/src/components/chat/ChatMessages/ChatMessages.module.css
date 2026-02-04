@@ -90,6 +90,7 @@
 @media (max-width: 768px) {
   .messages {
     padding: 0.5rem 0.5rem 0.5rem 0; /* Reduce from 1rem */
+    padding-top: 1.25rem; /* Extra top padding for fixed header clearance */
     gap: 0.75rem; /* Reduce from 1rem */
   }
 
