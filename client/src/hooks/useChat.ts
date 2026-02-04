@@ -43,6 +43,10 @@ export function useChat({
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setInput('');
+
+    // Clear selected files immediately after creating message
+    onClearSelectedFiles();
+
     setIsLoading(true);
 
     try {
@@ -53,9 +57,6 @@ export function useChat({
       if (!conversationId && onConversationCreated) {
         onConversationCreated(data.conversation_id);
       }
-
-      // Clear selected files after successful send
-      onClearSelectedFiles();
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
