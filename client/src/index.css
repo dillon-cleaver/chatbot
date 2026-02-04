@@ -21,18 +21,18 @@
 
 /* Light theme */
 [data-theme="light"] {
-  --bg-primary: #f5f0e6;
-  --header-bg: #faf6ed;
+  --bg-primary: #ebe5d5;
+  --header-bg: #e8e2d0;
   --text-primary: #1a1a1a;
   --text-secondary: #666666;
   --border-color: #000000;
   --shadow-color: #000000;
-  --message-bg: #fffcf5;
+  --message-bg: #f8f4e8;
   --user-message-bg: #4a90e2;
   --user-border-color: #2a5a9a;
-  --assistant-message-bg: #f0ebe0;
+  --assistant-message-bg: #e6dfc8;
   --assistant-border-color: #c4bfb4;
-  --input-bg: #fffcf5;
+  --input-bg: #f8f4e8;
   --button-bg: #6c5ce7;
   --focus-color: #6c5ce7;
   --focus-shadow: rgba(108, 92, 231, 0.3);
