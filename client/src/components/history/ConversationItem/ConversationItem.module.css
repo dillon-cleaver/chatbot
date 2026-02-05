@@ -12,8 +12,10 @@
   transition: transform var(--transition-fast);
 }
 
-.conversationItem:hover {
-  transform: scale(1.02);
+@media (hover: hover) {
+  .conversationItem:hover {
+    transform: scale(1.02);
+  }
 }
 
 .currentConversation {
@@ -71,18 +73,20 @@
   transition: transform var(--transition-fast);
 }
 
-.editButton:hover {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .editButton:hover {
+    transform: scale(1.1);
+  }
+
+  .deleteButton:hover {
+    transform: scale(1.1);
+    background-color: #ff4444;
+    border-color: #cc0000;
+  }
 }
 
 .editButton:active {
   transform: scale(0.9);
-}
-
-.deleteButton:hover {
-  transform: scale(1.1);
-  background-color: #ff4444;
-  border-color: #cc0000;
 }
 
 .deleteButton:active {
@@ -125,9 +129,11 @@
   transition: transform 0.1s;
 }
 
-.saveButton:hover,
-.cancelButton:hover {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .saveButton:hover,
+  .cancelButton:hover {
+    transform: scale(1.1);
+  }
 }
 
 .saveButton:active,

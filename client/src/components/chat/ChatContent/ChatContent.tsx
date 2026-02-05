@@ -5,13 +5,16 @@ import { useTheme } from "../../../hooks/useTheme";
 import { useFileManager } from "../../../hooks/useFileManager";
 import { useConversations } from "../../../hooks/useConversations";
 import { useChat } from "../../../hooks/useChat";
-import { Header } from "../../layout/Header/Header";
+import { useKeyboardShortcuts } from "../../../hooks/useKeyboardShortcuts";
+import { useAnnouncer, ANNOUNCEMENTS } from "../../../hooks/useAnnouncer";
+import { Header, type HeaderRef } from "../../layout/Header/Header";
 import { ChatMessages } from "../ChatMessages/ChatMessages";
-import { ChatInput } from "../ChatInput/ChatInput";
+import { ChatInput, type ChatInputRef } from "../ChatInput/ChatInput";
 import { ChatContainer } from "../ChatContainer/ChatContainer";
 import { FileAttachModal } from "../../files/FileAttachModal/FileAttachModal";
 import { ChatHistoryModal } from "../../history/ChatHistoryModal/ChatHistoryModal";
 import { ConfirmDialog } from "../../ui/ConfirmDialog/ConfirmDialog";
+import { KeyboardShortcutsModal } from "../../ui/KeyboardShortcutsModal/KeyboardShortcutsModal";
 import { Spinner } from "../../ui/Spinner/Spinner";
 
 export function ChatContent(): React.JSX.Element {
@@ -21,13 +24,22 @@ export function ChatContent(): React.JSX.Element {
 
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] =
     useState<boolean>(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatInputRef = useRef<ChatInputRef>(null);
+  const headerRef = useRef<HeaderRef>(null);
   const justCreatedConversationRef = useRef<boolean>(false);
 
   // Initialize hooks
   const { theme, toggleTheme } = useTheme();
-  const fileManager = useFileManager({ conversationId: currentConversationId });
+  const announce = useAnnouncer();
+
+  const fileManager = useFileManager({
+    conversationId: currentConversationId,
+    onUploadSuccess: (count) => announce(ANNOUNCEMENTS.FILE_UPLOADED(count)),
+    onDeleteSuccess: () => announce(ANNOUNCEMENTS.FILE_DELETED),
+  });
 
   // Navigate to conversation when created
   const handleConversationCreated = useCallback(
@@ -66,6 +78,7 @@ export function ChatContent(): React.JSX.Element {
     onMessagesLoad: chat.setMessages,
     onClearSelectedFiles: fileManager.clearSelectedFiles,
     onNewChat: handleNewChat,
+    onDeleteSuccess: () => announce(ANNOUNCEMENTS.CONVERSATION_DELETED),
   });
 
   // Auto-scroll to bottom when messages change
@@ -98,8 +111,11 @@ export function ChatContent(): React.JSX.Element {
           justCreatedConversationRef.current = false;
           return;
         }
+        // Announce loading start
+        announce("Loading conversation...");
         // Load conversation from server
         await loadConversation(conversationId);
+        announce(ANNOUNCEMENTS.CONVERSATION_LOADED);
       } else {
         // At "/" route - clear messages for new chat
         // Note: Don't clear files - let useFileManager handle per-conversation state
@@ -107,7 +123,7 @@ export function ChatContent(): React.JSX.Element {
       }
     };
     loadFromUrl();
-  }, [conversationId, loadConversation, setMessages]);
+  }, [conversationId, loadConversation, setMessages, announce]);
 
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -138,9 +154,48 @@ export function ChatContent(): React.JSX.Element {
   };
 
   const handleSendMessage = async (): Promise<void> => {
+    if (!chat.input.trim()) return;
+    announce(ANNOUNCEMENTS.MESSAGE_SENDING);
     await chat.sendMessage();
     await conversations.refreshConversations();
+    announce(ANNOUNCEMENTS.MESSAGE_SENT);
   };
+
+  // Handle escape key - close modals or toggle input focus
+  const handleEscape = useCallback((): void => {
+    if (isHelpModalOpen) {
+      setIsHelpModalOpen(false);
+    } else if (fileManager.isModalOpen) {
+      fileManager.closeModal();
+    } else if (conversations.isHistoryModalOpen) {
+      conversations.closeHistoryModal();
+    } else if (isDeleteAllModalOpen) {
+      setIsDeleteAllModalOpen(false);
+    } else {
+      // Toggle input focus - blur if focused, focus if not
+      const activeElement = document.activeElement;
+      const isInputFocused =
+        activeElement?.tagName === "TEXTAREA" ||
+        activeElement?.tagName === "INPUT";
+
+      if (isInputFocused) {
+        (activeElement as HTMLElement).blur(); // Exit "typing mode"
+      } else {
+        chatInputRef.current?.focus(); // Enter "typing mode"
+      }
+    }
+  }, [isHelpModalOpen, fileManager, conversations, isDeleteAllModalOpen]);
+
+  // Global keyboard shortcuts
+  useKeyboardShortcuts({
+    handlers: {
+      onSend: handleSendMessage,
+      onAttach: fileManager.openModal,
+      onHistory: conversations.openHistoryModal,
+      onEscape: handleEscape,
+      onHelp: () => setIsHelpModalOpen(true),
+    },
+  });
 
   // Show empty state only when truly at home with no conversation to load
   const isEmpty =
@@ -148,67 +203,94 @@ export function ChatContent(): React.JSX.Element {
     !conversationId &&
     !conversations.isLoadingConversation;
 
+  // Navigation between header and input
+  const handleNavigateToHeader = useCallback(() => {
+    headerRef.current?.focusNav();
+  }, []);
+
+  const handleNavigateToInput = useCallback(() => {
+    chatInputRef.current?.focus();
+  }, []);
+
+  // Handler for starting new chat from history modal - focuses input after modal closes
+  const handleStartNewChat = useCallback(() => {
+    conversations.startNewConversation();
+    // Focus input after modal animation completes
+    setTimeout(() => {
+      chatInputRef.current?.focus();
+    }, 50);
+  }, [conversations]);
+
   return (
     <div className={styles.app}>
       <Header
+        ref={headerRef}
         onHistoryClick={conversations.openHistoryModal}
         onTitleClick={() => navigate("/", { replace: true })}
+        onHelpClick={() => setIsHelpModalOpen(true)}
         theme={theme}
         onThemeToggle={toggleTheme}
+        onNavigateDown={handleNavigateToInput}
       />
 
-      <ChatContainer
-        isEmpty={isEmpty}
-        emptyContent={
-          <>
-            <div className={styles.emptyGreeting}>
-              <h1 className={styles.emptyTitle}>CHATBOT</h1>
-              <p className={styles.emptySubtitle}>type, type, type</p>
+      <main id="main-content" className={styles.mainContent}>
+        <ChatContainer
+          isEmpty={isEmpty}
+          emptyContent={
+            <>
+              <div className={styles.emptyGreeting}>
+                <h1 className={styles.emptyTitle}>CHATBOT</h1>
+                <p className={styles.emptySubtitle}>type, type, type</p>
+              </div>
+              <ChatInput
+                ref={chatInputRef}
+                value={chat.input}
+                onChange={chat.setInput}
+                onSend={handleSendMessage}
+                onKeyDown={handleKeyPress}
+                onAttachClick={fileManager.openModal}
+                isLoading={chat.isLoading}
+                selectedFiles={selectedFiles}
+                onRemoveFile={fileManager.removeSelectedFile}
+                onClearAllFiles={fileManager.clearSelectedFiles}
+                showTopBorder={false}
+                isModalOpen={fileManager.isModalOpen}
+                autoFocus={true}
+                onNavigateUp={handleNavigateToHeader}
+              />
+            </>
+          }
+        >
+          {conversations.isLoadingConversation ? (
+            <div className={styles.loadingConversation}>
+              <Spinner />
+              <p>Loading conversation...</p>
             </div>
-            <ChatInput
-              value={chat.input}
-              onChange={chat.setInput}
-              onSend={handleSendMessage}
-              onKeyDown={handleKeyPress}
-              onAttachClick={fileManager.openModal}
-              isLoading={chat.isLoading}
-              selectedFiles={selectedFiles}
-              onRemoveFile={fileManager.removeSelectedFile}
-              onClearAllFiles={fileManager.clearSelectedFiles}
-              showTopBorder={false}
-              isModalOpen={fileManager.isModalOpen}
-              autoFocus={true}
-            />
-          </>
-        }
-      >
-        {conversations.isLoadingConversation ? (
-          <div className={styles.loadingConversation}>
-            <Spinner />
-            <p>Loading conversation...</p>
-          </div>
-        ) : (
-          <>
-            <ChatMessages
-              messages={chat.messages}
-              isLoading={chat.isLoading}
-              messagesEndRef={messagesEndRef}
-            />
-            <ChatInput
-              value={chat.input}
-              onChange={chat.setInput}
-              onSend={handleSendMessage}
-              onKeyDown={handleKeyPress}
-              onAttachClick={fileManager.openModal}
-              isLoading={chat.isLoading}
-              selectedFiles={selectedFiles}
-              onRemoveFile={fileManager.removeSelectedFile}
-              onClearAllFiles={fileManager.clearSelectedFiles}
-              isModalOpen={fileManager.isModalOpen}
-            />
-          </>
-        )}
-      </ChatContainer>
+          ) : (
+            <>
+              <ChatMessages
+                messages={chat.messages}
+                isLoading={chat.isLoading}
+                messagesEndRef={messagesEndRef}
+              />
+              <ChatInput
+                ref={chatInputRef}
+                value={chat.input}
+                onChange={chat.setInput}
+                onSend={handleSendMessage}
+                onKeyDown={handleKeyPress}
+                onAttachClick={fileManager.openModal}
+                isLoading={chat.isLoading}
+                selectedFiles={selectedFiles}
+                onRemoveFile={fileManager.removeSelectedFile}
+                onClearAllFiles={fileManager.clearSelectedFiles}
+                isModalOpen={fileManager.isModalOpen}
+                onNavigateUp={handleNavigateToHeader}
+              />
+            </>
+          )}
+        </ChatContainer>
+      </main>
 
       <FileAttachModal
         isOpen={fileManager.isModalOpen}
@@ -232,7 +314,7 @@ export function ChatContent(): React.JSX.Element {
         conversations={conversations.conversations}
         currentConversationId={currentConversationId}
         onDeleteConversation={conversations.deleteConversation}
-        onStartNewChat={conversations.startNewConversation}
+        onStartNewChat={handleStartNewChat}
         onDeleteAllClick={() => setIsDeleteAllModalOpen(true)}
         onUpdateTitle={conversations.updateConversationTitle}
       />
@@ -243,6 +325,11 @@ export function ChatContent(): React.JSX.Element {
         onConfirm={handleDeleteAllConversations}
         title="Delete All Conversations?"
         message="This will permanently delete all your chat history. This action cannot be undone."
+      />
+
+      <KeyboardShortcutsModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
       />
     </div>
   );
