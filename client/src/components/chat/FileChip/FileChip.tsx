@@ -34,11 +34,20 @@ export function FileChip({ file, onRemove, onClick, compact = false }: FileChipP
       onKeyDown={handleKeyDown}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `View ${file.original_name}` : undefined}
     >
-      <span className={styles.fileChipIcon}>{getFileIcon(file.mime_type)}</span>
+      <span className={styles.fileChipIcon} aria-hidden="true">
+        {getFileIcon(file.mime_type)}
+      </span>
       <span className={nameClassName}>{file.original_name}</span>
       {onRemove && (
-        <Button variant="message" destructive className={styles.fileChipRemove} onClick={handleRemoveClick}>
+        <Button
+          variant="message"
+          destructive
+          className={styles.fileChipRemove}
+          onClick={handleRemoveClick}
+          aria-label={`Remove ${file.original_name}`}
+        >
           <X size={14} />
         </Button>
       )}

@@ -1,8 +1,14 @@
-import type { Message } from '../../../types';
-import { MessageItem } from '../MessageItem/MessageItem';
-import { useScrollTrack } from '../../../hooks/useScrollTrack';
-import { ScrollBar } from '../../ui/ScrollBar/ScrollBar';
-import styles from './ChatMessages.module.css';
+import { useState } from "react";
+import type { Message } from "../../../types";
+import { MessageItem } from "../MessageItem/MessageItem";
+import styles from "./ChatMessages.module.css";
+
+const LOADING_MESSAGES = [
+  "PROCESSING...",
+  "LOADING...",
+  "CALCULATING...",
+  "HOLD ON...",
+];
 
 export interface ChatMessagesProps {
   messages: Message[];
@@ -15,24 +21,35 @@ export function ChatMessages({
   isLoading,
   messagesEndRef,
 }: ChatMessagesProps): React.JSX.Element {
-  const { containerRef, isScrolling, scrollThumbStyle } = useScrollTrack({
-    dependencies: [messages],
+  // Pick a random loading message when loading starts
+  const [loadingMessage] = useState(() => {
+    return LOADING_MESSAGES[
+      Math.floor(Math.random() * LOADING_MESSAGES.length)
+    ];
   });
 
   return (
     <div className={styles.messagesWrapper}>
-      <div ref={containerRef} className={styles.messages}>
+      <div
+        className={styles.messages}
+        role="log"
+        aria-live="polite"
+        aria-label="Chat messages"
+      >
         {messages.map((msg) => (
           <MessageItem key={msg.id} message={msg} />
         ))}
         {isLoading && (
-          <div className={`${styles.message} ${styles.assistantMessage}`}>
-            <div className={styles.messageContent}>Thinking...</div>
+          <div
+            className={`${styles.message} ${styles.assistantMessage}`}
+            role="status"
+            aria-live="polite"
+          >
+            <div className={styles.messageContent}>{loadingMessage}</div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-      <ScrollBar isVisible={isScrolling} thumbStyle={scrollThumbStyle} />
     </div>
   );
 }

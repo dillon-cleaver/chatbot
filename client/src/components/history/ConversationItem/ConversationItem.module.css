@@ -4,20 +4,28 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem;
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   background-color: var(--message-bg);
-  box-shadow: 4px 4px 0px var(--shadow-color);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: transform var(--transition-fast);
 }
 
-.conversationItem:hover {
-  transform: scale(1.02);
+@media (hover: hover) {
+  .conversationItem:hover {
+    transform: scale(1.02);
+  }
 }
 
 .currentConversation {
   background-color: var(--user-message-bg);
   border-color: var(--user-border-color);
+}
+
+.conversationItem:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 .conversationInfo {
@@ -56,27 +64,29 @@
 .editButton,
 .deleteButton {
   padding: 0.5rem 0.75rem;
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   border-radius: 0;
   background-color: var(--button-bg);
   color: var(--text-primary);
   font-size: 1.2rem;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: transform var(--transition-fast);
 }
 
-.editButton:hover {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .editButton:hover {
+    transform: scale(1.1);
+  }
+
+  .deleteButton:hover {
+    transform: scale(1.1);
+    background-color: #ff4444;
+    border-color: #cc0000;
+  }
 }
 
 .editButton:active {
   transform: scale(0.9);
-}
-
-.deleteButton:hover {
-  transform: scale(1.1);
-  background-color: #ff4444;
-  border-color: #cc0000;
 }
 
 .deleteButton:active {
@@ -119,9 +129,11 @@
   transition: transform 0.1s;
 }
 
-.saveButton:hover,
-.cancelButton:hover {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .saveButton:hover,
+  .cancelButton:hover {
+    transform: scale(1.1);
+  }
 }
 
 .saveButton:active,

@@ -36,6 +36,30 @@ pnpm start            # Run server only (port 3000)
 2. Run `pnpm install` from root
 3. Run `pnpm dev` to start both services
 
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Enter` | Send message (when in input) |
+| `Shift+Enter` | New line in message |
+| `Ctrl/⌘+Enter` | Send message (from anywhere) |
+| `Ctrl/⌘+U` | Open file attach modal |
+| `Escape` | Close modal / toggle input focus |
+| `?` | Show keyboard shortcuts (when not typing) |
+| `↑/↓` | Navigate lists and modal sections |
+| `←/→` | Navigate within file rows (VIEW/DELETE buttons) |
+| `Home/End` | Jump to first/last list item |
+| `Space/Enter` | Toggle selection or activate focused button |
+
+## Accessibility
+
+- Skip link for keyboard users to bypass header
+- Semantic landmarks (`<header>`, `<main>`, `<nav>`)
+- ARIA live regions announce dynamic content (message sent, file uploaded, etc.)
+- Roving tabindex for file and conversation lists
+- `prefers-reduced-motion` support
+- All interactive elements have visible focus indicators
+
 ## Recent Changes
 
 ### Message IDs (2024-02)

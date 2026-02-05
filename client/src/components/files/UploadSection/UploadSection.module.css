@@ -1,6 +1,6 @@
 .uploadSection {
   padding: 1rem 1.5rem;
-  border-bottom: 3px solid var(--border-color);
+  border-bottom: var(--border-width) solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -9,7 +9,7 @@
 .uploadButton {
   width: 100%;
   padding: 0.75rem 2rem;
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   background-color: var(--button-bg);
   color: var(--text-primary);
   font-family: "Fraunces", serif;
@@ -19,19 +19,27 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   transition:
-    transform 0.1s,
-    box-shadow 0.1s;
-  box-shadow: 4px 4px 0px var(--shadow-color);
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .uploadButton:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--shadow-color);
+  transform: var(--hover-translate);
+  box-shadow: var(--hover-shadow-offset) var(--hover-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .uploadButton:active:not(:disabled) {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0px var(--shadow-color);
+  transform: var(--active-translate);
+  box-shadow: var(--active-shadow-offset) var(--active-shadow-offset) 0px
+    var(--shadow-color);
+}
+
+.uploadButton:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 .uploadButton:disabled {
@@ -45,12 +53,12 @@
   gap: 0.75rem;
   padding: 1rem;
   background-color: #ffe6e6;
-  border: 3px solid #ff4444;
+  border: var(--border-width) solid #ff4444;
   color: #cc0000;
   font-family: "Roboto", sans-serif;
   font-size: 0.95rem;
   line-height: 1.4;
-  animation: slideDown 0.3s ease-out;
+  animation: slideDown var(--transition-slow) ease-out;
 }
 
 [data-theme="dark"] .uploadError {
@@ -82,13 +90,38 @@
 }
 
 .fileTypes {
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .fileTypeSupported {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .fileTypeSupported {
   color: #22c55e;
 }
 
 .fileTypeUnsupported {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .fileTypeUnsupported {
   color: #ef4444;
+}
+
+.infoSection {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .uploadSection {
+    padding: 0.75rem 1rem; /* Reduce from 1rem 1.5rem */
+  }
+
+  .uploadButton {
+    padding: 0.625rem 1.5rem; /* Reduce from 0.75rem 2rem */
+    font-size: 0.9rem; /* Reduce from 1rem */
+  }
 }

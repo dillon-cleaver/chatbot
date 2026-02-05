@@ -1,16 +1,20 @@
-import { useEffect, useRef } from 'react';
-import { Button } from '../Button';
-import styles from './ConfirmDialog.module.css';
+import { useEffect, useRef } from "react";
+import { Button } from "../Button";
+import styles from "./AlertDialog.module.css";
 
-export interface ConfirmDialogProps {
+export interface AlertDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
   title: string;
   message: string;
 }
 
-export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }: ConfirmDialogProps): React.JSX.Element | null {
+export function AlertDialog({
+  isOpen,
+  onClose,
+  title,
+  message,
+}: AlertDialogProps): React.JSX.Element | null {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -29,13 +33,13 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }: Co
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
   // Simple focus trap
@@ -43,16 +47,18 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }: Co
     if (!isOpen || !dialogRef.current) return;
 
     const handleFocusTrap = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== "Tab") return;
 
       const focusableElements = dialogRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
       );
 
       if (!focusableElements || focusableElements.length === 0) return;
 
       const firstElement = focusableElements[0] as HTMLElement;
-      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+      const lastElement = focusableElements[
+        focusableElements.length - 1
+      ] as HTMLElement;
 
       if (e.shiftKey && document.activeElement === firstElement) {
         e.preventDefault();
@@ -63,8 +69,8 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }: Co
       }
     };
 
-    document.addEventListener('keydown', handleFocusTrap);
-    return () => document.removeEventListener('keydown', handleFocusTrap);
+    document.addEventListener("keydown", handleFocusTrap);
+    return () => document.removeEventListener("keydown", handleFocusTrap);
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -73,31 +79,23 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }: Co
     <div className={styles.modalOverlay} onClick={onClose}>
       <div
         ref={dialogRef}
-        className={styles.confirmModal}
+        className={styles.alertModal}
         onClick={(e) => e.stopPropagation()}
-        role="dialog"
+        role="alertdialog"
         aria-modal="true"
-        aria-labelledby="confirm-dialog-title"
-        aria-describedby="confirm-dialog-message"
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-message"
         tabIndex={-1}
       >
-        <h3 id="confirm-dialog-title">{title}</h3>
-        <p id="confirm-dialog-message">{message}</p>
-        <div className={styles.confirmActions}>
+        <h3 id="alert-dialog-title">{title}</h3>
+        <p id="alert-dialog-message">{message}</p>
+        <div className={styles.alertActions}>
           <Button
             variant="chunky"
-            destructive
-            className={styles.confirmDeleteButton}
-            onClick={onConfirm}
-          >
-            Delete All
-          </Button>
-          <Button
-            variant="chunky"
-            className={styles.cancelConfirmButton}
+            className={styles.okButton}
             onClick={onClose}
           >
-            Cancel
+            OK
           </Button>
         </div>
       </div>

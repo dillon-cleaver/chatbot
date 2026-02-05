@@ -19,7 +19,9 @@
   padding: 0;
   margin: 0;
   cursor: pointer;
-  transition: transform 0.1s, opacity 0.1s;
+  transition:
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .titleButton:hover .title {
@@ -32,8 +34,8 @@
 }
 
 .titleButton:focus-visible {
-  outline: 2px solid var(--border-color);
-  outline-offset: 4px;
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 .title {
@@ -44,7 +46,9 @@
   color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 2px;
-  transition: opacity 0.1s, transform 0.1s;
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .headerRight {
@@ -53,28 +57,76 @@
   gap: 0.5rem;
 }
 
+.helpButton,
 .historyButton,
 .themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--button-bg);
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   color: var(--text-primary);
   font-size: 1.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem;
   cursor: pointer;
   font-family: "Fraunces", serif;
   font-weight: 600;
-  transition: transform 0.1s, box-shadow 0.1s;
-  box-shadow: 4px 4px 0px var(--shadow-color);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
 }
 
+.helpButton:hover,
 .historyButton:hover,
 .themeToggle:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--shadow-color);
+  transform: var(--hover-translate);
+  box-shadow: var(--hover-shadow-offset) var(--hover-shadow-offset) 0px
+    var(--shadow-color);
 }
 
+.helpButton:active,
 .historyButton:active,
 .themeToggle:active {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0px var(--shadow-color);
+  transform: var(--active-translate);
+  box-shadow: var(--active-shadow-offset) var(--active-shadow-offset) 0px
+    var(--shadow-color);
+}
+
+.helpButton:focus-visible,
+.historyButton:focus-visible,
+.themeToggle:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
+}
+
+@media (max-width: 768px) {
+  .header {
+    position: fixed; /* Fixed positioning to stay visible when keyboard opens */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* High z-index to ensure it's above all content */
+    background-color: var(
+      --header-bg
+    ); /* Explicit background for fixed positioning */
+    padding: 0.75rem 1rem; /* Reduce from 1rem 2rem */
+    padding-top: max(
+      0.75rem,
+      env(safe-area-inset-top)
+    ); /* Add safe area padding for notch */
+  }
+
+  .title {
+    font-size: 1.75rem; /* Larger for mobile readability */
+    letter-spacing: 1px; /* Reduce from 2px */
+  }
+
+  .helpButton,
+  .historyButton,
+  .themeToggle {
+    font-size: 1.25rem; /* Reduce from 1.5rem */
+    padding: 0.625rem; /* Equal padding for centered icons */
+  }
 }

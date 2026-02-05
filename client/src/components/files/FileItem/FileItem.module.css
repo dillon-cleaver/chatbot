@@ -3,14 +3,20 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   background-color: var(--message-bg);
-  box-shadow: 4px 4px 0px var(--shadow-color);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
 }
 
-.fileItem:has(.fileCheckbox:checked) {
+.fileItem.selected {
   background-color: var(--user-message-bg);
   border-color: var(--user-border-color);
+}
+
+.fileItem:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 .fileCheckbox {
@@ -20,29 +26,37 @@
   flex-shrink: 0;
   appearance: none;
   -webkit-appearance: none;
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   background-color: var(--bg-secondary);
   box-shadow: 2px 2px 0px var(--shadow-color);
-  transition: transform 0.1s, background-color 0.1s, border-color 0.1s;
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
   position: relative;
+  touch-action: manipulation; /* Improve touch responsiveness */
 }
 
-.fileCheckbox:hover {
-  transform: scale(1.2);
-  background-color: #6c5ce7;
-}
+/* Only apply hover effects on devices with actual hover support (desktop) */
+@media (hover: hover) and (pointer: fine) {
+  .fileCheckbox:hover {
+    transform: scale(1.2);
+    background-color: #6c5ce7;
+  }
 
-.fileCheckbox:hover::after {
-  content: "✓";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-  opacity: 0.6;
+  .fileCheckbox:hover::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    opacity: 0.6;
+    pointer-events: none; /* Ensure checkmark doesn't block clicks */
+  }
 }
 
 .fileCheckbox:checked {
@@ -60,6 +74,7 @@
   font-weight: 700;
   line-height: 1;
   opacity: 1;
+  pointer-events: none; /* Ensure checkmark doesn't block clicks */
 }
 
 .fileIcon {
@@ -102,6 +117,17 @@
   flex-shrink: 0;
 }
 
+.viewButton {
+  margin-left: auto; /* Push buttons to the right edge */
+}
+
+.viewButton {
+  height: 40px; /* Match deleteButton height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .deleteButton {
   font-size: 2rem;
   width: 40px;
@@ -126,23 +152,44 @@
   .viewButton {
     padding: 0.4rem 0.6rem;
     font-size: 0.75rem;
+    height: 36px; /* Match deleteButton height */
   }
 
   .deleteButton {
     width: 36px;
     height: 36px;
+    font-size: 1.5rem; /* Reduce from 2rem */
   }
 }
 
 @media (max-width: 480px) {
   .fileItem {
     gap: 0.4rem;
+    padding: 0.625rem; /* Reduce from 0.75rem */
+  }
+
+  .fileCheckbox {
+    width: 20px; /* Reduce from 24px */
+    height: 20px;
+    border: 2px solid var(--border-color); /* Reduce from 3px */
+  }
+
+  .fileCheckbox:checked::after,
+  .fileCheckbox:hover::after {
+    font-size: 14px; /* Reduce from 16px */
   }
 
   .viewButton {
     padding: 0.3rem 0.5rem;
     font-size: 0.7rem;
     letter-spacing: 0.5px;
+    height: 32px; /* Match deleteButton height */
+  }
+
+  .deleteButton {
+    width: 32px; /* Reduce from 36px to match smaller viewButton height */
+    height: 32px;
+    font-size: 1.25rem; /* Reduce from 1.5rem */
   }
 
   .fileSize {

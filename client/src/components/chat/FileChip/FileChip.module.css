@@ -10,6 +10,11 @@
   max-width: 250px;
 }
 
+.fileChip:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
+}
+
 .fileChipIcon {
   font-size: 1rem;
   flex-shrink: 0;
@@ -42,7 +47,9 @@
   font-size: 0.75rem;
   opacity: 0.85;
   max-width: 180px;
-  transition: opacity 0.15s ease, transform 0.1s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.1s ease;
   border: 2px solid var(--border-color);
   box-shadow: 4px 4px 0px var(--shadow-color);
 }
