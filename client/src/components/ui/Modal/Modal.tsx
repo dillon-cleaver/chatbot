@@ -33,12 +33,24 @@ export function Modal({
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement;
-      // Focus the dialog when it opens
-      dialogRef.current?.focus();
+      // Focus the close button if ref provided, otherwise focus first focusable element
+      if (closeButtonRef?.current) {
+        closeButtonRef.current.focus();
+      } else {
+        // Fallback: focus first focusable element in the dialog
+        const firstFocusable = dialogRef.current?.querySelector(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ) as HTMLElement | null;
+        if (firstFocusable) {
+          firstFocusable.focus();
+        } else {
+          dialogRef.current?.focus();
+        }
+      }
     } else if (previousFocusRef.current) {
       previousFocusRef.current.focus();
     }
-  }, [isOpen]);
+  }, [closeButtonRef, isOpen]);
 
   // Handle Escape key
   useEffect(() => {
