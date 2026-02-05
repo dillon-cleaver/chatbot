@@ -150,6 +150,7 @@ export const FileItem = forwardRef<FileItemRef, FileItemProps>(
           className={styles.fileCheckbox}
           aria-label={`Select ${file.original_name}`}
           tabIndex={-1}
+          role="presentation"
         />
         <span className={styles.fileIcon} aria-hidden="true">
           {getFileIcon(file.mime_type)}

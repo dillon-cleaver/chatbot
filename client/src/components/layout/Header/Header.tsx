@@ -1,11 +1,12 @@
 import { useRef, useCallback, forwardRef, useImperativeHandle } from "react";
-import { MessageSquare, Sun, Moon, HelpCircle } from "lucide-react";
+import { MessageSquare, Sun, Moon, HelpCircle, Settings } from "lucide-react";
 import styles from "./Header.module.css";
 
 export interface HeaderProps {
   onHistoryClick: () => void;
   onTitleClick: () => void;
   onHelpClick: () => void;
+  onSettingsClick: () => void;
   theme: "dark" | "light";
   onThemeToggle: () => void;
   onNavigateDown?: () => void;
@@ -20,6 +21,7 @@ export const Header = forwardRef<HeaderRef, HeaderProps>(function Header(
     onHistoryClick,
     onTitleClick,
     onHelpClick,
+    onSettingsClick,
     theme,
     onThemeToggle,
     onNavigateDown,
@@ -28,6 +30,7 @@ export const Header = forwardRef<HeaderRef, HeaderProps>(function Header(
 ): React.JSX.Element {
   const helpButtonRef = useRef<HTMLButtonElement>(null);
   const historyButtonRef = useRef<HTMLButtonElement>(null);
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const themeButtonRef = useRef<HTMLButtonElement>(null);
 
   useImperativeHandle(ref, () => ({
@@ -56,6 +59,22 @@ export const Header = forwardRef<HeaderRef, HeaderProps>(function Header(
         helpButtonRef.current?.focus();
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
+        settingsButtonRef.current?.focus();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        onNavigateDown?.();
+      }
+    },
+    [onNavigateDown],
+  );
+
+  const handleSettingsKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        historyButtonRef.current?.focus();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
         themeButtonRef.current?.focus();
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -69,7 +88,7 @@ export const Header = forwardRef<HeaderRef, HeaderProps>(function Header(
     (e: React.KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        historyButtonRef.current?.focus();
+        settingsButtonRef.current?.focus();
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         onNavigateDown?.();
@@ -96,7 +115,6 @@ export const Header = forwardRef<HeaderRef, HeaderProps>(function Header(
           onClick={onHelpClick}
           onKeyDown={handleHelpKeyDown}
           aria-label="Keyboard shortcuts"
-          aria-keyshortcuts="?"
         >
           <HelpCircle size={20} />
         </button>
@@ -108,6 +126,15 @@ export const Header = forwardRef<HeaderRef, HeaderProps>(function Header(
           aria-label="View conversation history"
         >
           <MessageSquare size={20} />
+        </button>
+        <button
+          ref={settingsButtonRef}
+          className={styles.settingsButton}
+          onClick={onSettingsClick}
+          onKeyDown={handleSettingsKeyDown}
+          aria-label="Open settings"
+        >
+          <Settings size={20} />
         </button>
         <button
           ref={themeButtonRef}

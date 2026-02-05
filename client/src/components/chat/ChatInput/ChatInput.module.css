@@ -160,11 +160,10 @@
 
   .input {
     font-size: 1rem; /* Ensure 16px minimum to prevent iOS zoom */
-    /* Inner height = 40px - 6px borders = 34px */
-    line-height: 34px; /* Match inner height for vertical centering */
+    line-height: 1.5; /* Relative line-height to support multi-line text */
     height: 40px;
     min-height: 40px;
-    padding: 0 0.75rem; /* Horizontal padding only */
+    padding: 0.5rem 0.75rem; /* Add vertical padding for visual centering */
   }
 
   .attachButton {

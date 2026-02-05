@@ -44,10 +44,11 @@ pnpm start            # Run server only (port 3000)
 | `Shift+Enter` | New line in message |
 | `Ctrl/⌘+Enter` | Send message (from anywhere) |
 | `Ctrl/⌘+U` | Open file attach modal |
+| `Ctrl/⌘+Y` | Open chat history |
 | `Escape` | Close modal / toggle input focus |
 | `?` | Show keyboard shortcuts (when not typing) |
 | `↑/↓` | Navigate lists and modal sections |
-| `←/→` | Navigate within file rows (VIEW/DELETE buttons) |
+| `←/→` | Navigate header buttons or row actions |
 | `Home/End` | Jump to first/last list item |
 | `Space/Enter` | Toggle selection or activate focused button |
 
