@@ -6,7 +6,7 @@
 }
 
 .inputContainer.withBorder {
-  border-top: 4px solid var(--border-color);
+  border-top: var(--border-width-thick) solid var(--border-color);
   padding-top: 1rem;
 }
 
@@ -18,31 +18,39 @@
 
 .attachButton {
   background-color: var(--button-bg);
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   color: var(--text-primary);
   font-size: 1.5rem;
   height: 50px;
   width: 50px;
   cursor: pointer;
   transition:
-    transform 0.1s,
-    box-shadow 0.1s;
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 4px 4px 0px var(--shadow-color);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
   position: relative;
 }
 
 .attachButton:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--shadow-color);
+  transform: var(--hover-translate);
+  box-shadow: var(--hover-shadow-offset) var(--hover-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .attachButton:active {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0px var(--shadow-color);
+  transform: var(--active-translate);
+  box-shadow: var(--active-shadow-offset) var(--active-shadow-offset) 0px
+    var(--shadow-color);
+}
+
+.attachButton:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 .badge {
@@ -61,13 +69,14 @@
   align-items: center;
   justify-content: center;
   border: 2px solid var(--border-color);
-  box-shadow: 2px 2px 0px var(--shadow-color);
+  box-shadow: var(--active-shadow-offset) var(--active-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .input {
   flex: 1;
   padding: 0.75rem 1rem; /* Increased from 0.625rem for better vertical centering */
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   background-color: var(--input-bg);
   color: var(--text-primary);
   font-family: "Roboto", sans-serif;
@@ -77,15 +86,17 @@
   max-height: 200px;
   line-height: 1.5;
   overflow: hidden;
-  box-shadow: 4px 4px 0px var(--shadow-color);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .input:focus {
   outline: none;
   border-color: var(--focus-color);
   box-shadow:
-    4px 4px 0px var(--shadow-color),
-    0 0 0 2px var(--focus-shadow);
+    var(--default-shadow-offset) var(--default-shadow-offset) 0px
+      var(--shadow-color),
+    0 0 0 var(--focus-outline-width) var(--focus-shadow);
 }
 
 .input:disabled {
@@ -96,7 +107,7 @@
 .sendButton {
   height: 50px;
   padding: 0 1.5rem;
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   background-color: var(--button-bg);
   color: var(--text-primary);
   font-family: "Fraunces", serif;
@@ -106,19 +117,27 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   transition:
-    transform 0.1s,
-    box-shadow 0.1s;
-  box-shadow: 4px 4px 0px var(--shadow-color);
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .sendButton:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--shadow-color);
+  transform: var(--hover-translate);
+  box-shadow: var(--hover-shadow-offset) var(--hover-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .sendButton:active:not(:disabled) {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0px var(--shadow-color);
+  transform: var(--active-translate);
+  box-shadow: var(--active-shadow-offset) var(--active-shadow-offset) 0px
+    var(--shadow-color);
+}
+
+.sendButton:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 .sendButton:disabled {

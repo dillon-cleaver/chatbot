@@ -1,8 +1,9 @@
-import { Check } from 'lucide-react';
-import type { UploadedFile } from '../../../types';
-import { FileChip } from '../FileChip/FileChip';
-import { Button } from '../../ui/Button';
-import styles from './FileChipsDisplay.module.css';
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import { Check } from "lucide-react";
+import type { UploadedFile } from "../../../types";
+import { FileChip } from "../FileChip/FileChip";
+import { Button } from "../../ui/Button";
+import styles from "./FileChipsDisplay.module.css";
 
 export interface FileChipsDisplayProps {
   files: UploadedFile[];
@@ -11,16 +12,61 @@ export interface FileChipsDisplayProps {
   onAdd?: () => void;
   showFileChips?: boolean;
   showHelperText?: boolean;
+  onNavigateToList?: () => void;
 }
 
-export function FileChipsDisplay({
-  files,
-  onRemoveFile,
-  onClearAll,
-  onAdd,
-  showFileChips = true,
-  showHelperText = true,
-}: FileChipsDisplayProps): React.JSX.Element | null {
+export interface FileChipsDisplayRef {
+  focusAttachButton: () => void;
+}
+
+export const FileChipsDisplay = forwardRef<
+  FileChipsDisplayRef,
+  FileChipsDisplayProps
+>(function FileChipsDisplay(
+  {
+    files,
+    onRemoveFile,
+    onClearAll,
+    onAdd,
+    showFileChips = true,
+    showHelperText = true,
+    onNavigateToList,
+  },
+  ref,
+): React.JSX.Element | null {
+  const attachButtonRef = useRef<HTMLButtonElement>(null);
+  const clearButtonRef = useRef<HTMLButtonElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    focusAttachButton: () => {
+      attachButtonRef.current?.focus();
+    },
+  }));
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown" && onNavigateToList) {
+      e.preventDefault();
+      onNavigateToList();
+    }
+
+    // Arrow navigation between ATTACH and CLEAR buttons
+    if (
+      e.key === "ArrowRight" &&
+      document.activeElement === attachButtonRef.current
+    ) {
+      e.preventDefault();
+      clearButtonRef.current?.focus();
+    }
+
+    if (
+      e.key === "ArrowLeft" &&
+      document.activeElement === clearButtonRef.current
+    ) {
+      e.preventDefault();
+      attachButtonRef.current?.focus();
+    }
+  };
+
   if (files.length === 0) return null;
 
   return (
@@ -29,22 +75,36 @@ export function FileChipsDisplay({
         <div className={styles.selectionInfo}>
           <div className={styles.count} role="status" aria-live="polite">
             <Check size={20} aria-hidden="true" />
-            {files.length} {files.length === 1 ? 'file' : 'files'} selected
+            {files.length} {files.length === 1 ? "file" : "files"} selected
           </div>
           {showHelperText && (
             <span className={styles.helperText} role="note">
-              Sent with next message only. Message history provides context for follow-ups.
+              Sent with next message only. Message history provides context for
+              follow-ups.
             </span>
           )}
         </div>
-        <div className={styles.buttonGroup}>
+        <div className={styles.buttonGroup} onKeyDown={handleKeyDown}>
           {onAdd && (
-            <Button variant="message" className={styles.addButton} onClick={onAdd}>
+            <Button
+              ref={attachButtonRef}
+              variant="message"
+              className={styles.addButton}
+              onClick={onAdd}
+              aria-label={`Attach ${files.length} selected ${files.length === 1 ? "file" : "files"}`}
+            >
               Attach
             </Button>
           )}
           {onClearAll && (
-            <Button variant="message" destructive className={styles.clearButton} onClick={onClearAll}>
+            <Button
+              ref={clearButtonRef}
+              variant="message"
+              destructive
+              className={styles.clearButton}
+              onClick={onClearAll}
+              aria-label="Clear all selected files"
+            >
               Clear
             </Button>
           )}
@@ -52,7 +112,7 @@ export function FileChipsDisplay({
       </div>
       {showFileChips && (
         <div className={styles.fileChipsContainer}>
-          {files.map(file => (
+          {files.map((file) => (
             <FileChip
               key={file.id}
               file={file}
@@ -63,4 +123,4 @@ export function FileChipsDisplay({
       )}
     </div>
   );
-}
+});
