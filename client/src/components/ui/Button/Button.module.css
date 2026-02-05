@@ -24,8 +24,9 @@
   cursor: pointer;
   border-radius: 4px;
   padding: 0.5rem 1rem;
-  border: 3px solid var(--border-color);
-  box-shadow: 4px 4px 0px var(--shadow-color);
+  border: var(--border-width) solid var(--border-color);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .button:disabled {
@@ -34,28 +35,35 @@
 }
 
 .button:focus-visible {
-  outline: 2px solid var(--border-color);
-  outline-offset: 2px;
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 /* CHUNKY STYLE - Primary actions */
 .buttonChunky {
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .buttonChunky:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--shadow-color);
+  transform: var(--hover-translate);
+  box-shadow: var(--hover-shadow-offset) var(--hover-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .buttonChunky:active:not(:disabled) {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0px var(--shadow-color);
+  transform: var(--active-translate);
+  box-shadow: var(--active-shadow-offset) var(--active-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 /* MESSAGE STYLE - Secondary actions */
 .buttonMessage {
-  transition: transform 0.1s, background-color 0.1s, border-color 0.1s;
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .buttonMessage:hover:not(:disabled) {
@@ -68,7 +76,9 @@
 
 /* STATIC STYLE - No animation (for buttons in animated containers) */
 .buttonStatic {
-  transition: background-color 0.1s, border-color 0.1s;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 /* DESTRUCTIVE MODIFIER */

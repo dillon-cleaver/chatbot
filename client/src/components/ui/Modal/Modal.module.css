@@ -84,6 +84,11 @@
   padding: 0;
 }
 
+.closeButton:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
+}
+
 .modalBody {
   flex: 1;
   overflow-y: auto;

@@ -1,7 +1,7 @@
-import { ReactNode, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
-import { Button } from '../Button';
-import styles from './Modal.module.css';
+import { ReactNode, useEffect, useRef } from "react";
+import { X } from "lucide-react";
+import { Button } from "../Button";
+import styles from "./Modal.module.css";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -11,9 +11,21 @@ export interface ModalProps {
   children: ReactNode;
   footer?: ReactNode;
   bodyClassName?: string;
+  closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
+  onCloseButtonKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
-export function Modal({ isOpen, onClose, title, subtitle, children, footer, bodyClassName }: ModalProps): React.JSX.Element | null {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  subtitle,
+  children,
+  footer,
+  bodyClassName,
+  closeButtonRef,
+  onCloseButtonKeyDown,
+}: ModalProps): React.JSX.Element | null {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -33,13 +45,13 @@ export function Modal({ isOpen, onClose, title, subtitle, children, footer, body
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
   // Simple focus trap
@@ -47,16 +59,18 @@ export function Modal({ isOpen, onClose, title, subtitle, children, footer, body
     if (!isOpen || !dialogRef.current) return;
 
     const handleFocusTrap = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== "Tab") return;
 
       const focusableElements = dialogRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
       );
 
       if (!focusableElements || focusableElements.length === 0) return;
 
       const firstElement = focusableElements[0] as HTMLElement;
-      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+      const lastElement = focusableElements[
+        focusableElements.length - 1
+      ] as HTMLElement;
 
       if (e.shiftKey && document.activeElement === firstElement) {
         e.preventDefault();
@@ -67,14 +81,14 @@ export function Modal({ isOpen, onClose, title, subtitle, children, footer, body
       }
     };
 
-    document.addEventListener('keydown', handleFocusTrap);
-    return () => document.removeEventListener('keydown', handleFocusTrap);
+    document.addEventListener("keydown", handleFocusTrap);
+    return () => document.removeEventListener("keydown", handleFocusTrap);
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const titleId = title ? 'modal-title' : undefined;
-  const subtitleId = subtitle ? 'modal-subtitle' : undefined;
+  const titleId = title ? "modal-title" : undefined;
+  const subtitleId = subtitle ? "modal-subtitle" : undefined;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -99,16 +113,22 @@ export function Modal({ isOpen, onClose, title, subtitle, children, footer, body
               )}
             </div>
             <Button
+              ref={closeButtonRef}
               variant="message"
               className={styles.closeButton}
               onClick={onClose}
+              onKeyDown={onCloseButtonKeyDown}
               aria-label="Close modal"
             >
               <X size={20} />
             </Button>
           </div>
         )}
-        <div className={`${styles.modalBody}${bodyClassName ? ` ${bodyClassName}` : ''}`}>{children}</div>
+        <div
+          className={`${styles.modalBody}${bodyClassName ? ` ${bodyClassName}` : ""}`}
+        >
+          {children}
+        </div>
         {footer && <div className={styles.modalFooter}>{footer}</div>}
       </div>
     </div>
