@@ -48,9 +48,15 @@ const saveSelectedFiles = (conversationId: string | null, fileIds: string[]): vo
 
 export interface UseFileManagerOptions {
   conversationId: string | null;
+  onUploadSuccess?: (count: number) => void;
+  onDeleteSuccess?: () => void;
 }
 
-export function useFileManager({ conversationId }: UseFileManagerOptions): UseFileManagerReturn {
+export function useFileManager({
+  conversationId,
+  onUploadSuccess,
+  onDeleteSuccess,
+}: UseFileManagerOptions): UseFileManagerReturn {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>(() => loadSelectedFiles(conversationId));
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -117,6 +123,7 @@ export function useFileManager({ conversationId }: UseFileManagerOptions): UseFi
       const newFiles = await api.uploadFiles(filesToUpload);
       setFiles((prev) => [...newFiles, ...prev]);
       setUploadError(null);
+      onUploadSuccess?.(newFiles.length);
     } catch (error) {
       console.error('Upload failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload files. Please try again.';
@@ -134,6 +141,7 @@ export function useFileManager({ conversationId }: UseFileManagerOptions): UseFi
       await api.deleteFile(fileId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       setSelectedFileIds((prev) => prev.filter((id) => id !== fileId));
+      onDeleteSuccess?.();
     } catch (error) {
       console.error('Delete failed:', error);
       setError('Failed to delete file. Please try again.');

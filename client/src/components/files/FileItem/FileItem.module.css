@@ -3,14 +3,20 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   background-color: var(--message-bg);
-  box-shadow: 4px 4px 0px var(--shadow-color);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .fileItem.selected {
   background-color: var(--user-message-bg);
   border-color: var(--user-border-color);
+}
+
+.fileItem:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 .fileCheckbox {
@@ -20,10 +26,13 @@
   flex-shrink: 0;
   appearance: none;
   -webkit-appearance: none;
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   background-color: var(--bg-secondary);
   box-shadow: 2px 2px 0px var(--shadow-color);
-  transition: transform 0.1s, background-color 0.1s, border-color 0.1s;
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
   position: relative;
   touch-action: manipulation; /* Improve touch responsiveness */
 }
