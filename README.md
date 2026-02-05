@@ -12,9 +12,10 @@ A modern, context-aware chatbot powered by Claude with file upload and analysis 
 
 ### 📎 File Upload & Management
 - Upload multiple file types: PDF, images (PNG/JPEG/GIF/WebP), Word docs, Excel spreadsheets, PowerPoint, CSV, and plain text
-- Persistent storage using SQLite database
+- Files and conversation history stored in **IndexedDB** (browser-only; no server-side storage)
 - View uploaded files in modal interface
 - Delete files when no longer needed
+- Clearing site data clears all conversations and files
 
 ### 🎯 Selective File Attachment
 - Choose which files to include with each message
@@ -34,67 +35,76 @@ A modern, context-aware chatbot powered by Claude with file upload and analysis 
 - Custom fonts: Fraunces (headings) and Roboto (body)
 - Responsive layout optimized for chat interfaces
 
+### ⌨️ Keyboard Accessible
+- Full keyboard navigation throughout the app
+- Global shortcuts for common actions
+- Arrow key navigation in modals and lists
+- Screen reader friendly with ARIA live regions
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Enter` | Send message (when in input) |
+| `Shift+Enter` | New line in message |
+| `Ctrl/⌘+Enter` | Send message (from anywhere) |
+| `Ctrl/⌘+U` | Open file attach modal |
+| `Ctrl/⌘+Y` | Open chat history |
+| `Escape` | Close modal / toggle input focus |
+| `?` | Show keyboard shortcuts (when not typing) |
+| `↑/↓` | Navigate lists and modal sections |
+| `←/→` | Navigate header buttons or row actions |
+| `Home/End` | Jump to first/last list item |
+| `Space/Enter` | Toggle selection or activate focused button |
+
+## Accessibility
+
+- **Skip link** for keyboard users to bypass header
+- **Semantic landmarks** (`<header>`, `<main>`, `<nav>`)
+- **ARIA live regions** announce dynamic content (message sent, file uploaded, etc.)
+- **Roving tabindex** for file and conversation lists
+- **Reduced motion** support via `prefers-reduced-motion`
+- **Visible focus indicators** on all interactive elements
+- **Focus trap** in modals with proper Tab cycling
+
 ## Architecture
 
 ```
 ┌─────────────────┐         ┌──────────────────┐
 │  React Frontend │ ◄─────► │  Express Backend │
-│   (Vite + CSS)  │  HTTP   │   (Node + ESM)   │
-└─────────────────┘         └──────────────────┘
-                                      │
-                            ┌─────────┴─────────┐
-                            ▼                   ▼
-                    ┌──────────────┐    ┌─────────────┐
-                    │   SQLite DB  │    │ Anthropic   │
-                    │ (File Metadata)│   │  Claude API │
-                    └──────────────┘    └─────────────┘
-                            │
-                            ▼
-                    ┌──────────────┐
-                    │ File System  │
-                    │  (uploads/)  │
-                    └──────────────┘
+│ (Vite + IndexedDB)│  /chat  │ (stateless proxy) │
+└────────┬────────┘         └────────┬─────────┘
+         │                            │
+         ▼                            ▼
+┌─────────────────┐          ┌─────────────┐
+│    IndexedDB    │          │  Anthropic  │
+│ conversations   │          │ Claude API  │
+│ messages, files │          └─────────────┘
+└─────────────────┘
 ```
+
+All persistent data (conversations, messages, uploaded files) lives in the browser via IndexedDB. The server only exposes `POST /chat` and proxies to the LLM; it does not store data.
 
 ## How It Works
 
 ### File Upload Flow
 1. User selects files via the 📎 button in the header
-2. Files uploaded to Express server via `multer`
-3. Metadata stored in SQLite database (original name, MIME type, size, upload timestamp)
-4. Physical files saved to `server/uploads/` directory
-5. Files appear in modal for selection
+2. Files are stored in **IndexedDB** in the browser (no server upload)
+3. Files appear in modal for selection
 
 ### Chat with Files Flow
 1. User checks boxes next to files in the modal to select them
 2. Selected files appear as "chips" below the chat input
 3. User types a message and clicks Send
-4. Frontend sends message + array of selected file IDs to backend
-5. Backend processes each file based on type:
-   - **PDFs & Images**: Encoded as base64 and sent as `document` or `image` content blocks
-   - **Text files**: Read and sent as `text` content blocks
-   - **Office docs**: Parsed and extracted text sent as `text` content blocks
-6. All content blocks (message text + file contents) sent to Claude API
-7. Claude analyzes the message in context of the files
-8. Response rendered with markdown formatting
-9. Selected files cleared for next message
+4. Frontend reads file blobs from IndexedDB, processes them client-side (PDFs, images, Office docs, etc.), and builds content blocks
+5. Frontend sends `messages` (with last user message content as content blocks) and `conversation_id` to `POST /chat`
+6. Server forwards messages to Claude API (no file storage or DB)
+7. Response is stored in IndexedDB and rendered with markdown
+8. Selected files cleared for next message
 
 ### File Processing Details
 
-**PDF & Image Processing** (`fileProcessor.js:14-45`)
-```javascript
-// PDFs sent as native document blocks
-{ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: '...' }}
-
-// Images sent as vision-compatible blocks
-{ type: 'image', source: { type: 'base64', media_type: 'image/png', data: '...' }}
-```
-
-**Text Extraction** (`fileProcessor.js:106-177`)
-- Word docs parsed with `mammoth` library
-- Excel sheets converted to tables with `xlsx`
-- CSV parsed with `csv-parse` into formatted tables
-- Plain text read directly
+File processing runs **in the client** (`client/src/services/fileProcessor.ts`). Content blocks (text, image, document) are built there and sent in the `/chat` request. The server does not read or store files.
 
 ## Prerequisites
 
@@ -164,13 +174,10 @@ chatbot/
 │   ├── package.json
 │   └── vite.config.js
 │
-├── server/              # Express 5 backend
-│   ├── index.js              # Express server + API endpoints
-│   ├── fileProcessor.js      # File type processing logic
+├── server/              # Express 5 backend (stateless)
+│   ├── index.js              # POST /chat only; proxies to Claude
 │   ├── package.json
-│   ├── .env                  # Environment variables (create this)
-│   ├── database.db           # SQLite database (auto-created)
-│   └── uploads/              # File storage (auto-created)
+│   └── .env                  # ANTHROPIC_API_KEY, PORT (create this)
 │
 ├── package.json         # Root workspace config
 ├── pnpm-workspace.yaml  # pnpm workspace definition
@@ -187,18 +194,14 @@ chatbot/
 
 ### Backend
 - **Express 5** - Web framework
-- **Anthropic SDK** - Claude API client
-- **better-sqlite3** - Database for file metadata
-- **multer** - File upload handling
-- **pdf-parse** - PDF text extraction
-- **mammoth** - Word document parsing
-- **xlsx** - Excel spreadsheet parsing
-- **csv-parse** - CSV file parsing
+- **Anthropic SDK** - Claude API client (stateless; no DB or file storage)
 
 ## API Endpoints
 
+The server exposes only one endpoint:
+
 ### `POST /chat`
-Send a message to Claude, optionally with attached files.
+Send messages to Claude. Client sends content blocks (including file content) in the last user message; no file IDs.
 
 **Request:**
 ```json
@@ -206,45 +209,25 @@ Send a message to Claude, optionally with attached files.
   "messages": [
     { "role": "user", "content": "What's in this document?" }
   ],
-  "fileIds": ["uuid-1", "uuid-2"]  // optional, max 5
+  "conversation_id": "optional-uuid-from-client"
 }
 ```
 
 **Response:**
 ```json
 {
-  "content": "This document discusses..."
+  "content": "This document discusses...",
+  "conversation_id": "uuid"
 }
 ```
 
-### `POST /upload`
-Upload one or more files.
+## Deployment
 
-**Request:** `multipart/form-data` with `files` field
+For a live/production build, point the client at your chat server:
 
-**Response:**
-```json
-[
-  {
-    "id": "uuid",
-    "original_name": "document.pdf",
-    "mime_type": "application/pdf",
-    "size": 102400,
-    "uploaded_at": "2024-01-20T10:30:00.000Z"
-  }
-]
-```
-
-### `GET /files`
-List all uploaded files.
-
-### `GET /files/:id`
-View/download a specific file.
-
-### `DELETE /files/:id`
-Delete a file from storage and database.
-
-## Configuration
+- **Build:** Set `VITE_API_URL` to your server URL when building (e.g. `VITE_API_URL=https://your-api.example.com pnpm build`), or configure it in `.env` (e.g. `client/.env.production` with `VITE_API_URL=https://...`). If unset, the client uses `http://localhost:3000`.
+- **Server:** Deploy the server (e.g. Node host or serverless) so it exposes `POST /chat`; keep CORS enabled for your frontend origin.
+- **Storage:** The app uses IndexedDB only; there is no server-side database or file storage. Clearing site data in the browser clears all conversations and uploaded files.
 
 ### Supported File Types
 - **Documents**: PDF, Word (.doc, .docx)
@@ -260,9 +243,9 @@ Delete a file from storage and database.
 - Maximum files per message: 5
 
 ### Model Configuration
-- Model: `claude-sonnet-4-5`
+- Model: `claude-haiku-4-5-20251001` (Claude Haiku 4.5)
 - Max tokens: 2048
-- Adjustable in `server/index.js:136`
+- Adjustable in `server/index.js`
 
 ## Git Conventions
 
@@ -278,15 +261,13 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 
 ## Development Notes
 
-- The SQLite database (`database.db`) is created automatically on first run
-- Uploaded files persist in `server/uploads/` directory
-- The `uploads/` directory is created automatically if it doesn't exist
+- Conversations, messages, and uploaded files are stored in **IndexedDB** in the browser
+- Clearing site data (or unregistering the site) clears all conversations and files
 - File selections are cleared after each message to prevent accidental context pollution
-- Conversation history is maintained in browser memory (clears on refresh)
+- The server is stateless: no database or file storage on the server
 
 ## Future Enhancements
 
-- [ ] Persistent conversation history across sessions
 - [ ] User authentication and multi-user support
 - [ ] Full PowerPoint text extraction
 - [ ] File previews in modal
