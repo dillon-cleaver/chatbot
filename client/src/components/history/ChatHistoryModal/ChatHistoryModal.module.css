@@ -2,13 +2,13 @@
   display: flex;
   gap: 0.5rem;
   padding: 1rem 1.5rem;
-  border-bottom: 3px solid var(--border-color);
+  border-bottom: var(--border-width) solid var(--border-color);
 }
 
 .newChatButton {
   flex: 1;
   padding: 0.75rem 1.5rem;
-  border: 3px solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
   border-radius: 0;
   background-color: var(--button-bg);
   color: var(--text-primary);
@@ -19,19 +19,27 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   transition:
-    transform 0.1s,
-    box-shadow 0.1s;
-  box-shadow: 4px 4px 0px var(--shadow-color);
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .newChatButton:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--shadow-color);
+  transform: var(--hover-translate);
+  box-shadow: var(--hover-shadow-offset) var(--hover-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .newChatButton:active {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0px var(--shadow-color);
+  transform: var(--active-translate);
+  box-shadow: var(--active-shadow-offset) var(--active-shadow-offset) 0px
+    var(--shadow-color);
+}
+
+.newChatButton:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 .deleteAllButton {
@@ -46,19 +54,27 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   transition:
-    transform 0.1s,
-    box-shadow 0.1s;
-  box-shadow: 4px 4px 0px var(--shadow-color);
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .deleteAllButton:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--shadow-color);
+  transform: var(--hover-translate);
+  box-shadow: var(--hover-shadow-offset) var(--hover-shadow-offset) 0px
+    var(--shadow-color);
 }
 
 .deleteAllButton:active {
-  transform: translate(0, 0);
-  box-shadow: 2px 2px 0px var(--shadow-color);
+  transform: var(--active-translate);
+  box-shadow: var(--active-shadow-offset) var(--active-shadow-offset) 0px
+    var(--shadow-color);
+}
+
+.deleteAllButton:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 .conversationList {

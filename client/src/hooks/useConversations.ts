@@ -30,6 +30,7 @@ interface UseConversationsProps {
   onMessagesLoad: (messages: Message[]) => void;
   onClearSelectedFiles: () => void;
   onNewChat: () => void;
+  onDeleteSuccess?: () => void;
 }
 
 export function useConversations({
@@ -37,6 +38,7 @@ export function useConversations({
   onMessagesLoad,
   onClearSelectedFiles,
   onNewChat,
+  onDeleteSuccess,
 }: UseConversationsProps): UseConversationsReturn {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
@@ -167,6 +169,7 @@ export function useConversations({
       await api.deleteConversation(conversationId);
 
       setConversations((prev) => prev.filter((c) => c.id !== conversationId));
+      onDeleteSuccess?.();
 
       if (conversationId === currentConversationId) {
         startNewConversation();
@@ -182,6 +185,7 @@ export function useConversations({
       await api.deleteAllConversations();
 
       setConversations([]);
+      onDeleteSuccess?.();
       startNewConversation();
     } catch (error) {
       console.error("Failed to delete all conversations:", error);
