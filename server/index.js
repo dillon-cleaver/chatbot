@@ -41,7 +41,7 @@ app.post("/chat", async (req, res) => {
     // Client may send the last user message with content as an array of content blocks (from IndexedDB files).
     // Pass messages through to Claude as-is.
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001",
       max_tokens: 2048,
       system: SYSTEM_PROMPT,
       messages: messages.map((msg) => ({
@@ -50,7 +50,11 @@ app.post("/chat", async (req, res) => {
       })),
     });
 
-    const assistantContent = response.content[0].text;
+    const textBlock = response.content.find((block) => block.type === "text");
+    if (!textBlock) {
+      throw new Error("No text content in response");
+    }
+    const assistantContent = textBlock.text;
 
     res.json({
       content: assistantContent,

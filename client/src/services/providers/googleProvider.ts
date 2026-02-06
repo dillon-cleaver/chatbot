@@ -11,6 +11,9 @@ interface GoogleResponse {
   }>;
 }
 
+const MESSAGE_TIMEOUT_MS = 30_000;
+const TEST_CONNECTION_TIMEOUT_MS = 10_000;
+
 // Map deprecated Gemini model IDs to current API model IDs (fixes 404)
 const GEMINI_MODEL_ALIASES: Record<string, string> = {
   "gemini-pro": "gemini-2.5-pro",
@@ -107,32 +110,45 @@ export class GoogleProvider implements LLMProvider {
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`;
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": this.apiKey,  // Google API requires lowercase header name
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), MESSAGE_TIMEOUT_MS);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `Google API error: ${response.statusText}`);
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": this.apiKey,  // Header-based auth (no key in URL)
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error?.message || `Google API error: ${response.statusText}`);
+        }
+
+        const data = (await response.json()) as GoogleResponse;
+
+        if (!data.candidates || data.candidates.length === 0) {
+          throw new Error("No response from Google");
+        }
+
+        const textPart = data.candidates[0].content.parts.find((p) => p.text);
+        if (!textPart || !textPart.text) {
+          throw new Error("No text content in response");
+        }
+
+        return textPart.text;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          throw new Error('Request timed out');
+        }
+        throw error;
       }
-
-      const data = (await response.json()) as GoogleResponse;
-      
-      if (!data.candidates || data.candidates.length === 0) {
-        throw new Error("No response from Google");
-      }
-
-      const textPart = data.candidates[0].content.parts.find((p) => p.text);
-      if (!textPart || !textPart.text) {
-        throw new Error("No text content in response");
-      }
-
-      return textPart.text;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Google API error: ${error.message}`);
@@ -142,6 +158,9 @@ export class GoogleProvider implements LLMProvider {
   }
 
   async testConnection(): Promise<boolean> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TEST_CONNECTION_TIMEOUT_MS);
+
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`;
 
@@ -149,7 +168,7 @@ export class GoogleProvider implements LLMProvider {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-goog-api-key": this.apiKey,  // Google API requires lowercase header name
+          "x-goog-api-key": this.apiKey,  // Header-based auth (no key in URL)
         },
         body: JSON.stringify({
           systemInstruction: {
@@ -162,10 +181,13 @@ export class GoogleProvider implements LLMProvider {
             },
           ],
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       return response.ok;
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error("Google connection test failed:", error);
       return false;
     }

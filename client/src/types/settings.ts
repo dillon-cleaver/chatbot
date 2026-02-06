@@ -93,16 +93,12 @@ export async function saveSettings(settings: Settings): Promise<void> {
 
     // Encrypt API key before saving
     if (settingsToSave.apiKey) {
-      try {
-        settingsToSave.apiKey = await encryptApiKey(settingsToSave.apiKey);
-      } catch (error) {
-        console.error("Failed to encrypt API key, saving as plain text:", error);
-        // Fallback to plain text if encryption fails
-      }
+      settingsToSave.apiKey = await encryptApiKey(settingsToSave.apiKey);
     }
 
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsToSave));
   } catch (error) {
     console.error("Failed to save settings:", error);
+    throw error;
   }
 }

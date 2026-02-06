@@ -114,7 +114,7 @@ export function useChat({
             ...updatedMessages.slice(0, -1),
             {
               ...updatedMessages[updatedMessages.length - 1],
-              content: typeof contentBlocks === 'string' ? contentBlocks : JSON.stringify(contentBlocks)
+              content: JSON.stringify(contentBlocks)
             },
           ];
         }
@@ -122,7 +122,7 @@ export function useChat({
           console.log("[Chat] Sending message — mode: default, model: Claude Haiku (server)");
           const data = await api.sendChatMessage(messagesToSend, currentConvId);
           const assistantContent = data.content;
-          setMessages([...updatedMessages, { id: crypto.randomUUID(), role: "assistant", content: assistantContent }]);
+          setMessages([...updatedMessages, { id: generateUUID(), role: "assistant", content: assistantContent }]);
 
           await indexedDB.addMessage(currentConvId, "assistant", assistantContent);
         } catch (error) {
@@ -224,7 +224,7 @@ export function useChat({
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setMessages([
         ...updatedMessages,
-        { id: crypto.randomUUID(), role: 'assistant', content: `Sorry, I encountered an error: ${errorMessage}` },
+        { id: generateUUID(), role: 'assistant', content: `Sorry, I encountered an error: ${errorMessage}` },
       ]);
     } finally {
       setIsLoading(false);

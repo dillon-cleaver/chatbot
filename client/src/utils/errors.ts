@@ -65,35 +65,36 @@ export function getUserFriendlyError(error: unknown): string {
     message = message.replace(/^(API error|Server error):\s*/i, '');
 
     // Handle common error patterns
-    if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes('failed to fetch') || lowerMessage.includes('networkerror')) {
       return 'Connection error: Check your network and try again';
     }
 
-    if (message.includes('timeout') || message.includes('timed out')) {
+    if (lowerMessage.includes('timeout') || lowerMessage.includes('timed out')) {
       return 'Request timed out. Please try again';
     }
 
-    if (message.includes('401') || message.includes('Unauthorized')) {
+    if (lowerMessage.includes('401') || lowerMessage.includes('unauthorized')) {
       return 'Authentication failed. Check your API key';
     }
 
-    if (message.includes('403') || message.includes('Forbidden')) {
+    if (lowerMessage.includes('403') || lowerMessage.includes('forbidden')) {
       return 'Access denied. Check your API key permissions';
     }
 
-    if (message.includes('404') || message.includes('Not Found')) {
+    if (lowerMessage.includes('404') || lowerMessage.includes('not found')) {
       return 'Resource not found. Check your configuration';
     }
 
-    if (message.includes('429') || message.includes('Too Many Requests')) {
+    if (lowerMessage.includes('429') || lowerMessage.includes('too many requests')) {
       return 'Rate limit exceeded. Please wait and try again';
     }
 
-    if (message.includes('500') || message.includes('Internal Server Error')) {
+    if (lowerMessage.includes('500') || lowerMessage.includes('internal server error')) {
       return 'Server error. Please try again later';
     }
 
-    if (message.includes('503') || message.includes('Service Unavailable')) {
+    if (lowerMessage.includes('503') || lowerMessage.includes('service unavailable')) {
       return 'Service temporarily unavailable. Please try again later';
     }
 

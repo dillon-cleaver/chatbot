@@ -16,9 +16,6 @@ const IV_LENGTH = 12; // 96 bits recommended for AES-GCM
 const DEVICE_ID_KEY = "chatbot-device-id";
 const ENCRYPTION_PREFIX = "enc_v1:"; // Marker to identify encrypted values
 
-// Timing constants
-const ENCRYPTION_KEY_SIZE = 256; // AES-256
-
 /**
  * Get or create a stable device ID for this browser
  * This ID persists across sessions and doesn't change with window size/zoom
@@ -92,7 +89,11 @@ export async function encryptApiKey(apiKey: string): Promise<string> {
     combined.set(iv, 0);
     combined.set(new Uint8Array(ciphertext), iv.length);
 
-    const base64 = btoa(String.fromCharCode(...combined));
+    let binaryString = "";
+    for (let i = 0; i < combined.length; i++) {
+      binaryString += String.fromCharCode(combined[i]);
+    }
+    const base64 = btoa(binaryString);
     return ENCRYPTION_PREFIX + base64;
   } catch (error) {
     console.error("Encryption failed:", error);
