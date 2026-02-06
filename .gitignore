@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 .pnp
 .pnp.js
 
@@ -34,6 +35,12 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Database files
+*.db
+
+# Server uploads (legacy)
+server/uploads/
 
 # OS files
 .DS_Store
