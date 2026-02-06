@@ -132,7 +132,8 @@ export class OpenAIProvider implements LLMProvider {
       );
 
       return response.ok;
-    } catch {
+    } catch (error) {
+      console.error("OpenAI connection test failed:", error);
       return false;
     }
   }

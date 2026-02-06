@@ -33,27 +33,38 @@ const DB_VERSION = 2;
 
 async function getDB(): Promise<IDBPDatabase> {
   return openDB(DB_NAME, DB_VERSION, {
-    upgrade(db: IDBPDatabase) {
-      // Create conversations store
-      if (!db.objectStoreNames.contains("conversations")) {
-        const conversationStore = db.createObjectStore("conversations", {
-          keyPath: "id",
-        });
-        conversationStore.createIndex("updated_at", "updated_at");
+    upgrade(db: IDBPDatabase, oldVersion: number, newVersion: number | null) {
+      console.log(`Upgrading DB from v${oldVersion} to v${newVersion}`);
+
+      // V1: Initial schema
+      if (oldVersion < 1) {
+        // Create conversations store
+        if (!db.objectStoreNames.contains("conversations")) {
+          const conversationStore = db.createObjectStore("conversations", {
+            keyPath: "id",
+          });
+          conversationStore.createIndex("updated_at", "updated_at");
+        }
+
+        // Create messages store
+        if (!db.objectStoreNames.contains("messages")) {
+          const messageStore = db.createObjectStore("messages", {
+            keyPath: "id",
+          });
+          messageStore.createIndex("conversation_id", "conversation_id");
+          messageStore.createIndex("timestamp", "timestamp");
+        }
+
+        // Create files store (IndexedDB-only; no server storage)
+        if (!db.objectStoreNames.contains("files")) {
+          db.createObjectStore("files", { keyPath: "id" });
+        }
       }
 
-      // Create messages store
-      if (!db.objectStoreNames.contains("messages")) {
-        const messageStore = db.createObjectStore("messages", {
-          keyPath: "id",
-        });
-        messageStore.createIndex("conversation_id", "conversation_id");
-        messageStore.createIndex("timestamp", "timestamp");
-      }
-
-      // Create files store (IndexedDB-only; no server storage)
-      if (!db.objectStoreNames.contains("files")) {
-        db.createObjectStore("files", { keyPath: "id" });
+      // V2: Future migrations can be added here
+      if (oldVersion < 2) {
+        // Add new stores/indexes for version 2 here
+        // Currently version 2 has same schema as version 1
       }
     },
   });

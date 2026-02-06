@@ -1,5 +1,9 @@
 import { useCallback, useRef, useEffect } from "react";
 
+// Reference counting for shared live regions
+let politeRefCount = 0;
+let assertiveRefCount = 0;
+
 /**
  * Custom hook for announcing messages to screen readers via ARIA live regions.
  *
@@ -39,6 +43,7 @@ export function useAnnouncer(): (
       document.body.appendChild(politeRegion);
     }
     politeRef.current = politeRegion;
+    politeRefCount++;
 
     // Check for existing assertive region or create one
     let assertiveRegion = document.getElementById(
@@ -54,9 +59,21 @@ export function useAnnouncer(): (
       document.body.appendChild(assertiveRegion);
     }
     assertiveRef.current = assertiveRegion;
+    assertiveRefCount++;
 
-    // Don't remove on cleanup - regions may be shared across instances
+    // Cleanup with reference counting
     return () => {
+      politeRefCount--;
+      assertiveRefCount--;
+
+      // Only remove regions when no more instances need them
+      if (politeRefCount === 0 && politeRef.current?.parentNode) {
+        document.body.removeChild(politeRef.current);
+      }
+      if (assertiveRefCount === 0 && assertiveRef.current?.parentNode) {
+        document.body.removeChild(assertiveRef.current);
+      }
+
       politeRef.current = null;
       assertiveRef.current = null;
     };

@@ -5,12 +5,18 @@ import styles from './MessageItem.module.css';
 
 export interface MessageItemProps {
   message: Message;
-  onViewFile?: (fileId: string) => void;
+  onViewFile?: (fileId: string) => void | Promise<void>;
 }
 
 export function MessageItem({ message, onViewFile }: MessageItemProps): React.JSX.Element {
-  const handleFileClick = (fileId: string) => {
-    onViewFile?.(fileId);
+  const handleFileClick = async (fileId: string) => {
+    try {
+      if (onViewFile) {
+        await onViewFile(fileId);
+      }
+    } catch (error) {
+      console.error('Failed to open file:', error);
+    }
   };
 
   const messageLabel = message.role === 'user' ? 'User message' : 'Assistant message';

@@ -7,24 +7,47 @@ export async function sendChatMessage(
   messages: Message[],
   conversationId: string | null,
 ): Promise<ChatResponse> {
-  const response = await fetch(`${API_BASE_URL}/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messages,
-      conversation_id: conversationId,
-    }),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages,
+        conversation_id: conversationId,
+      }),
+    });
 
-  if (!response.ok) {
-    if (response.status === 413) {
-      throw new Error("File attachment is too large. Try a smaller file.");
+    if (!response.ok) {
+      if (response.status === 413) {
+        throw new Error("File too large");
+      }
+
+      // Try to extract error message from response
+      let errorMessage = "Failed to get response";
+      try {
+        const errorData = (await response.json()) as { error?: string };
+        errorMessage = errorData.error || errorMessage;
+      } catch {
+        // If JSON parsing fails, try text
+        try {
+          const textError = await response.text();
+          if (textError) errorMessage = textError;
+        } catch {
+          // Use default message
+        }
+      }
+      throw new Error(errorMessage);
     }
-    const errorData = (await response.json()) as { error?: string };
-    throw new Error(errorData.error || "Failed to get response");
-  }
 
-  return response.json();
+    return response.json();
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError) {
+      throw new Error('Network error: Check your connection');
+    }
+    // Re-throw other errors
+    throw error;
+  }
 }

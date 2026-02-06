@@ -20,7 +20,7 @@ interface UseChatProps {
   conversationId: string | null;
   selectedFileIds: string[];
   selectedFiles: UploadedFile[];
-  onConversationCreated: (conversationId: string) => void;
+  onConversationCreated: (conversationId: string | null) => void;
   onClearSelectedFiles: () => void;
 }
 
@@ -58,18 +58,22 @@ export function useChat({
       if (settings.mode === "default") {
         // Default mode: server proxy for LLM; storage in IndexedDB
         let currentConvId = conversationId;
+        let isNewConversation = false;
+
         if (!currentConvId) {
           const title = input.trim().length > 50
             ? input.trim().substring(0, 47) + "..."
             : input.trim();
           const newConv = await indexedDB.createConversation(title);
           currentConvId = newConv.id;
+          isNewConversation = true;
           if (onConversationCreated) {
             onConversationCreated(currentConvId);
           }
         }
 
-        await indexedDB.addMessage(currentConvId, "user", input.trim());
+        try {
+          await indexedDB.addMessage(currentConvId, "user", input.trim());
 
         // Build messages for API: if we have file IDs, last message content = content blocks (from IndexedDB files)
         let messagesToSend: Message[] = updatedMessages;
@@ -105,18 +109,32 @@ export function useChat({
               });
             }
           }
+          // Server expects string content (parses JSON internally if needed)
           messagesToSend = [
             ...updatedMessages.slice(0, -1),
-            { ...updatedMessages[updatedMessages.length - 1], content: contentBlocks as unknown as string },
+            {
+              ...updatedMessages[updatedMessages.length - 1],
+              content: typeof contentBlocks === 'string' ? contentBlocks : JSON.stringify(contentBlocks)
+            },
           ];
         }
 
-        console.log("[Chat] Sending message — mode: default, model: Claude Haiku (server)");
-        const data = await api.sendChatMessage(messagesToSend, currentConvId);
-        const assistantContent = data.content;
-        setMessages([...updatedMessages, { id: crypto.randomUUID(), role: "assistant", content: assistantContent }]);
+          console.log("[Chat] Sending message — mode: default, model: Claude Haiku (server)");
+          const data = await api.sendChatMessage(messagesToSend, currentConvId);
+          const assistantContent = data.content;
+          setMessages([...updatedMessages, { id: crypto.randomUUID(), role: "assistant", content: assistantContent }]);
 
-        await indexedDB.addMessage(currentConvId, "assistant", assistantContent);
+          await indexedDB.addMessage(currentConvId, "assistant", assistantContent);
+        } catch (error) {
+          // Rollback: delete conversation if just created
+          if (isNewConversation && currentConvId) {
+            await indexedDB.deleteConversation(currentConvId).catch(console.error);
+            if (onConversationCreated) {
+              onConversationCreated(null);
+            }
+          }
+          throw error; // Re-throw to outer catch
+        }
       } else {
         // Custom mode: use client-side LLM provider
         if (!settings.provider || !settings.model || !settings.apiKey) {
@@ -157,35 +175,49 @@ export function useChat({
 
         // Get or create conversation
         let currentConvId = conversationId;
+        let isNewConversation = false;
+
         if (!currentConvId) {
-          const title = input.trim().length > 50 
+          const title = input.trim().length > 50
             ? input.trim().substring(0, 47) + '...'
             : input.trim();
           const newConv = await indexedDB.createConversation(title);
           currentConvId = newConv.id;
+          isNewConversation = true;
           if (onConversationCreated) {
             onConversationCreated(currentConvId);
           }
         }
 
-        // Save user message to IndexedDB
-        await indexedDB.addMessage(currentConvId, 'user', input.trim());
+        try {
+          // Save user message to IndexedDB
+          await indexedDB.addMessage(currentConvId, 'user', input.trim());
 
-        // Call LLM provider
-        const response = await provider.sendMessage(
-          updatedMessages,
-          SYSTEM_PROMPT,
-          fileAttachments
-        );
+          // Call LLM provider
+          const response = await provider.sendMessage(
+            updatedMessages,
+            SYSTEM_PROMPT,
+            fileAttachments
+          );
 
-        // Save assistant message to IndexedDB
-        await indexedDB.addMessage(currentConvId, 'assistant', response);
+          // Save assistant message to IndexedDB
+          await indexedDB.addMessage(currentConvId, 'assistant', response);
 
-        setMessages([...updatedMessages, { 
-          id: generateUUID(), 
-          role: 'assistant', 
-          content: response 
-        }]);
+          setMessages([...updatedMessages, {
+            id: generateUUID(),
+            role: 'assistant',
+            content: response
+          }]);
+        } catch (error) {
+          // Rollback: delete conversation if just created
+          if (isNewConversation && currentConvId) {
+            await indexedDB.deleteConversation(currentConvId).catch(console.error);
+            if (onConversationCreated) {
+              onConversationCreated(null);
+            }
+          }
+          throw error; // Re-throw to outer catch
+        }
       }
     } catch (error) {
       console.error('Error:', error);

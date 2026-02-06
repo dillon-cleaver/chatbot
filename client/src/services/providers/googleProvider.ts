@@ -103,12 +103,13 @@ export class GoogleProvider implements LLMProvider {
         requestBody.contents = [...conversationHistory, ...requestBody.contents];
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
-      
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`;
+
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-Goog-Api-Key": this.apiKey,  // Move API key to header for security
         },
         body: JSON.stringify(requestBody),
       });
@@ -140,12 +141,13 @@ export class GoogleProvider implements LLMProvider {
 
   async testConnection(): Promise<boolean> {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
-      
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`;
+
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-Goog-Api-Key": this.apiKey,  // Move API key to header for security
         },
         body: JSON.stringify({
           contents: [
@@ -158,7 +160,8 @@ export class GoogleProvider implements LLMProvider {
       });
 
       return response.ok;
-    } catch {
+    } catch (error) {
+      console.error("Google connection test failed:", error);
       return false;
     }
   }

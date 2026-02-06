@@ -3,6 +3,7 @@ import type { Settings } from "../types/settings";
 import { AnthropicProvider } from "./providers/anthropicProvider";
 import { OpenAIProvider } from "./providers/openaiProvider";
 import { GoogleProvider } from "./providers/googleProvider";
+import { ValidationError } from "../utils/errors";
 
 export interface FileAttachment {
   type: "image" | "document" | "text";
@@ -22,8 +23,8 @@ export interface LLMProvider {
 
 export class LLMServiceFactory {
   static create(settings: Settings, apiKey: string): LLMProvider {
-    if (!settings.provider || !settings.model) {
-      throw new Error("Provider and model must be specified for custom mode");
+    if (!settings.provider || !settings.model || !apiKey?.trim()) {
+      throw new ValidationError("Provider, model, and API key required");
     }
 
     switch (settings.provider) {

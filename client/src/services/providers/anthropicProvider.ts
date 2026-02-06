@@ -7,6 +7,9 @@ export class AnthropicProvider implements LLMProvider {
   private model: string;
 
   constructor(apiKey: string, model: string) {
+    // Required for browser usage - acknowledges API key visible in DevTools
+    // Mitigated by localStorage encryption (see utils/crypto.ts)
+    // For maximum security, use default server mode instead
     this.client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
     this.model = model;
   }
@@ -100,7 +103,8 @@ export class AnthropicProvider implements LLMProvider {
         messages: [{ role: "user", content: "test" }],
       });
       return true;
-    } catch {
+    } catch (error) {
+      console.error("Anthropic connection test failed:", error);
       return false;
     }
   }

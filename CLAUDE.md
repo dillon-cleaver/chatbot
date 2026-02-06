@@ -61,6 +61,23 @@ pnpm start            # Run server only (port 3000)
 - `prefers-reduced-motion` support
 - All interactive elements have visible focus indicators
 
+## Security
+
+### API Key Storage
+Custom mode API keys are encrypted using Web Crypto API (AES-GCM) before storage in localStorage. The encryption key is derived from a device fingerprint. See [SECURITY.md](SECURITY.md) for full details.
+
+**Important**: Browser-based encryption provides limited security. For sensitive use cases:
+- Use default server mode (keys never leave server)
+- Clear browser data when using shared computers
+- Avoid custom mode on untrusted devices
+
+### Network Security
+- Google Provider uses header-based authentication (no keys in URLs)
+- PDF.js uses local workers (no CDN dependencies)
+- All file processing happens locally
+
+See [SECURITY.md](SECURITY.md) for complete security documentation.
+
 ## Recent Changes
 
 ### Message IDs (2024-02)

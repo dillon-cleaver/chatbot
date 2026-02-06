@@ -23,7 +23,7 @@ importers:
         specifier: ^0.563.0
         version: 0.563.0(react@19.2.3)
       mammoth:
-        specifier: ^1.6.0
+        specifier: ^1.11.0
         version: 1.11.0
       pdfjs-dist:
         specifier: ^4.0.0

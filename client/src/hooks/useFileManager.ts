@@ -194,8 +194,15 @@ export function useFileManager({
     try {
       const { blob } = await indexedDB.getFileBlob(fileId);
       const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      const newWindow = window.open(url, "_blank");
+
+      // Revoke after 5 minutes (increased from 1 minute)
+      setTimeout(() => URL.revokeObjectURL(url), 5 * 60 * 1000);
+
+      // Also revoke when the new window closes
+      if (newWindow) {
+        newWindow.addEventListener('beforeunload', () => URL.revokeObjectURL(url));
+      }
     } catch (error) {
       console.error("Failed to open file:", error);
     }

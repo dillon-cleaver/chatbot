@@ -199,6 +199,16 @@
   margin: 0;
 }
 
+.securityWarning {
+  font-family: "Roboto", sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+  padding: 0.5rem;
+  background-color: rgba(255, 165, 0, 0.1);
+  border-left: 3px solid #ffa500;
+}
+
 .testResult {
   display: flex;
   align-items: center;
@@ -225,7 +235,16 @@
 
 .testButtonContainer {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.testInfo {
+  font-family: "Roboto", sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 /* Footer uses Modal's built-in footer prop — these overrides

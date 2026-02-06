@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
@@ -14,17 +15,30 @@ import {
 
 export interface UseSettingsReturn {
   settings: Settings;
-  updateSettings: (updates: Partial<Settings>) => void;
-  resetToDefault: () => void;
+  updateSettings: (updates: Partial<Settings>) => Promise<void>;
+  resetToDefault: () => Promise<void>;
   isCustomMode: boolean;
+  isLoading: boolean;
 }
 
 const SettingsContext = createContext<UseSettingsReturn | null>(null);
 
 export function SettingsProvider({ children }: { children: ReactNode }): React.JSX.Element {
-  const [settings, setSettings] = useState<Settings>(() => loadSettings());
+  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const updateSettings = useCallback((updates: Partial<Settings>): void => {
+  // Load settings on mount
+  useEffect(() => {
+    loadSettings()
+      .then(setSettings)
+      .catch((error) => {
+        console.error("Failed to load settings:", error);
+        setSettings(DEFAULT_SETTINGS);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const updateSettings = useCallback(async (updates: Partial<Settings>): Promise<void> => {
     setSettings((prev) => {
       const newSettings: Settings = {
         ...prev,
@@ -37,20 +51,27 @@ export function SettingsProvider({ children }: { children: ReactNode }): React.J
         newSettings.apiKey = undefined;
       }
 
+      // Validate BEFORE saving
       if (newSettings.mode === "custom") {
         if (!newSettings.provider || !newSettings.model || !newSettings.apiKey) {
-          return prev;
+          console.warn('Incomplete custom settings - not saved');
+          return prev; // Reject update
         }
       }
 
-      saveSettings(newSettings);
+      // Save asynchronously (don't block UI)
+      saveSettings(newSettings).catch((error) => {
+        console.error("Failed to save settings:", error);
+      });
       return newSettings;
     });
   }, []);
 
-  const resetToDefault = useCallback((): void => {
+  const resetToDefault = useCallback(async (): Promise<void> => {
     setSettings(DEFAULT_SETTINGS);
-    saveSettings(DEFAULT_SETTINGS);
+    await saveSettings(DEFAULT_SETTINGS).catch((error) => {
+      console.error("Failed to save default settings:", error);
+    });
   }, []);
 
   const value: UseSettingsReturn = {
@@ -58,6 +79,7 @@ export function SettingsProvider({ children }: { children: ReactNode }): React.J
     updateSettings,
     resetToDefault,
     isCustomMode: settings.mode === "custom",
+    isLoading,
   };
 
   return React.createElement(SettingsContext.Provider, { value }, children);

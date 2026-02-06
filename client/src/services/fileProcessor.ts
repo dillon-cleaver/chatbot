@@ -9,16 +9,12 @@ let csvParse: typeof import("csv-parse/sync") | null = null;
 async function getPdfjsLib() {
   if (!pdfjsLib) {
     pdfjsLib = await import("pdfjs-dist");
-    // Configure PDF.js worker
-    try {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-    } catch {
-      // Fallback to local worker if CDN fails
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-        "pdfjs-dist/build/pdf.worker.min.js",
-        import.meta.url
-      ).toString();
-    }
+    // Configure PDF.js worker - use local worker for security
+    // Local worker is bundled by Vite, avoiding CDN MITM risks
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      "pdfjs-dist/build/pdf.worker.min.js",
+      import.meta.url
+    ).toString();
   }
   return pdfjsLib;
 }

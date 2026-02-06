@@ -45,15 +45,35 @@ export const DEFAULT_SETTINGS: Settings = {
   mode: "default",
 };
 
+import { encryptApiKey, decryptApiKey, isEncrypted } from "../utils/crypto";
+
 const SETTINGS_STORAGE_KEY = "chatbot-settings";
 
-export function loadSettings(): Settings {
+export async function loadSettings(): Promise<Settings> {
   try {
     const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored) as Settings;
       // Validate settings structure
       if (parsed.mode === "default" || parsed.mode === "custom") {
+        // Decrypt API key if present and encrypted
+        if (parsed.apiKey) {
+          try {
+            if (isEncrypted(parsed.apiKey)) {
+              parsed.apiKey = await decryptApiKey(parsed.apiKey);
+            } else {
+              // Migration: encrypt unencrypted keys
+              console.warn("Migrating unencrypted API key to encrypted storage");
+              const encrypted = await encryptApiKey(parsed.apiKey);
+              const migratedSettings = { ...parsed, apiKey: encrypted };
+              localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(migratedSettings));
+              // Return with decrypted key for use
+            }
+          } catch (error) {
+            console.error("Failed to decrypt API key, falling back to plain text:", error);
+            // Keep the value as-is if decryption fails
+          }
+        }
         return parsed;
       }
     }
@@ -63,9 +83,21 @@ export function loadSettings(): Settings {
   return DEFAULT_SETTINGS;
 }
 
-export function saveSettings(settings: Settings): void {
+export async function saveSettings(settings: Settings): Promise<void> {
   try {
-    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    const settingsToSave = { ...settings };
+
+    // Encrypt API key before saving
+    if (settingsToSave.apiKey) {
+      try {
+        settingsToSave.apiKey = await encryptApiKey(settingsToSave.apiKey);
+      } catch (error) {
+        console.error("Failed to encrypt API key, saving as plain text:", error);
+        // Fallback to plain text if encryption fails
+      }
+    }
+
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsToSave));
   } catch (error) {
     console.error("Failed to save settings:", error);
   }

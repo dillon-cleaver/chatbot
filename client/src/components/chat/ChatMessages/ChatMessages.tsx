@@ -45,6 +45,8 @@ export function ChatMessages({
           <div
             className={`${styles.message} ${styles.assistantMessage}`}
             role="status"
+            aria-live="polite"
+            aria-atomic="true"
           >
             <div className={styles.messageContent}>
               <span className={styles.loadingDots} aria-hidden="true">

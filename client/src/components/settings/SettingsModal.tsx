@@ -220,7 +220,7 @@ export function SettingsModal({
       const activeEl = document.activeElement;
 
       // Find current index
-      let currentIdx = refs.findIndex((r) => r.current === activeEl);
+      const currentIdx = refs.findIndex((r) => r.current === activeEl);
       if (currentIdx === -1) return;
 
       // Enter on buttons should activate normally (don't intercept)
@@ -319,7 +319,6 @@ export function SettingsModal({
         </div>
       }
     >
-      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div className={styles.settingsContent} onKeyDown={handleArrowNav}>
         <div className={styles.modeSelection}>
           <label className={styles.label}>Mode</label>
@@ -431,6 +430,10 @@ export function SettingsModal({
                   Last 4 characters: {apiKey.slice(-4)}
                 </p>
               )}
+              <p className={(styles as Record<string, string>).securityWarning}>
+                API keys are encrypted but stored in your browser. For maximum
+                security, use default server mode.
+              </p>
             </div>
 
             {testResult && (
@@ -450,6 +453,9 @@ export function SettingsModal({
             )}
 
             <div className={styles.testButtonContainer}>
+              <p className={(styles as Record<string, string>).testInfo}>
+                Connection test sends a minimal request to verify your API key
+              </p>
               <Button
                 ref={testButtonRef}
                 variant="chunky"
