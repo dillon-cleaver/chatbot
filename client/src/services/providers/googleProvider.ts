@@ -109,7 +109,7 @@ export class GoogleProvider implements LLMProvider {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Goog-Api-Key": this.apiKey,  // Move API key to header for security
+          "x-goog-api-key": this.apiKey,  // Google API requires lowercase header name
         },
         body: JSON.stringify(requestBody),
       });
@@ -147,7 +147,7 @@ export class GoogleProvider implements LLMProvider {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Goog-Api-Key": this.apiKey,  // Move API key to header for security
+          "x-goog-api-key": this.apiKey,  // Google API requires lowercase header name
         },
         body: JSON.stringify({
           contents: [
