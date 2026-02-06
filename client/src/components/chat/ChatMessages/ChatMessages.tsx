@@ -4,10 +4,10 @@ import { MessageItem } from "../MessageItem/MessageItem";
 import styles from "./ChatMessages.module.css";
 
 const LOADING_MESSAGES = [
-  "PROCESSING...",
-  "LOADING...",
-  "CALCULATING...",
-  "HOLD ON...",
+  "Processing...",
+  "Thinking...",
+  "Calculating...",
+  "One moment...",
 ];
 
 export interface ChatMessagesProps {
@@ -46,7 +46,14 @@ export function ChatMessages({
             className={`${styles.message} ${styles.assistantMessage}`}
             role="status"
           >
-            <div className={styles.messageContent}>{loadingMessage}</div>
+            <div className={styles.messageContent}>
+              <span className={styles.loadingDots} aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
+              {loadingMessage}
+            </div>
           </div>
         )}
         <div ref={messagesEndRef} />
