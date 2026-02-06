@@ -100,6 +100,7 @@ export class AnthropicProvider implements LLMProvider {
       await this.client.messages.create({
         model: this.model,
         max_tokens: 10,
+        system: "",
         messages: [{ role: "user", content: "test" }],
       });
       return true;

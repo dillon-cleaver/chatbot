@@ -115,6 +115,7 @@ export class OpenAIProvider implements LLMProvider {
 
   async testConnection(): Promise<boolean> {
     try {
+      const isGpt5 = this.model.startsWith("gpt-5");
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -125,7 +126,10 @@ export class OpenAIProvider implements LLMProvider {
           },
           body: JSON.stringify({
             model: this.model,
-            messages: [{ role: "user", content: "test" }],
+            messages: [
+              { role: isGpt5 ? "developer" : "system", content: "" },
+              { role: "user", content: "test" },
+            ],
             max_completion_tokens: 10,
           }),
         },

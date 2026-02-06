@@ -152,6 +152,9 @@ export class GoogleProvider implements LLMProvider {
           "x-goog-api-key": this.apiKey,  // Google API requires lowercase header name
         },
         body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: "" }],
+          },
           contents: [
             {
               role: "user",
