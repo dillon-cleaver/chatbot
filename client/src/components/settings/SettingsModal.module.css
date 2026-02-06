@@ -1,0 +1,260 @@
+.settingsContent {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.modeSelection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.label {
+  font-family: "Roboto", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/*
+ * Radio option rows — reuses the same neobrutalist card pattern as FileItem.
+ * The radio input itself mirrors .fileCheckbox (appearance:none, thick border,
+ * box-shadow, checkmark pseudo-element).
+ */
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  font-family: "Roboto", sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  border: var(--border-width) solid var(--border-color);
+  background-color: var(--message-bg);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
+}
+
+.radioLabel.selected {
+  background-color: var(--button-bg);
+  border-color: var(--border-color);
+  color: #ffffff;
+}
+
+/* Custom radio — matches .fileCheckbox exactly */
+.radioLabel input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: var(--border-width) solid var(--border-color);
+  background-color: var(--bg-secondary);
+  box-shadow: 2px 2px 0px var(--shadow-color);
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+  position: relative;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .radioLabel input[type="radio"]:hover {
+    transform: scale(1.2);
+    background-color: #6c5ce7;
+  }
+
+  .radioLabel input[type="radio"]:hover::after {
+    content: "\2713";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.radioLabel input[type="radio"]:checked {
+  background-color: #6c5ce7;
+}
+
+.radioLabel input[type="radio"]:checked::after {
+  content: "\2713";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.radioLabel input[type="radio"]:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Shared input & select styles — neobrutalist */
+.select,
+.input {
+  font-family: "Roboto", sans-serif;
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border: var(--border-width) solid var(--border-color);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
+  transition: border-color var(--transition-fast);
+}
+
+.select:focus,
+.input:focus {
+  outline: none;
+  position: relative;
+  z-index: 1;
+  border-color: var(--focus-color);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
+}
+
+.select:disabled,
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Custom select arrow */
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.apiKeyContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  flex: 1;
+  padding-right: 3rem;
+}
+
+.toggleButton {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggleButton:hover {
+  color: var(--text-primary);
+}
+
+.toggleButton:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-color);
+  outline-offset: var(--focus-outline-offset);
+}
+
+.apiKeyHint {
+  font-family: "Roboto", sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.testResult {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  font-family: "Roboto", sans-serif;
+  font-size: 0.9rem;
+  border: var(--border-width) solid;
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
+}
+
+.testSuccess {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+  border-color: #4caf50;
+}
+
+.testError {
+  background-color: rgba(244, 67, 54, 0.15);
+  color: #f44336;
+  border-color: #f44336;
+}
+
+.testButtonContainer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Footer uses Modal's built-in footer prop — these overrides
+   arrange Cancel / Save inside the slot the Modal provides. */
+.footerButtons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .settingsContent {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .radioLabel input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+  }
+
+  .radioLabel input[type="radio"]:checked::after {
+    font-size: 14px;
+  }
+}
+
+/* Light theme: dark chevron for selects */
+:global([data-theme="light"]) .select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231a1a1a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
