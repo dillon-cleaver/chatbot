@@ -40,20 +40,14 @@ export function FileAttachModal({
   onCommitSelection,
   fileInputRef,
 }: FileAttachModalProps): React.JSX.Element {
-  // Local pending selection state
-  const [pendingFileIds, setPendingFileIds] =
-    useState<string[]>(selectedFileIds);
+  const [pendingFileIds, setPendingFileIds] = useState<string[]>(selectedFileIds);
   const [showLimitWarning, setShowLimitWarning] = useState<boolean>(false);
 
-  // Refs for keyboard navigation between sections
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const uploadSectionRef = useRef<UploadSectionRef>(null);
   const fileChipsRef = useRef<FileChipsDisplayRef>(null);
   const fileListRef = useRef<FileListRef>(null);
 
-  // Initialize pending state when modal opens
-  // Note: We only sync when modal opens, not when selectedFileIds changes externally.
-  // This implements the "pending state" pattern where changes are isolated until commit.
   useEffect(() => {
     if (isOpen) {
       setPendingFileIds(selectedFileIds);
@@ -61,13 +55,11 @@ export function FileAttachModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  // Local toggle handler for pending selections
   const handleTogglePending = (fileId: string): void => {
     setPendingFileIds((prev) => {
       if (prev.includes(fileId)) {
         return prev.filter((id) => id !== fileId);
       } else {
-        // Prevent adding more than MAX_FILES_PER_MESSAGE
         if (prev.length >= MAX_FILES_PER_MESSAGE) {
           setShowLimitWarning(true);
           return prev;
@@ -77,20 +69,15 @@ export function FileAttachModal({
     });
   };
 
-  // Clear pending selections
   const handleClearPending = (): void => {
     setPendingFileIds([]);
   };
 
-  // Commit pending selections and close
   const handleClose = (): void => {
     onCommitSelection(pendingFileIds);
     onClose();
   };
 
-  // Keyboard navigation handlers
-
-  // Navigate from close button down to upload section
   const handleCloseButtonKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -98,17 +85,14 @@ export function FileAttachModal({
     }
   }, []);
 
-  // Navigate from upload section up to close button
   const handleNavigateToCloseButton = useCallback(() => {
     closeButtonRef.current?.focus();
   }, []);
 
-  // Navigate down from selection bar to file list
   const handleNavigateToList = useCallback(() => {
     fileListRef.current?.focusFirstItem();
   }, []);
 
-  // Navigate up from file list - go to selection bar if files selected, otherwise to collapsible
   const handleNavigateUpFromList = useCallback(() => {
     if (pendingFileIds.length > 0) {
       fileChipsRef.current?.focusAttachButton();
@@ -117,7 +101,6 @@ export function FileAttachModal({
     }
   }, [pendingFileIds.length]);
 
-  // Navigate down from upload section to file list (or selection bar if files selected)
   const handleNavigateFromUploadToList = useCallback(() => {
     if (pendingFileIds.length > 0) {
       fileChipsRef.current?.focusAttachButton();
@@ -126,7 +109,6 @@ export function FileAttachModal({
     }
   }, [pendingFileIds.length, files.length]);
 
-  // Get selected file objects for display
   const selectedFiles = useMemo(
     () => files.filter((f) => pendingFileIds.includes(f.id)),
     [files, pendingFileIds],
@@ -184,6 +166,9 @@ export function FileAttachModal({
               onDeleteFile={onDeleteFile}
               onNavigateUp={handleNavigateUpFromList}
             />
+            <div className={styles.localFilesHint}>
+              <p>Files are stored and processed locally; only message content is sent to the server.</p>
+            </div>
           </div>
         </div>
       </div>

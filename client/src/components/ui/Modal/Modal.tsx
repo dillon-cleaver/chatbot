@@ -52,12 +52,13 @@ export function Modal({
     }
   }, [closeButtonRef, isOpen]);
 
-  // Handle Escape key
+  // Handle Escape key (stopPropagation prevents duplicate handling by global shortcuts)
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        e.stopPropagation();
         onClose();
       }
     };

@@ -16,6 +16,9 @@ import { ChatHistoryModal } from "../../history/ChatHistoryModal/ChatHistoryModa
 import { ConfirmDialog } from "../../ui/ConfirmDialog/ConfirmDialog";
 import { KeyboardShortcutsModal } from "../../ui/KeyboardShortcutsModal/KeyboardShortcutsModal";
 import { Spinner } from "../../ui/Spinner/Spinner";
+import { SettingsModal } from "../../settings/SettingsModal";
+import { useSettings } from "../../../hooks/useSettings";
+import { SUPPORTED_MODELS } from "../../../types/settings";
 
 export function ChatContent(): React.JSX.Element {
   const { conversationId } = useParams<{ conversationId?: string }>();
@@ -25,6 +28,8 @@ export function ChatContent(): React.JSX.Element {
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] =
     useState<boolean>(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] =
+    useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatInputRef = useRef<ChatInputRef>(null);
@@ -34,6 +39,7 @@ export function ChatContent(): React.JSX.Element {
   // Initialize hooks
   const { theme, toggleTheme } = useTheme();
   const announce = useAnnouncer();
+  const { settings } = useSettings();
 
   const fileManager = useFileManager({
     conversationId: currentConversationId,
@@ -63,7 +69,6 @@ export function ChatContent(): React.JSX.Element {
     [fileManager.files, fileManager.selectedFileIds],
   );
 
-  // Initialize chat with conversation ID from App state
   const chat = useChat({
     conversationId: currentConversationId,
     selectedFileIds: fileManager.selectedFileIds,
@@ -192,6 +197,7 @@ export function ChatContent(): React.JSX.Element {
       onSend: handleSendMessage,
       onAttach: fileManager.openModal,
       onHistory: conversations.openHistoryModal,
+      onSettings: () => setIsSettingsModalOpen(true),
       onEscape: handleEscape,
       onHelp: () => setIsHelpModalOpen(true),
     },
@@ -228,12 +234,20 @@ export function ChatContent(): React.JSX.Element {
         onHistoryClick={conversations.openHistoryModal}
         onTitleClick={() => navigate("/", { replace: true })}
         onHelpClick={() => setIsHelpModalOpen(true)}
+        onSettingsClick={() => setIsSettingsModalOpen(true)}
         theme={theme}
         onThemeToggle={toggleTheme}
         onNavigateDown={handleNavigateToInput}
       />
 
       <main id="main-content" className={styles.mainContent}>
+        <div className={styles.modeIndicator} role="status" aria-live="polite">
+          {settings.mode === "default"
+            ? "Using Claude Haiku (server)"
+            : settings.model
+              ? `Using ${SUPPORTED_MODELS.find((m) => m.id === settings.model)?.name || settings.model}`
+              : "Using custom API key — select model in Settings"}
+        </div>
         <ChatContainer
           isEmpty={isEmpty}
           emptyContent={
@@ -272,6 +286,7 @@ export function ChatContent(): React.JSX.Element {
                 messages={chat.messages}
                 isLoading={chat.isLoading}
                 messagesEndRef={messagesEndRef}
+                onViewFile={fileManager.viewFile}
               />
               <ChatInput
                 ref={chatInputRef}
@@ -330,6 +345,15 @@ export function ChatContent(): React.JSX.Element {
       <KeyboardShortcutsModal
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => {
+          setIsSettingsModalOpen(false);
+          // Refresh conversations when settings change
+          conversations.refreshConversations();
+        }}
       />
     </div>
   );

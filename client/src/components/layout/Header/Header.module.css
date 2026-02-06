@@ -59,6 +59,7 @@
 
 .helpButton,
 .historyButton,
+.settingsButton,
 .themeToggle {
   display: flex;
   align-items: center;
@@ -80,6 +81,7 @@
 
 .helpButton:hover,
 .historyButton:hover,
+.settingsButton:hover,
 .themeToggle:hover {
   transform: var(--hover-translate);
   box-shadow: var(--hover-shadow-offset) var(--hover-shadow-offset) 0px
@@ -88,6 +90,7 @@
 
 .helpButton:active,
 .historyButton:active,
+.settingsButton:active,
 .themeToggle:active {
   transform: var(--active-translate);
   box-shadow: var(--active-shadow-offset) var(--active-shadow-offset) 0px
@@ -96,6 +99,7 @@
 
 .helpButton:focus-visible,
 .historyButton:focus-visible,
+.settingsButton:focus-visible,
 .themeToggle:focus-visible {
   outline: var(--focus-outline-width) solid var(--focus-color);
   outline-offset: var(--focus-outline-offset);
@@ -125,6 +129,7 @@
 
   .helpButton,
   .historyButton,
+  .settingsButton,
   .themeToggle {
     font-size: 1.25rem; /* Reduce from 1.5rem */
     padding: 0.625rem; /* Equal padding for centered icons */
