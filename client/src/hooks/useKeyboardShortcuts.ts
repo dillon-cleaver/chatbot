@@ -71,7 +71,7 @@ export function useKeyboardShortcuts({
       }
 
       // Shift + Ctrl/Cmd + O: New chat
-      if (isMod && e.shiftKey && e.key === "O") {
+      if (isMod && e.shiftKey && e.key.toLowerCase() === "o") {
         e.preventDefault();
         handlers.onNewChat?.();
         return;
