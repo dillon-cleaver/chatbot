@@ -5,16 +5,17 @@ let mammoth: typeof import("mammoth") | null = null;
 let XLSX: typeof import("xlsx") | null = null;
 let csvParse: typeof import("csv-parse/sync") | null = null;
 
+// Import worker URL at top level so Vite can process it
+// @ts-ignore - Vite special syntax for worker imports
+import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+
 // Lazy load PDF.js
 async function getPdfjsLib() {
   if (!pdfjsLib) {
     pdfjsLib = await import("pdfjs-dist");
-    // Configure PDF.js worker - use local worker for security
-    // Local worker is bundled by Vite, avoiding CDN MITM risks
-    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-      "pdfjs-dist/build/pdf.worker.min.js",
-      import.meta.url
-    ).toString();
+    // Configure PDF.js worker - use local worker bundled by Vite
+    // The ?url import tells Vite to emit the file and give us its URL
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
   }
   return pdfjsLib;
 }
