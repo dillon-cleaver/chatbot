@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
 import { Modal } from "../ui/Modal/Modal";
 import { Button } from "../ui/Button";
+import { CollapsibleSection } from "../ui/CollapsibleSection/CollapsibleSection";
 import { useSettings } from "../../hooks/useSettings";
 import { SUPPORTED_MODELS, type Provider } from "../../types/settings";
 import { LLMServiceFactory } from "../../services/llmService";
@@ -434,6 +435,57 @@ export function SettingsModal({
                 API keys are encrypted but stored in your browser. For maximum
                 security, use default server mode.
               </p>
+
+              <CollapsibleSection
+                label="About API Key Security"
+                defaultOpen={false}
+                className={styles.securityInfo}
+              >
+                <p>
+                  <strong>How encryption works:</strong> API keys are encrypted
+                  using AES-GCM before storage in localStorage. The encryption
+                  key is derived from a device ID stored in your browser.
+                </p>
+                <p>
+                  <strong>What this protects against:</strong>
+                </p>
+                <ul>
+                  <li>Casual snooping (plain text not visible in DevTools)</li>
+                  <li>
+                    Simple data breaches (exported localStorage contains
+                    encrypted blobs)
+                  </li>
+                </ul>
+                <p>
+                  <strong>What this doesn't protect against:</strong>
+                </p>
+                <ul>
+                  <li>
+                    XSS attacks (malicious JavaScript can access encryption
+                    logic)
+                  </li>
+                  <li>
+                    Malicious browser extensions (extensions can read
+                    localStorage)
+                  </li>
+                  <li>
+                    Physical access (anyone with access to your computer can
+                    open DevTools)
+                  </li>
+                </ul>
+                <p>
+                  <strong>Realistic risk for casual use:</strong> For personal
+                  projects, the risk is low. XSS requires a code vulnerability,
+                  malicious extensions require you to install them, and physical
+                  access requires hands-on access to your unlocked computer. The
+                  encryption adds a reasonable layer of protection.
+                </p>
+                <p>
+                  <strong>For maximum security:</strong> Use default mode where
+                  your API key stays on the server and never touches the
+                  browser.
+                </p>
+              </CollapsibleSection>
             </div>
 
             {testResult && (
