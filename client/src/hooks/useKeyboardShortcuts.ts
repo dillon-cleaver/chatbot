@@ -4,6 +4,7 @@ export interface KeyboardShortcutHandlers {
   onSend?: () => void;
   onAttach?: () => void;
   onHistory?: () => void;
+  onSettings?: () => void;
   onEscape?: () => void;
   onHelp?: () => void;
 }
@@ -58,6 +59,13 @@ export function useKeyboardShortcuts({
         return;
       }
 
+      // Ctrl/Cmd + S: Open settings modal
+      if (isMod && e.key === "s") {
+        e.preventDefault();
+        handlers.onSettings?.();
+        return;
+      }
+
       // Escape: Close modals / return focus
       if (e.key === "Escape") {
         handlers.onEscape?.();
@@ -94,7 +102,7 @@ export const KEYBOARD_SHORTCUTS = [
   },
   {
     keys: ["Ctrl/⌘", "Enter"],
-    description: "Send message (from anywhere)",
+    description: "Send message (even without input focus)",
   },
   {
     keys: ["Ctrl/⌘", "U"],
@@ -103,6 +111,10 @@ export const KEYBOARD_SHORTCUTS = [
   {
     keys: ["Ctrl/⌘", "Y"],
     description: "Open chat history",
+  },
+  {
+    keys: ["Ctrl/⌘", "S"],
+    description: "Open settings",
   },
   {
     keys: ["Escape"],
