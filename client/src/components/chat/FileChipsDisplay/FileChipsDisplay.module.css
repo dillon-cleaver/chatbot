@@ -24,7 +24,7 @@
   gap: 1rem;
   padding: 0.5rem 0.75rem;
   background-color: var(--message-bg);
-  border: 3px solid #6c5ce7;
+  border: var(--border-width) solid var(--border-color);
   box-shadow: 4px 4px 0px var(--shadow-color);
 }
 

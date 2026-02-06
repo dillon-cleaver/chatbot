@@ -1,7 +1,7 @@
 .inputContainer {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 12px;
   padding: 1rem 0;
 }
 
@@ -12,7 +12,7 @@
 
 .inputRow {
   display: flex;
-  gap: 0.5rem;
+  gap: 12px;
   align-items: flex-end;
 }
 

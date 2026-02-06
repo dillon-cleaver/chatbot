@@ -12,6 +12,7 @@
 const ALGORITHM = "AES-GCM";
 const IV_LENGTH = 12; // 96 bits recommended for AES-GCM
 const DEVICE_ID_KEY = "chatbot-device-id";
+const ENCRYPTION_PREFIX = "enc_v1:"; // Marker to identify encrypted values
 
 /**
  * Get or create a stable device ID for this browser
@@ -63,7 +64,7 @@ async function deriveKey(): Promise<CryptoKey> {
 /**
  * Encrypt an API key
  * @param apiKey - Plain text API key
- * @returns Base64-encoded encrypted data (format: iv:ciphertext)
+ * @returns Prefixed base64-encoded encrypted data (format: enc_v1:base64data)
  */
 export async function encryptApiKey(apiKey: string): Promise<string> {
   try {
@@ -86,7 +87,8 @@ export async function encryptApiKey(apiKey: string): Promise<string> {
     combined.set(iv, 0);
     combined.set(new Uint8Array(ciphertext), iv.length);
 
-    return btoa(String.fromCharCode(...combined));
+    const base64 = btoa(String.fromCharCode(...combined));
+    return ENCRYPTION_PREFIX + base64;
   } catch (error) {
     console.error("Encryption failed:", error);
     throw new Error("Failed to encrypt API key");
@@ -95,15 +97,20 @@ export async function encryptApiKey(apiKey: string): Promise<string> {
 
 /**
  * Decrypt an encrypted API key
- * @param encrypted - Base64-encoded encrypted data
+ * @param encrypted - Prefixed base64-encoded encrypted data (format: enc_v1:base64data)
  * @returns Plain text API key
  */
 export async function decryptApiKey(encrypted: string): Promise<string> {
   try {
     const key = await deriveKey();
 
+    // Remove encryption prefix if present
+    const base64Data = encrypted.startsWith(ENCRYPTION_PREFIX)
+      ? encrypted.slice(ENCRYPTION_PREFIX.length)
+      : encrypted;
+
     // Decode from base64
-    const combined = Uint8Array.from(atob(encrypted), c => c.charCodeAt(0));
+    const combined = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
 
     // Extract IV and ciphertext
     const iv = combined.slice(0, IV_LENGTH);
@@ -125,14 +132,8 @@ export async function decryptApiKey(encrypted: string): Promise<string> {
 }
 
 /**
- * Check if a string appears to be encrypted (base64 format)
+ * Check if a string appears to be encrypted (has encryption prefix)
  */
 export function isEncrypted(value: string): boolean {
-  // Encrypted values are base64 and should be longer than typical API keys
-  // Also check if it's valid base64
-  try {
-    return value.length > 100 && /^[A-Za-z0-9+/]+=*$/.test(value);
-  } catch {
-    return false;
-  }
+  return value.startsWith(ENCRYPTION_PREFIX);
 }

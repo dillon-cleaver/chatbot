@@ -94,13 +94,14 @@ export function ChatContent(): React.JSX.Element {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat.messages]);
 
-  // Auto-scroll when modal closes to accommodate file selection UI
+  // Auto-scroll and auto-focus when modal closes to accommodate file selection UI
   useEffect(() => {
     // Only scroll when modal closes (transitions from true to false)
     if (!fileManager.isModalOpen && fileManager.selectedFileIds.length > 0) {
-      // Delay to let modal close animation complete, then smooth scroll
+      // Delay to let modal close animation complete, then smooth scroll and focus input
       const timer = setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        chatInputRef.current?.focus();
       }, 150);
       return () => clearTimeout(timer);
     }
