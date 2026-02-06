@@ -442,48 +442,28 @@ export function SettingsModal({
                 className={styles.securityInfo}
               >
                 <p>
-                  <strong>How encryption works:</strong> API keys are encrypted
-                  using AES-GCM before storage in localStorage. The encryption
-                  key is derived from a device ID stored in your browser.
+                  <strong>How it works:</strong> API keys are encrypted using
+                  AES-GCM before storage in localStorage. The encryption key is
+                  derived from a device ID stored in your browser.
                 </p>
                 <p>
-                  <strong>What this protects against:</strong>
-                </p>
-                <ul>
-                  <li>Casual snooping (plain text not visible in DevTools)</li>
-                  <li>
-                    Simple data breaches (exported localStorage contains
-                    encrypted blobs)
-                  </li>
-                </ul>
-                <p>
-                  <strong>What this doesn't protect against:</strong>
-                </p>
-                <ul>
-                  <li>
-                    XSS attacks (malicious JavaScript can access encryption
-                    logic)
-                  </li>
-                  <li>
-                    Malicious browser extensions (extensions can read
-                    localStorage)
-                  </li>
-                  <li>
-                    Physical access (anyone with access to your computer can
-                    open DevTools)
-                  </li>
-                </ul>
-                <p>
-                  <strong>Realistic risk for casual use:</strong> For personal
-                  projects, the risk is low. XSS requires a code vulnerability,
-                  malicious extensions require you to install them, and physical
-                  access requires hands-on access to your unlocked computer. The
-                  encryption adds a reasonable layer of protection.
+                  <strong>What this protects:</strong> Casual snooping and
+                  simple data exports. The encrypted blob is unreadable without
+                  the decryption logic.
                 </p>
                 <p>
-                  <strong>For maximum security:</strong> Use default mode where
-                  your API key stays on the server and never touches the
-                  browser.
+                  <strong>What to know:</strong> Browser-based encryption can't
+                  protect against XSS vulnerabilities, malicious browser
+                  extensions, or someone with physical access to your computer.
+                  Your API key is also visible in network request headers (check
+                  DevTools → Network tab).
+                </p>
+                <p>
+                  <strong>Bottom line:</strong> For personal projects and demos,
+                  this is reasonable protection. For production or sensitive use
+                  cases, use default mode (key stays on server) or consider
+                  adding a local LLM option (fully secure, nothing leaves your
+                  machine).
                 </p>
               </CollapsibleSection>
             </div>
