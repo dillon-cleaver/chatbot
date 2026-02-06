@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { UploadedFile } from '../types';
-import * as api from '../utils/api';
+import * as indexedDB from '../services/indexedDBService';
 import { MAX_FILES_PER_MESSAGE } from '../constants';
 
 export interface UseFileManagerReturn {
@@ -68,7 +68,7 @@ export function useFileManager({
   const fetchFiles = useCallback(async (): Promise<void> => {
     setError(null);
     try {
-      const data = await api.fetchFiles();
+      const data = await indexedDB.listFiles();
       setFiles(data);
     } catch (error) {
       console.error('Failed to fetch files:', error);
@@ -120,7 +120,16 @@ export function useFileManager({
     setError(null);
 
     try {
-      const newFiles = await api.uploadFiles(filesToUpload);
+      const newFiles: UploadedFile[] = [];
+      for (const file of filesToUpload) {
+        const uploaded = await indexedDB.addFile(
+          file.name,
+          file.type || "application/octet-stream",
+          file.size,
+          file
+        );
+        newFiles.push(uploaded);
+      }
       setFiles((prev) => [...newFiles, ...prev]);
       setUploadError(null);
       onUploadSuccess?.(newFiles.length);
@@ -138,7 +147,7 @@ export function useFileManager({
 
     setError(null);
     try {
-      await api.deleteFile(fileId);
+      await indexedDB.deleteFileById(fileId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       setSelectedFileIds((prev) => prev.filter((id) => id !== fileId));
       onDeleteSuccess?.();
@@ -181,8 +190,15 @@ export function useFileManager({
     setSelectedFileIds(fileIds);
   }, []);
 
-  const viewFile = useCallback((fileId: string): void => {
-    api.viewFile(fileId);
+  const viewFile = useCallback(async (fileId: string): Promise<void> => {
+    try {
+      const { blob } = await indexedDB.getFileBlob(fileId);
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (error) {
+      console.error("Failed to open file:", error);
+    }
   }, []);
 
   const openModal = useCallback((): void => {

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Conversation, Message } from '../types';
-import * as api from '../utils/api';
 import { generateUUID } from '../utils/uuid';
+import * as indexedDB from '../services/indexedDBService';
 
 export interface UseConversationsReturn {
   conversations: Conversation[];
@@ -66,15 +66,13 @@ export function useConversations({
       const minLoadingTime = new Promise(resolve => setTimeout(resolve, 400));
 
       try {
-        const [data] = await Promise.all([
-          api.fetchConversation(conversationId, abortController.signal),
-          minLoadingTime
-        ]);
+        await minLoadingTime;
 
-        // Check if this request was aborted (user navigated away)
         if (abortController.signal.aborted) {
           return;
         }
+
+        const data = await indexedDB.loadConversation(conversationId);
 
         // Set messages from conversation
         const messages = data.messages.map((msg) => {
@@ -121,7 +119,7 @@ export function useConversations({
         console.error("Failed to load conversation:", error);
         // Navigate to home if conversation not found
         const err = error as Error & { status?: number };
-        if (err?.status === 404) {
+        if (err?.status === 404 || (err instanceof Error && err.message === "Conversation not found")) {
           alert("Conversation not found. Redirecting to home.");
           onNewChat();
         } else {
@@ -129,7 +127,7 @@ export function useConversations({
         }
       } finally {
         // Only clear loading if this request wasn't aborted
-        if (!abortController.signal.aborted) {
+        if (!abortControllerRef.current?.signal.aborted) {
           setIsLoadingConversation(false);
         }
       }
@@ -139,7 +137,7 @@ export function useConversations({
 
   const refreshConversations = useCallback(async (): Promise<void> => {
     try {
-      const data = await api.fetchConversations();
+      const data = await indexedDB.listConversations();
       setConversations(data);
     } catch (error) {
       console.error("Failed to fetch conversations:", error);
@@ -147,13 +145,12 @@ export function useConversations({
   }, []);
 
   useEffect(() => {
-    // Only load conversations once on mount
+    // Load conversations when mode changes or on mount
     const loadInitial = async () => {
       await refreshConversations();
     };
     loadInitial();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [refreshConversations]);
 
   const startNewConversation = useCallback((): void => {
     onMessagesLoad([]);
@@ -166,7 +163,7 @@ export function useConversations({
     if (!confirm("Delete this conversation? This cannot be undone.")) return;
 
     try {
-      await api.deleteConversation(conversationId);
+      await indexedDB.deleteConversation(conversationId);
 
       setConversations((prev) => prev.filter((c) => c.id !== conversationId));
       onDeleteSuccess?.();
@@ -182,7 +179,7 @@ export function useConversations({
 
   const deleteAllConversations = async (): Promise<void> => {
     try {
-      await api.deleteAllConversations();
+      await indexedDB.deleteAllConversations();
 
       setConversations([]);
       onDeleteSuccess?.();
@@ -200,7 +197,7 @@ export function useConversations({
     if (!newTitle.trim()) return;
 
     try {
-      await api.updateConversationTitle(conversationId, newTitle);
+      await indexedDB.updateConversationTitle(conversationId, newTitle);
 
       setConversations((prev) =>
         prev.map((c) =>

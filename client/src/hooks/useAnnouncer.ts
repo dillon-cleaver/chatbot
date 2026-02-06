@@ -23,31 +23,42 @@ export function useAnnouncer(): (
   const politeRef = useRef<HTMLDivElement | null>(null);
   const assertiveRef = useRef<HTMLDivElement | null>(null);
 
-  // Create live regions on mount
+  // Create live regions on mount (or reuse existing ones)
   useEffect(() => {
-    // Create polite live region
-    const politeRegion = document.createElement("div");
-    politeRegion.setAttribute("aria-live", "polite");
-    politeRegion.setAttribute("aria-atomic", "true");
-    politeRegion.setAttribute("role", "status");
-    politeRegion.className = "visually-hidden";
-    politeRegion.id = "announcer-polite";
-    document.body.appendChild(politeRegion);
+    // Check for existing polite region or create one
+    let politeRegion = document.getElementById(
+      "announcer-polite",
+    ) as HTMLDivElement | null;
+    if (!politeRegion) {
+      politeRegion = document.createElement("div");
+      politeRegion.setAttribute("aria-live", "polite");
+      politeRegion.setAttribute("aria-atomic", "true");
+      politeRegion.setAttribute("role", "status");
+      politeRegion.className = "visually-hidden";
+      politeRegion.id = "announcer-polite";
+      document.body.appendChild(politeRegion);
+    }
     politeRef.current = politeRegion;
 
-    // Create assertive live region (for urgent announcements)
-    const assertiveRegion = document.createElement("div");
-    assertiveRegion.setAttribute("aria-live", "assertive");
-    assertiveRegion.setAttribute("aria-atomic", "true");
-    assertiveRegion.setAttribute("role", "alert");
-    assertiveRegion.className = "visually-hidden";
-    assertiveRegion.id = "announcer-assertive";
-    document.body.appendChild(assertiveRegion);
+    // Check for existing assertive region or create one
+    let assertiveRegion = document.getElementById(
+      "announcer-assertive",
+    ) as HTMLDivElement | null;
+    if (!assertiveRegion) {
+      assertiveRegion = document.createElement("div");
+      assertiveRegion.setAttribute("aria-live", "assertive");
+      assertiveRegion.setAttribute("aria-atomic", "true");
+      assertiveRegion.setAttribute("role", "alert");
+      assertiveRegion.className = "visually-hidden";
+      assertiveRegion.id = "announcer-assertive";
+      document.body.appendChild(assertiveRegion);
+    }
     assertiveRef.current = assertiveRegion;
 
+    // Don't remove on cleanup - regions may be shared across instances
     return () => {
-      politeRegion.remove();
-      assertiveRegion.remove();
+      politeRef.current = null;
+      assertiveRef.current = null;
     };
   }, []);
 
