@@ -113,39 +113,31 @@ async function processPDF(file: File): Promise<ProcessedFile> {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 
-    // Claude API has a 100 page limit for PDF documents
-    // If over 100 pages, extract text instead
-    if (pdf.numPages > 100) {
-      let fullText = "";
-      for (let i = 1; i <= Math.min(pdf.numPages, 200); i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .map((item) => ("str" in item ? item.str : ""))
-          .join(" ");
-        fullText += pageText + "\n";
-      }
+    // Extract text from PDF (works across all providers)
+    // Some providers (Google) don't support PDF documents, so text extraction is more compatible
+    let fullText = "";
+    const maxPages = Math.min(pdf.numPages, 200); // Limit to 200 pages
 
-      let truncated = false;
-      if (fullText.length > MAX_EXTRACTED_TEXT_CHARS) {
-        fullText = fullText.substring(0, MAX_EXTRACTED_TEXT_CHARS);
-        truncated = true;
-      }
-
-      const header = `PDF Document (${pdf.numPages} pages - text extracted due to page limit${truncated ? ", content truncated to fit context limits" : ""}):\n\n`;
-
-      return {
-        type: "text",
-        data: header + fullText + (truncated ? "\n\n[Content truncated - document too large]" : ""),
-      };
+    for (let i = 1; i <= maxPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item) => ("str" in item ? item.str : ""))
+        .join(" ");
+      fullText += `Page ${i}:\n${pageText}\n\n`;
     }
 
-    // For PDFs under 100 pages, send as document
-    const base64 = await fileToBase64(file);
+    let truncated = false;
+    if (fullText.length > MAX_EXTRACTED_TEXT_CHARS) {
+      fullText = fullText.substring(0, MAX_EXTRACTED_TEXT_CHARS);
+      truncated = true;
+    }
+
+    const header = `PDF Document (${pdf.numPages} pages${pdf.numPages > maxPages ? `, showing first ${maxPages}` : ""}${truncated ? ", content truncated to fit context limits" : ""}):\n\n`;
+
     return {
-      type: "document",
-      data: base64,
-      mimeType: "application/pdf",
+      type: "text",
+      data: header + fullText + (truncated ? "\n\n[Content truncated - document too large]" : ""),
     };
   } catch (error) {
     throw new Error(`Failed to parse PDF: ${error instanceof Error ? error.message : "Unknown error"}`);

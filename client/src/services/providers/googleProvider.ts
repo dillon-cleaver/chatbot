@@ -53,8 +53,10 @@ export class GoogleProvider implements LLMProvider {
               },
             });
           } else if (file.type === "text") {
+            // Text includes extracted PDF content
             parts.push({ text: file.data });
           }
+          // Note: 'document' type no longer used - PDFs are now extracted to text
         }
       }
 
