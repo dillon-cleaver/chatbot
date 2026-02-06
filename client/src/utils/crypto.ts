@@ -9,10 +9,15 @@
  * For sensitive use cases, use server mode where keys never leave the server.
  */
 
+import { ERROR_MESSAGES } from "../constants/errorMessages";
+
 const ALGORITHM = "AES-GCM";
 const IV_LENGTH = 12; // 96 bits recommended for AES-GCM
 const DEVICE_ID_KEY = "chatbot-device-id";
 const ENCRYPTION_PREFIX = "enc_v1:"; // Marker to identify encrypted values
+
+// Timing constants
+const ENCRYPTION_KEY_SIZE = 256; // AES-256
 
 /**
  * Get or create a stable device ID for this browser
@@ -91,7 +96,7 @@ export async function encryptApiKey(apiKey: string): Promise<string> {
     return ENCRYPTION_PREFIX + base64;
   } catch (error) {
     console.error("Encryption failed:", error);
-    throw new Error("Failed to encrypt API key");
+    throw new Error(ERROR_MESSAGES.ENCRYPTION_FAILED);
   }
 }
 
@@ -127,7 +132,7 @@ export async function decryptApiKey(encrypted: string): Promise<string> {
     return decoder.decode(decrypted);
   } catch (error) {
     console.error("Decryption failed:", error);
-    throw new Error("Failed to decrypt API key");
+    throw new Error(ERROR_MESSAGES.DECRYPTION_FAILED);
   }
 }
 

@@ -20,6 +20,10 @@ import { SettingsModal } from "../../settings/SettingsModal";
 import { useSettings } from "../../../hooks/useSettings";
 import { SUPPORTED_MODELS } from "../../../types/settings";
 
+// Timing constants
+const MODAL_CLOSE_ANIMATION_MS = 150; // Delay for modal close animation before scroll/focus
+const FOCUS_AFTER_NEW_CHAT_MS = 50; // Delay for focus after starting new chat
+
 export function ChatContent(): React.JSX.Element {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const navigate = useNavigate();
@@ -102,7 +106,7 @@ export function ChatContent(): React.JSX.Element {
       const timer = setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
         chatInputRef.current?.focus();
-      }, 150);
+      }, MODAL_CLOSE_ANIMATION_MS);
       return () => clearTimeout(timer);
     }
   }, [fileManager.isModalOpen, fileManager.selectedFileIds.length]);
@@ -229,7 +233,7 @@ export function ChatContent(): React.JSX.Element {
     // Focus input after modal animation completes
     setTimeout(() => {
       chatInputRef.current?.focus();
-    }, 50);
+    }, FOCUS_AFTER_NEW_CHAT_MS);
   }, [conversations]);
 
   return (

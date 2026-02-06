@@ -4,6 +4,9 @@ import { useCallback, useRef, useEffect } from "react";
 let politeRefCount = 0;
 let assertiveRefCount = 0;
 
+// Timing constants
+const ANNOUNCEMENT_DELAY_MS = 50; // Delay to ensure DOM update triggers screen reader announcement
+
 /**
  * Custom hook for announcing messages to screen readers via ARIA live regions.
  *
@@ -89,7 +92,7 @@ export function useAnnouncer(): (
         // Use setTimeout to ensure the DOM update triggers the announcement
         setTimeout(() => {
           region.textContent = message;
-        }, 50);
+        }, ANNOUNCEMENT_DELAY_MS);
       }
     },
     [],
