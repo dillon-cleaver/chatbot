@@ -204,6 +204,7 @@ export function ChatContent(): React.JSX.Element {
       onSettings: () => setIsSettingsModalOpen(true),
       onEscape: handleEscape,
       onHelp: () => setIsHelpModalOpen(true),
+      onNewChat: handleNewChat,
     },
   });
 

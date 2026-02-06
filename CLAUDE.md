@@ -45,6 +45,8 @@ pnpm start            # Run server only (port 3000)
 | `Ctrl/⌘+Enter` | Send message (from anywhere) |
 | `Ctrl/⌘+U` | Open file attach modal |
 | `Ctrl/⌘+Y` | Open chat history |
+| `Ctrl/⌘+S` | Open settings |
+| `Shift+Ctrl/⌘+O` | Start new chat |
 | `Escape` | Close modal / toggle input focus |
 | `?` | Show keyboard shortcuts (when not typing) |
 | `↑/↓` | Navigate lists and modal sections |

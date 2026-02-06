@@ -7,6 +7,7 @@ export interface KeyboardShortcutHandlers {
   onSettings?: () => void;
   onEscape?: () => void;
   onHelp?: () => void;
+  onNewChat?: () => void;
 }
 
 export interface UseKeyboardShortcutsOptions {
@@ -20,6 +21,9 @@ export interface UseKeyboardShortcutsOptions {
  * Shortcuts:
  * - Ctrl/Cmd + Enter: Send message (alternative to Enter in textarea)
  * - Ctrl/Cmd + U: Open file attach modal
+ * - Ctrl/Cmd + Y: Open chat history
+ * - Ctrl/Cmd + S: Open settings
+ * - Shift + Ctrl/Cmd + O: Start new chat
  * - Escape: Close modals / return focus to input
  * - ?: Show keyboard shortcuts help (when not typing)
  */
@@ -63,6 +67,13 @@ export function useKeyboardShortcuts({
       if (isMod && e.key === "s") {
         e.preventDefault();
         handlers.onSettings?.();
+        return;
+      }
+
+      // Shift + Ctrl/Cmd + O: New chat
+      if (isMod && e.shiftKey && e.key === "O") {
+        e.preventDefault();
+        handlers.onNewChat?.();
         return;
       }
 
@@ -115,6 +126,10 @@ export const KEYBOARD_SHORTCUTS = [
   {
     keys: ["Ctrl/⌘", "S"],
     description: "Open settings",
+  },
+  {
+    keys: ["Shift", "Ctrl/⌘", "O"],
+    description: "Start new chat",
   },
   {
     keys: ["Escape"],
