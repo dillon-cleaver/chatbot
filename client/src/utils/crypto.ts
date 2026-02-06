@@ -2,7 +2,7 @@
  * API Key Encryption Utilities
  *
  * Uses Web Crypto API (AES-GCM) to encrypt API keys before storing in localStorage.
- * Encryption key is derived from device fingerprint (screen dimensions + user agent hash).
+ * Encryption key is derived from a stable device ID stored in localStorage.
  *
  * IMPORTANT: This provides limited security against sophisticated attacks.
  * Browser-based encryption cannot fully protect against XSS or compromised extensions.
@@ -11,14 +11,32 @@
 
 const ALGORITHM = "AES-GCM";
 const IV_LENGTH = 12; // 96 bits recommended for AES-GCM
+const DEVICE_ID_KEY = "chatbot-device-id";
+
+/**
+ * Get or create a stable device ID for this browser
+ * This ID persists across sessions and doesn't change with window size/zoom
+ */
+function getStableDeviceId(): string {
+  let deviceId = localStorage.getItem(DEVICE_ID_KEY);
+
+  if (!deviceId) {
+    // Generate a new stable ID using crypto.randomUUID()
+    deviceId = crypto.randomUUID();
+    localStorage.setItem(DEVICE_ID_KEY, deviceId);
+  }
+
+  return deviceId;
+}
 
 /**
  * Generate a device fingerprint for key derivation
+ * Uses stable device ID + browser fingerprint that doesn't change with window size
  */
 function getDeviceFingerprint(): string {
-  const screenData = `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`;
-  const userAgent = navigator.userAgent;
-  return `${screenData}|${userAgent}`;
+  const stableId = getStableDeviceId();
+  const browserFingerprint = navigator.userAgent;
+  return `${stableId}|${browserFingerprint}`;
 }
 
 /**

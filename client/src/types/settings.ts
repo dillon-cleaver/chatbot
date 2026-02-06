@@ -70,8 +70,12 @@ export async function loadSettings(): Promise<Settings> {
               // Return with decrypted key for use
             }
           } catch (error) {
-            console.error("Failed to decrypt API key, falling back to plain text:", error);
-            // Keep the value as-is if decryption fails
+            console.error("Failed to decrypt API key - clearing invalid key. Please re-enter your API key.", error);
+            // Clear the invalid encrypted key - user will need to re-enter
+            parsed.apiKey = undefined;
+            // Save cleared settings
+            const clearedSettings = { ...parsed, apiKey: undefined };
+            localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(clearedSettings));
           }
         }
         return parsed;
