@@ -23,21 +23,25 @@ pnpm start    # Start server on port 3000
 
 ### POST /chat
 
-Request:
+Request (client may send last user message with `content` as an array of content blocks from IndexedDB files):
 ```json
 {
   "messages": [
     { "role": "user", "content": "Hello" }
-  ]
+  ],
+  "conversation_id": "optional-uuid-from-client"
 }
 ```
 
 Response:
 ```json
 {
-  "content": "Hi! How can I help you today?"
+  "content": "Hi! How can I help you today?",
+  "conversation_id": "uuid"
 }
 ```
+
+The server is stateless: no database, no file storage. Conversations and files are stored in IndexedDB on the client.
 
 ## Environment
 
@@ -60,7 +64,7 @@ The system prompt is defined in the `SYSTEM_PROMPT` constant in `index.js`.
 
 ## Notes
 
-- Uses `claude-sonnet-4-5` model
+- Uses `claude-haiku-4-5-20251001` model (Claude Haiku 4.5)
 - CORS enabled for cross-origin requests from client
 - Max tokens set to 2048
 - System prompt configured for Gen X/90s Sega Genesis-inspired personality
