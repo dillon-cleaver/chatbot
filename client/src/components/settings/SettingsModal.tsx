@@ -149,28 +149,34 @@ export function SettingsModal({
     }
   }, [selectedProvider, selectedModel, apiKey]);
 
-  const handleSave = useCallback(() => {
-    if (modeInModal === "default") {
-      updateSettings({ mode: "default" });
-      resetToDefault();
-    } else if (modeInModal === "custom") {
-      if (!selectedProvider || !selectedModel || !apiKey.trim()) {
-        setTestResult({
-          success: false,
-          message: "Please select a model and enter an API key",
+  const handleSave = useCallback(async () => {
+    try {
+      if (modeInModal === "default") {
+        await resetToDefault();
+      } else if (modeInModal === "custom") {
+        if (!selectedProvider || !selectedModel || !apiKey.trim()) {
+          setTestResult({
+            success: false,
+            message: "Please select a model and enter an API key",
+          });
+          return;
+        }
+
+        await updateSettings({
+          mode: "custom",
+          provider: selectedProvider,
+          model: selectedModel,
+          apiKey: apiKey.trim(),
         });
-        return;
       }
 
-      updateSettings({
-        mode: "custom",
-        provider: selectedProvider,
-        model: selectedModel,
-        apiKey: apiKey.trim(),
+      onClose();
+    } catch (error) {
+      setTestResult({
+        success: false,
+        message: error instanceof Error ? error.message : "Failed to save settings",
       });
     }
-
-    onClose();
   }, [
     modeInModal,
     selectedProvider,
@@ -431,7 +437,7 @@ export function SettingsModal({
                   Last 4 characters: {apiKey.slice(-4)}
                 </p>
               )}
-              <p className={(styles as Record<string, string>).securityWarning}>
+              <p className={styles.securityWarning}>
                 API keys are encrypted but stored in your browser. For maximum
                 security, use default server mode.
               </p>
@@ -485,7 +491,7 @@ export function SettingsModal({
             )}
 
             <div className={styles.testButtonContainer}>
-              <p className={(styles as Record<string, string>).testInfo}>
+              <p className={styles.testInfo}>
                 Connection test sends a minimal request to verify your API key
               </p>
               <Button

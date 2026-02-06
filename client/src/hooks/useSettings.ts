@@ -39,32 +39,26 @@ export function SettingsProvider({ children }: { children: ReactNode }): React.J
   }, []);
 
   const updateSettings = useCallback(async (updates: Partial<Settings>): Promise<void> => {
+    let newSettings: Settings | null = null;
     setSettings((prev) => {
-      const newSettings: Settings = {
-        ...prev,
-        ...updates,
-      };
-
-      if (newSettings.mode === "default") {
-        newSettings.provider = undefined;
-        newSettings.model = undefined;
-        newSettings.apiKey = undefined;
+      const merged: Settings = { ...prev, ...updates };
+      if (merged.mode === "default") {
+        merged.provider = undefined;
+        merged.model = undefined;
+        merged.apiKey = undefined;
       }
-
-      // Validate BEFORE saving
-      if (newSettings.mode === "custom") {
-        if (!newSettings.provider || !newSettings.model || !newSettings.apiKey) {
+      if (merged.mode === "custom") {
+        if (!merged.provider || !merged.model || !merged.apiKey) {
           console.warn('Incomplete custom settings - not saved');
-          return prev; // Reject update
+          return prev;
         }
       }
-
-      // Save asynchronously (don't block UI)
-      saveSettings(newSettings).catch((error) => {
-        console.error("Failed to save settings:", error);
-      });
-      return newSettings;
+      newSettings = merged;
+      return merged;
     });
+    if (newSettings) {
+      await saveSettings(newSettings);
+    }
   }, []);
 
   const resetToDefault = useCallback(async (): Promise<void> => {

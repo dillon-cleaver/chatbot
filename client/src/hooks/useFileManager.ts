@@ -202,6 +202,8 @@ export function useFileManager({
       // Also revoke when the new window closes
       if (newWindow) {
         newWindow.addEventListener('beforeunload', () => URL.revokeObjectURL(url));
+      } else {
+        console.warn("Popup blocked — file could not be opened in a new tab.");
       }
     } catch (error) {
       console.error("Failed to open file:", error);

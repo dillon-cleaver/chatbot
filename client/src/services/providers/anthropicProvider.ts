@@ -2,6 +2,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { Message } from "../../types";
 import type { LLMProvider, FileAttachment } from "../llmService";
 
+const MESSAGE_TIMEOUT_MS = 30_000;
+const TEST_CONNECTION_TIMEOUT_MS = 10_000;
+
 export class AnthropicProvider implements LLMProvider {
   private client: Anthropic;
   private model: string;
@@ -10,7 +13,7 @@ export class AnthropicProvider implements LLMProvider {
     // Required for browser usage - acknowledges API key visible in DevTools
     // Mitigated by localStorage encryption (see utils/crypto.ts)
     // For maximum security, use default server mode instead
-    this.client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+    this.client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true, timeout: MESSAGE_TIMEOUT_MS });
     this.model = model;
   }
 
@@ -97,12 +100,18 @@ export class AnthropicProvider implements LLMProvider {
 
   async testConnection(): Promise<boolean> {
     try {
-      await this.client.messages.create({
-        model: this.model,
-        max_tokens: 10,
-        system: "",
-        messages: [{ role: "user", content: "test" }],
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("Request timed out")), TEST_CONNECTION_TIMEOUT_MS);
       });
+      await Promise.race([
+        this.client.messages.create({
+          model: this.model,
+          max_tokens: 10,
+          system: "",
+          messages: [{ role: "user", content: "test" }],
+        }),
+        timeoutPromise,
+      ]);
       return true;
     } catch (error) {
       console.error("Anthropic connection test failed:", error);

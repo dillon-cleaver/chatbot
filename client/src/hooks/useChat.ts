@@ -75,49 +75,49 @@ export function useChat({
         try {
           await indexedDB.addMessage(currentConvId, "user", input.trim());
 
-        // Build messages for API: if we have file IDs, last message content = content blocks (from IndexedDB files)
-        let messagesToSend: Message[] = updatedMessages;
-        if (selectedFileIds.length > 0) {
-          const contentBlocks: Array<
-            | { type: "text"; text: string }
-            | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
-            | { type: "document"; source: { type: "base64"; media_type: string; data: string } }
-          > = [{ type: "text", text: input.trim() }];
-          for (const fileId of selectedFileIds) {
-            const { file, blob } = await indexedDB.getFileBlob(fileId);
-            const fileObj = new File([blob], file.original_name, { type: file.mime_type });
-            const processed = await processFile(fileObj);
-            if (processed.type === "text") {
-              contentBlocks.push({ type: "text", text: processed.data });
-            } else if (processed.type === "image") {
-              contentBlocks.push({
-                type: "image",
-                source: {
-                  type: "base64",
-                  media_type: processed.mimeType || "image/png",
-                  data: processed.data,
-                },
-              });
-            } else {
-              contentBlocks.push({
-                type: "document",
-                source: {
-                  type: "base64",
-                  media_type: processed.mimeType || "application/octet-stream",
-                  data: processed.data,
-                },
-              });
+          // Build messages for API: if we have file IDs, last message content = content blocks (from IndexedDB files)
+          let messagesToSend: Message[] = updatedMessages;
+          if (selectedFileIds.length > 0) {
+            const contentBlocks: Array<
+              | { type: "text"; text: string }
+              | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
+              | { type: "document"; source: { type: "base64"; media_type: string; data: string } }
+            > = [{ type: "text", text: input.trim() }];
+            for (const fileId of selectedFileIds) {
+              const { file, blob } = await indexedDB.getFileBlob(fileId);
+              const fileObj = new File([blob], file.original_name, { type: file.mime_type });
+              const processed = await processFile(fileObj);
+              if (processed.type === "text") {
+                contentBlocks.push({ type: "text", text: processed.data });
+              } else if (processed.type === "image") {
+                contentBlocks.push({
+                  type: "image",
+                  source: {
+                    type: "base64",
+                    media_type: processed.mimeType || "image/png",
+                    data: processed.data,
+                  },
+                });
+              } else {
+                contentBlocks.push({
+                  type: "document",
+                  source: {
+                    type: "base64",
+                    media_type: processed.mimeType || "application/octet-stream",
+                    data: processed.data,
+                  },
+                });
+              }
             }
+            // Server expects string content (parses JSON internally if needed)
+            messagesToSend = [
+              ...updatedMessages.slice(0, -1),
+              {
+                ...updatedMessages[updatedMessages.length - 1],
+                content: JSON.stringify(contentBlocks)
+              },
+            ];
           }
-          // Server expects string content (parses JSON internally if needed)
-          messagesToSend = [
-            ...updatedMessages.slice(0, -1),
-            {
-              ...updatedMessages[updatedMessages.length - 1],
-              content: JSON.stringify(contentBlocks)
-            },
-          ];
-        }
 
           console.log("[Chat] Sending message — mode: default, model: Claude Haiku (server)");
           const data = await api.sendChatMessage(messagesToSend, currentConvId);

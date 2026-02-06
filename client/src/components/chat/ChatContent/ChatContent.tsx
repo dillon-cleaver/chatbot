@@ -91,6 +91,7 @@ export function ChatContent(): React.JSX.Element {
     onClearSelectedFiles: fileManager.clearSelectedFiles,
     onNewChat: handleNewChat,
     onDeleteSuccess: () => announce(ANNOUNCEMENTS.CONVERSATION_DELETED),
+    onError: (message) => announce(ANNOUNCEMENTS.ERROR(message), "assertive"),
   });
 
   // Auto-scroll to bottom when messages change

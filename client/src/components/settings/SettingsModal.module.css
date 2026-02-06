@@ -71,7 +71,7 @@
 @media (hover: hover) and (pointer: fine) {
   .radioLabel input[type="radio"]:hover {
     transform: scale(1.2);
-    background-color: #6c5ce7;
+    background-color: var(--button-bg);
   }
 
   .radioLabel input[type="radio"]:hover::after {
@@ -90,7 +90,7 @@
 }
 
 .radioLabel input[type="radio"]:checked {
-  background-color: #6c5ce7;
+  background-color: var(--button-bg);
 }
 
 .radioLabel input[type="radio"]:checked::after {

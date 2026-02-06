@@ -11,6 +11,9 @@ declare const styles: {
   readonly apiKeyContainer: string;
   readonly toggleButton: string;
   readonly apiKeyHint: string;
+  readonly securityWarning: string;
+  readonly securityInfo: string;
+  readonly testInfo: string;
   readonly testResult: string;
   readonly testSuccess: string;
   readonly testError: string;
