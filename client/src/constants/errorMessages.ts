@@ -6,12 +6,15 @@ export const ERROR_MESSAGES = {
   API_KEY_MISSING: 'Service configuration error. Please try again later.',
   API_CONNECTION_FAILED: 'Failed to connect to the API server.',
   API_REQUEST_FAILED: 'API request failed. Please try again.',
+  API_BAD_REQUEST: 'Invalid request. Please check your input.',
   API_AUTHENTICATION_FAILED: 'Authentication error. Please try again later.',
   API_ACCESS_DENIED: 'Access denied. Please try again later.',
   API_NOT_FOUND: 'Resource not found.',
   API_RATE_LIMITED: 'Too many requests. Please wait and try again.',
   API_SERVER_ERROR: 'Server error. Please try again later.',
+  API_BAD_GATEWAY: 'Service gateway error. Please try again later.',
   API_SERVICE_UNAVAILABLE: 'Service temporarily unavailable. Please try again later.',
+  API_GATEWAY_TIMEOUT: 'Service timeout. Please try again later.',
 
   // File errors
   FILE_UPLOAD_FAILED: 'Failed to upload file.',

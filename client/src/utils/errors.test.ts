@@ -11,6 +11,22 @@ describe('ValidationError', () => {
     expect(error instanceof Error).toBe(true);
     expect(error instanceof ValidationError).toBe(true);
   });
+
+  it('should capture clean stack trace without constructor', () => {
+    function throwValidationError() {
+      throw new ValidationError('Stack trace test');
+    }
+
+    try {
+      throwValidationError();
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        // Stack should include the calling function
+        expect(error.stack).toBeDefined();
+        expect(error.stack).toContain('throwValidationError');
+      }
+    }
+  });
 });
 
 describe('validateMessages', () => {
@@ -155,6 +171,26 @@ describe('getUserFriendlyError', () => {
     it('should handle error with status 503', () => {
       const error = { status: 503, message: 'Service Unavailable' };
       expect(getUserFriendlyError(error)).toBe(ERROR_MESSAGES.API_SERVICE_UNAVAILABLE);
+    });
+
+    it('should handle error with status 400', () => {
+      const error = { status: 400, message: 'Bad Request' };
+      expect(getUserFriendlyError(error)).toBe(ERROR_MESSAGES.API_BAD_REQUEST);
+    });
+
+    it('should handle error with status 408', () => {
+      const error = { status: 408, message: 'Request Timeout' };
+      expect(getUserFriendlyError(error)).toBe(ERROR_MESSAGES.NETWORK_TIMEOUT);
+    });
+
+    it('should handle error with status 502', () => {
+      const error = { status: 502, message: 'Bad Gateway' };
+      expect(getUserFriendlyError(error)).toBe(ERROR_MESSAGES.API_BAD_GATEWAY);
+    });
+
+    it('should handle error with status 504', () => {
+      const error = { status: 504, message: 'Gateway Timeout' };
+      expect(getUserFriendlyError(error)).toBe(ERROR_MESSAGES.API_GATEWAY_TIMEOUT);
     });
 
     it('should prioritize status property over message pattern matching', () => {

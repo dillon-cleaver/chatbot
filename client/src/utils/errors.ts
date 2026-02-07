@@ -8,6 +8,10 @@ export class ValidationError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'ValidationError';
+    // Maintains proper stack trace in V8 engines (Node.js, Chrome, Edge)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ValidationError);
+    }
   }
 }
 
@@ -87,18 +91,26 @@ export function getUserFriendlyError(error: unknown): string {
     const status = statusError.status;
 
     switch (status) {
+      case 400:
+        return ERROR_MESSAGES.API_BAD_REQUEST;
       case 401:
         return ERROR_MESSAGES.API_AUTHENTICATION_FAILED;
       case 403:
         return ERROR_MESSAGES.API_ACCESS_DENIED;
       case 404:
         return ERROR_MESSAGES.API_NOT_FOUND;
+      case 408:
+        return ERROR_MESSAGES.NETWORK_TIMEOUT;
       case 429:
         return ERROR_MESSAGES.API_RATE_LIMITED;
       case 500:
         return ERROR_MESSAGES.API_SERVER_ERROR;
+      case 502:
+        return ERROR_MESSAGES.API_BAD_GATEWAY;
       case 503:
         return ERROR_MESSAGES.API_SERVICE_UNAVAILABLE;
+      case 504:
+        return ERROR_MESSAGES.API_GATEWAY_TIMEOUT;
       default:
         // Fall through to message-based matching
         break;
