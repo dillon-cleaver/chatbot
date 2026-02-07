@@ -3,9 +3,15 @@
  */
 export const ERROR_MESSAGES = {
   // API errors
-  API_KEY_MISSING: 'API key is missing. Please configure your API key.',
+  API_KEY_MISSING: 'Service configuration error. Please try again later.',
   API_CONNECTION_FAILED: 'Failed to connect to the API server.',
   API_REQUEST_FAILED: 'API request failed. Please try again.',
+  API_AUTHENTICATION_FAILED: 'Authentication error. Please try again later.',
+  API_ACCESS_DENIED: 'Access denied. Please try again later.',
+  API_NOT_FOUND: 'Resource not found.',
+  API_RATE_LIMITED: 'Too many requests. Please wait and try again.',
+  API_SERVER_ERROR: 'Server error. Please try again later.',
+  API_SERVICE_UNAVAILABLE: 'Service temporarily unavailable. Please try again later.',
 
   // File errors
   FILE_UPLOAD_FAILED: 'Failed to upload file.',
@@ -29,7 +35,7 @@ export const ERROR_MESSAGES = {
 
   // IndexedDB errors
   INDEXEDDB_ERROR: 'Database error occurred.',
-  INDEXEDDB_NOT_SUPPORTED: 'Your browser does not support local storage.',
+  INDEXEDDB_NOT_SUPPORTED: 'Your browser does not support IndexedDB, which is required for local data storage.',
 } as const;
 
 /**
