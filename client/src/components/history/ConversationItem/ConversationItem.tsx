@@ -145,8 +145,8 @@ export const ConversationItem = forwardRef<
         e.preventDefault();
         e.stopPropagation();
         if (internalFocus === 0) {
-          navigate(`/chat/${conversation.id}`);
           onClose();
+          navigate(`/chat/${conversation.id}`);
         } else if (internalFocus === 1) {
           startEditing();
         } else if (internalFocus === 2) {

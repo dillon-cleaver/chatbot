@@ -42,6 +42,7 @@ export function useConversations({
   onDeleteSuccess,
   onError,
 }: UseConversationsProps): UseConversationsReturn {
+  const reportError = onError ?? alert;
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
   const [isLoadingConversation, setIsLoadingConversation] = useState<boolean>(false);
@@ -124,20 +125,10 @@ export function useConversations({
         // Navigate to home if conversation not found
         const err = error as Error & { status?: number };
         if (err?.status === 404) {
-          const message = "Conversation not found. Redirecting to home.";
-          if (onError) {
-            onError(message);
-          } else {
-            alert(message);
-          }
+          reportError("Conversation not found. Redirecting to home.");
           onNewChat();
         } else {
-          const message = "Failed to load conversation. Please try again.";
-          if (onError) {
-            onError(message);
-          } else {
-            alert(message);
-          }
+          reportError("Failed to load conversation. Please try again.");
         }
       } finally {
         // Only clear loading if this request wasn't aborted
@@ -146,7 +137,7 @@ export function useConversations({
         }
       }
     },
-    [onMessagesLoad, onNewChat, onError],
+    [onMessagesLoad, onNewChat, reportError],
   );
 
   const refreshConversations = useCallback(async (): Promise<void> => {
@@ -188,12 +179,7 @@ export function useConversations({
       }
     } catch (error) {
       console.error("Failed to delete conversation:", error);
-      const message = "Failed to delete conversation. Please try again.";
-      if (onError) {
-        onError(message);
-      } else {
-        alert(message);
-      }
+      reportError("Failed to delete conversation. Please try again.");
     }
   };
 
@@ -206,12 +192,7 @@ export function useConversations({
       startNewConversation();
     } catch (error) {
       console.error("Failed to delete all conversations:", error);
-      const message = "Failed to delete conversations. Please try again.";
-      if (onError) {
-        onError(message);
-      } else {
-        alert(message);
-      }
+      reportError("Failed to delete conversations. Please try again.");
     }
   };
 
@@ -234,12 +215,7 @@ export function useConversations({
       setEditingTitleValue("");
     } catch (error) {
       console.error("Failed to update title:", error);
-      const message = "Failed to update title. Please try again.";
-      if (onError) {
-        onError(message);
-      } else {
-        alert(message);
-      }
+      reportError("Failed to update title. Please try again.");
     }
   };
 
