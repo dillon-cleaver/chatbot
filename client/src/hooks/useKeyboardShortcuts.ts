@@ -60,6 +60,7 @@ export function useKeyboardShortcuts({
       }
 
       // Shift + Ctrl/Cmd + O: Start new chat
+      // Note: Use uppercase 'O' because e.key returns the uppercase character when Shift is pressed
       if (isMod && e.shiftKey && e.key === "O") {
         e.preventDefault();
         handlers.onNewChat?.();
