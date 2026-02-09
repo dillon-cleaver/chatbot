@@ -94,6 +94,26 @@
     gap: 0.75rem; /* Reduce from 1rem */
   }
 
+  /* Mobile scrollbar styling - purple and flush to edge */
+  .messages::-webkit-scrollbar {
+    width: 4px !important; /* Narrow for mobile */
+  }
+
+  .messages::-webkit-scrollbar-track {
+    background: transparent !important; /* Transparent to stay flush */
+  }
+
+  .messages::-webkit-scrollbar-thumb {
+    background: #6c5ce7 !important; /* Force purple color */
+    background-color: #6c5ce7 !important; /* Fallback */
+    border: none !important; /* No border for flush appearance */
+    border-radius: 2px;
+  }
+
+  .messages::-webkit-scrollbar-thumb:active {
+    background: #8b7ff5 !important; /* Lighter purple on touch */
+  }
+
   .messageContent {
     padding: 0.625rem 1rem; /* Reduce from 0.75rem 1.25rem */
     font-size: 0.9375rem; /* Slightly smaller */
