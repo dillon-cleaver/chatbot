@@ -67,8 +67,8 @@ export function useKeyboardShortcuts({
         return;
       }
 
-      // Escape: Close modals / return focus
-      if (e.key === "Escape") {
+      // Escape: Close modals / return focus (skip if already handled by a modal)
+      if (e.key === "Escape" && !e.defaultPrevented) {
         handlers.onEscape?.();
         return;
       }

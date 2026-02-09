@@ -186,8 +186,8 @@ export function FileAttachModal({
             />
             <div className={styles.localFilesHint}>
               <p>
-                Files are stored and processed locally; only message content is
-                sent to the server.
+                Uploaded files and message content may be sent to and processed
+                on our servers.
               </p>
             </div>
           </div>
