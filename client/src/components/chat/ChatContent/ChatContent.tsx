@@ -35,6 +35,12 @@ export function ChatContent(): React.JSX.Element {
   const { theme, toggleTheme } = useTheme();
   const announce = useAnnouncer();
 
+  // Memoize to keep loadConversation's identity stable (it depends on onError)
+  const handleError = useCallback(
+    (message: string) => announce(ANNOUNCEMENTS.ERROR(message), "assertive"),
+    [announce],
+  );
+
   const fileManager = useFileManager({
     conversationId: currentConversationId,
     onUploadSuccess: (count) => announce(ANNOUNCEMENTS.FILE_UPLOADED(count)),
@@ -79,6 +85,7 @@ export function ChatContent(): React.JSX.Element {
     onClearSelectedFiles: fileManager.clearSelectedFiles,
     onNewChat: handleNewChat,
     onDeleteSuccess: () => announce(ANNOUNCEMENTS.CONVERSATION_DELETED),
+    onError: handleError,
   });
 
   // Auto-scroll to bottom when messages change
@@ -192,6 +199,7 @@ export function ChatContent(): React.JSX.Element {
       onSend: handleSendMessage,
       onAttach: fileManager.openModal,
       onHistory: conversations.openHistoryModal,
+      onNewChat: handleNewChat,
       onEscape: handleEscape,
       onHelp: () => setIsHelpModalOpen(true),
     },

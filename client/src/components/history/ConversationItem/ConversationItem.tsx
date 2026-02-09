@@ -5,7 +5,7 @@ import {
   useEffect,
   useImperativeHandle,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Check, X, Pencil } from "lucide-react";
 import type { Conversation } from "../../../types";
 import { Button } from "../../ui/Button";
@@ -48,6 +48,7 @@ export const ConversationItem = forwardRef<
   },
   ref,
 ): React.JSX.Element {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(conversation.title);
   const [internalFocus, setInternalFocus] = useState<FocusPosition>(0);
@@ -144,9 +145,8 @@ export const ConversationItem = forwardRef<
         e.preventDefault();
         e.stopPropagation();
         if (internalFocus === 0) {
-          // Navigate via the link
-          const link = e.currentTarget.querySelector("a");
-          link?.click();
+          navigate(`/chat/${conversation.id}`);
+          onClose();
         } else if (internalFocus === 1) {
           startEditing();
         } else if (internalFocus === 2) {

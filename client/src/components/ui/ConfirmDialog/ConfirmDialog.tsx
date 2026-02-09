@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Button } from '../Button';
+import { FOCUSABLE_ELEMENTS_SELECTOR } from '../../../constants/a11y';
 import styles from './ConfirmDialog.module.css';
 
 export interface ConfirmDialogProps {
@@ -46,7 +47,7 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }: Co
       if (e.key !== 'Tab') return;
 
       const focusableElements = dialogRef.current?.querySelectorAll(
-        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        FOCUSABLE_ELEMENTS_SELECTOR,
       );
 
       if (!focusableElements || focusableElements.length === 0) return;
