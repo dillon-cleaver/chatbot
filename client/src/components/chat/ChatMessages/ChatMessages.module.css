@@ -95,23 +95,22 @@
   }
 
   /* Mobile scrollbar styling - purple and flush to edge */
-  .messages::-webkit-scrollbar {
-    width: 4px !important; /* Narrow for mobile */
+  .messages.messages::-webkit-scrollbar {
+    width: 4px; /* Narrow for mobile, double class for specificity */
   }
 
-  .messages::-webkit-scrollbar-track {
-    background: transparent !important; /* Transparent to stay flush */
+  .messages.messages::-webkit-scrollbar-track {
+    background: transparent; /* Transparent to stay flush */
   }
 
-  .messages::-webkit-scrollbar-thumb {
-    background: #6c5ce7 !important; /* Force purple color */
-    background-color: #6c5ce7 !important; /* Fallback */
-    border: none !important; /* No border for flush appearance */
+  .messages.messages::-webkit-scrollbar-thumb {
+    background: var(--button-bg); /* Use design system variable */
+    border: none; /* No border for flush appearance */
     border-radius: 2px;
   }
 
-  .messages::-webkit-scrollbar-thumb:active {
-    background: #8b7ff5 !important; /* Lighter purple on touch */
+  .messages.messages::-webkit-scrollbar-thumb:active {
+    background: var(--focus-color); /* Lighter purple on touch */
   }
 
   .messageContent {

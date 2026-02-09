@@ -92,15 +92,14 @@ export function ChatContent(): React.JSX.Element {
   }, [chat.messages]);
 
   // Auto-focus input after assistant responds
-  const lastMessage = chat.messages[chat.messages.length - 1];
-  const lastMessageIsAssistant = lastMessage?.role === "assistant";
+  const lastMessageIsAssistant = useMemo(
+    () => chat.messages[chat.messages.length - 1]?.role === "assistant",
+    [chat.messages],
+  );
 
   useAutoFocus({
     ref: chatInputRef,
-    enabled:
-      !chat.isLoading &&
-      chat.messages.length > 0 &&
-      lastMessageIsAssistant,
+    enabled: !chat.isLoading && chat.messages.length > 0 && lastMessageIsAssistant,
     trigger: "change",
   });
 

@@ -94,5 +94,7 @@ export function useAutoFocus({
         ref.current.focus();
       }
     }
-  }, [enabled, trigger, delay, ref]);
+    // Note: ref intentionally excluded from deps - ref.current changes don't need to trigger effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, trigger, delay]);
 }
