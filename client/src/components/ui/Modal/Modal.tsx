@@ -39,7 +39,7 @@ export function Modal({
       } else {
         // Fallback: focus first focusable element in the dialog
         const firstFocusable = dialogRef.current?.querySelector(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
         ) as HTMLElement | null;
         if (firstFocusable) {
           firstFocusable.focus();
@@ -58,6 +58,7 @@ export function Modal({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        e.stopPropagation();
         onClose();
       }
     };
@@ -74,7 +75,7 @@ export function Modal({
       if (e.key !== "Tab") return;
 
       const focusableElements = dialogRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
       );
 
       if (!focusableElements || focusableElements.length === 0) return;

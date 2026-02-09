@@ -72,6 +72,20 @@
     padding 0.3s ease-in-out 0.1s;
 }
 
+.localFilesHint {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+}
+
+.localFilesHint p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-family: "Roboto", sans-serif;
+}
+
 @media (max-width: 768px) {
   .sectionHeader {
     padding: 0.75rem 1rem 0.5rem 1rem; /* Reduce from 1rem 1.5rem 0.75rem */

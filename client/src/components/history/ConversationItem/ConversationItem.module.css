@@ -111,9 +111,10 @@
 }
 
 .titleInput:focus {
+  position: relative;
+  z-index: 1;
   outline: none;
   border-color: var(--focus-color);
-  box-shadow: 0 0 0 2px var(--focus-shadow);
 }
 
 .saveButton,

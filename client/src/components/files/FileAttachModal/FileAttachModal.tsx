@@ -184,6 +184,12 @@ export function FileAttachModal({
               onDeleteFile={onDeleteFile}
               onNavigateUp={handleNavigateUpFromList}
             />
+            <div className={styles.localFilesHint}>
+              <p>
+                Files are stored and processed locally; only message content is
+                sent to the server.
+              </p>
+            </div>
           </div>
         </div>
       </div>
