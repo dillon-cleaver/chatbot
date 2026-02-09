@@ -80,6 +80,10 @@ export function useAutoFocus({
         ? !hasMountedRef.current && enabled // Focus on mount if enabled
         : wasEnabled === false && enabled; // Focus on transition to enabled
 
+    // Always update refs regardless of focus/delay path
+    prevEnabledRef.current = enabled;
+    hasMountedRef.current = true;
+
     if (shouldFocus && ref.current) {
       if (delay > 0) {
         const timer = setTimeout(() => {
@@ -90,8 +94,5 @@ export function useAutoFocus({
         ref.current.focus();
       }
     }
-
-    prevEnabledRef.current = enabled;
-    hasMountedRef.current = true;
   }, [enabled, trigger, delay, ref]);
 }
