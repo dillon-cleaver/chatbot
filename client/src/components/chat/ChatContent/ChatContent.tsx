@@ -241,7 +241,7 @@ export function ChatContent(): React.JSX.Element {
         onNavigateDown={handleNavigateToInput}
       />
 
-      <main id="main-content" className={styles.mainContent}>
+      <main id="main-content" className={styles.mainContent} tabIndex={-1}>
         <ChatContainer
           isEmpty={isEmpty}
           emptyContent={
