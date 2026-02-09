@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { Button } from "../Button";
+import { FOCUSABLE_ELEMENTS_SELECTOR } from "../../../constants/a11y";
 import styles from "./Modal.module.css";
 
 export interface ModalProps {
@@ -39,7 +40,7 @@ export function Modal({
       } else {
         // Fallback: focus first focusable element in the dialog
         const firstFocusable = dialogRef.current?.querySelector(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          FOCUSABLE_ELEMENTS_SELECTOR,
         ) as HTMLElement | null;
         if (firstFocusable) {
           firstFocusable.focus();
@@ -58,6 +59,8 @@ export function Modal({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         onClose();
       }
     };
@@ -74,7 +77,7 @@ export function Modal({
       if (e.key !== "Tab") return;
 
       const focusableElements = dialogRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        FOCUSABLE_ELEMENTS_SELECTOR,
       );
 
       if (!focusableElements || focusableElements.length === 0) return;

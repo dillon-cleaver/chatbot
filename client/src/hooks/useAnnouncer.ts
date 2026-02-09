@@ -1,5 +1,12 @@
 import { useCallback, useRef, useEffect } from "react";
 
+// Module-level reference counting for shared live regions
+let politeRefCount = 0;
+let assertiveRefCount = 0;
+
+// Delay before setting announcement text (allows DOM to settle)
+const ANNOUNCEMENT_DELAY_MS = 50;
+
 /**
  * Custom hook for announcing messages to screen readers via ARIA live regions.
  *
@@ -25,29 +32,51 @@ export function useAnnouncer(): (
 
   // Create live regions on mount
   useEffect(() => {
-    // Create polite live region
-    const politeRegion = document.createElement("div");
-    politeRegion.setAttribute("aria-live", "polite");
-    politeRegion.setAttribute("aria-atomic", "true");
-    politeRegion.setAttribute("role", "status");
-    politeRegion.className = "visually-hidden";
-    politeRegion.id = "announcer-polite";
-    document.body.appendChild(politeRegion);
+    // Create or reuse polite live region
+    let politeRegion = document.getElementById(
+      "announcer-polite",
+    ) as HTMLDivElement | null;
+    if (!politeRegion) {
+      politeRegion = document.createElement("div");
+      politeRegion.setAttribute("aria-live", "polite");
+      politeRegion.setAttribute("aria-atomic", "true");
+      politeRegion.setAttribute("role", "status");
+      politeRegion.className = "visually-hidden";
+      politeRegion.id = "announcer-polite";
+      document.body.appendChild(politeRegion);
+    }
     politeRef.current = politeRegion;
+    politeRefCount++;
 
-    // Create assertive live region (for urgent announcements)
-    const assertiveRegion = document.createElement("div");
-    assertiveRegion.setAttribute("aria-live", "assertive");
-    assertiveRegion.setAttribute("aria-atomic", "true");
-    assertiveRegion.setAttribute("role", "alert");
-    assertiveRegion.className = "visually-hidden";
-    assertiveRegion.id = "announcer-assertive";
-    document.body.appendChild(assertiveRegion);
+    // Create or reuse assertive live region (for urgent announcements)
+    let assertiveRegion = document.getElementById(
+      "announcer-assertive",
+    ) as HTMLDivElement | null;
+    if (!assertiveRegion) {
+      assertiveRegion = document.createElement("div");
+      assertiveRegion.setAttribute("aria-live", "assertive");
+      assertiveRegion.setAttribute("aria-atomic", "true");
+      assertiveRegion.setAttribute("role", "alert");
+      assertiveRegion.className = "visually-hidden";
+      assertiveRegion.id = "announcer-assertive";
+      document.body.appendChild(assertiveRegion);
+    }
     assertiveRef.current = assertiveRegion;
+    assertiveRefCount++;
 
     return () => {
-      politeRegion.remove();
-      assertiveRegion.remove();
+      // Only remove DOM elements when no instances are using them
+      politeRefCount--;
+      if (politeRefCount === 0 && politeRef.current) {
+        politeRef.current.remove();
+      }
+      politeRef.current = null;
+
+      assertiveRefCount--;
+      if (assertiveRefCount === 0 && assertiveRef.current) {
+        assertiveRef.current.remove();
+      }
+      assertiveRef.current = null;
     };
   }, []);
 
@@ -61,7 +90,7 @@ export function useAnnouncer(): (
         // Use setTimeout to ensure the DOM update triggers the announcement
         setTimeout(() => {
           region.textContent = message;
-        }, 50);
+        }, ANNOUNCEMENT_DELAY_MS);
       }
     },
     [],

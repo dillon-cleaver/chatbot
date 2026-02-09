@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Button } from "../Button";
+import { FOCUSABLE_ELEMENTS_SELECTOR } from "../../../constants/a11y";
 import styles from "./AlertDialog.module.css";
 
 export interface AlertDialogProps {
@@ -50,7 +51,7 @@ export function AlertDialog({
       if (e.key !== "Tab") return;
 
       const focusableElements = dialogRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        FOCUSABLE_ELEMENTS_SELECTOR,
       );
 
       if (!focusableElements || focusableElements.length === 0) return;

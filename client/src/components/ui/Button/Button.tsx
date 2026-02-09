@@ -15,6 +15,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       destructive = false,
       animated = true,
       className = "",
+      type = "button",
       children,
       ...props
     },
@@ -30,7 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       `${styles.button} ${variantClass} ${destructiveClass} ${className}`.trim();
 
     return (
-      <button ref={ref} type="button" className={combinedClassName} {...props}>
+      <button ref={ref} type={type} className={combinedClassName} {...props}>
         {children}
       </button>
     );

@@ -6,6 +6,7 @@ export interface KeyboardShortcutHandlers {
   onHistory?: () => void;
   onEscape?: () => void;
   onHelp?: () => void;
+  onNewChat?: () => void;
 }
 
 export interface UseKeyboardShortcutsOptions {
@@ -58,8 +59,16 @@ export function useKeyboardShortcuts({
         return;
       }
 
-      // Escape: Close modals / return focus
-      if (e.key === "Escape") {
+      // Shift + Ctrl/Cmd + O: Start new chat
+      // Note: Normalize to lowercase since e.key casing varies across platforms when Shift is held
+      if (isMod && e.shiftKey && e.key.toLowerCase() === "o") {
+        e.preventDefault();
+        handlers.onNewChat?.();
+        return;
+      }
+
+      // Escape: Close modals / return focus (skip if already handled by a modal)
+      if (e.key === "Escape" && !e.defaultPrevented) {
         handlers.onEscape?.();
         return;
       }
@@ -94,7 +103,7 @@ export const KEYBOARD_SHORTCUTS = [
   },
   {
     keys: ["Ctrl/⌘", "Enter"],
-    description: "Send message (from anywhere)",
+    description: "Send message (even without input focus)",
   },
   {
     keys: ["Ctrl/⌘", "U"],
@@ -103,6 +112,10 @@ export const KEYBOARD_SHORTCUTS = [
   {
     keys: ["Ctrl/⌘", "Y"],
     description: "Open chat history",
+  },
+  {
+    keys: ["Shift", "Ctrl/⌘", "O"],
+    description: "Start new chat",
   },
   {
     keys: ["Escape"],

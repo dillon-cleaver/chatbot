@@ -96,7 +96,6 @@ export const Header = forwardRef<HeaderRef, HeaderProps>(function Header(
           onClick={onHelpClick}
           onKeyDown={handleHelpKeyDown}
           aria-label="Keyboard shortcuts"
-          aria-keyshortcuts="?"
         >
           <HelpCircle size={20} />
         </button>
