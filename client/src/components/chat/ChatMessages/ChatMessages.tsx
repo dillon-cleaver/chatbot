@@ -14,12 +14,14 @@ export interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  onViewFile?: (fileId: string) => void | Promise<void>;
 }
 
 export function ChatMessages({
   messages,
   isLoading,
   messagesEndRef,
+  onViewFile,
 }: ChatMessagesProps): React.JSX.Element {
   // Pick a random loading message when loading starts
   const [loadingMessage] = useState(() => {
@@ -37,7 +39,7 @@ export function ChatMessages({
         aria-label="Chat messages"
       >
         {messages.map((msg) => (
-          <MessageItem key={msg.id} message={msg} />
+          <MessageItem key={msg.id} message={msg} onViewFile={onViewFile} />
         ))}
         {isLoading && (
           <div

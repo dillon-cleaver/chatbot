@@ -22,7 +22,6 @@
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   cursor: pointer;
-  border-radius: 4px;
   padding: 0.5rem 1rem;
   border: var(--border-width) solid var(--border-color);
   box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px

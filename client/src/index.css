@@ -71,6 +71,13 @@
   box-sizing: border-box;
 }
 
+/* Neobrutalist reset - sharp corners on all form elements */
+input, textarea, select, button {
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 html {
   overflow: hidden;
 }
@@ -119,11 +126,8 @@ body::-webkit-scrollbar-thumb:hover,
   background: var(--focus-color);
 }
 
-/* Firefox scrollbar styling */
-body,
-.messages,
-.fileList,
-.fileChipsContainer {
+/* Firefox scrollbar styling (body only - CSS Module classes styled in component files) */
+body {
   scrollbar-width: thin;
   scrollbar-color: var(--button-bg) var(--bg-primary);
 }

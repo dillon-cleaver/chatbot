@@ -89,9 +89,28 @@
 
 @media (max-width: 768px) {
   .messages {
-    padding: 0.5rem 0.5rem 0.5rem 0; /* Reduce from 1rem */
+    padding: 0.5rem 0.5rem 0.5rem 0; /* Keep right padding for message spacing */
     padding-top: 1.25rem; /* Extra top padding for fixed header clearance */
     gap: 0.75rem; /* Reduce from 1rem */
+  }
+
+  /* Mobile scrollbar styling - purple and flush to edge */
+  .messages.messages::-webkit-scrollbar {
+    width: 4px; /* Narrow for mobile, double class for specificity */
+  }
+
+  .messages.messages::-webkit-scrollbar-track {
+    background: transparent; /* Transparent to stay flush */
+  }
+
+  .messages.messages::-webkit-scrollbar-thumb {
+    background: var(--button-bg); /* Use design system variable */
+    border: none; /* No border for flush appearance */
+    border-radius: 2px;
+  }
+
+  .messages.messages::-webkit-scrollbar-thumb:active {
+    background: var(--focus-color); /* Lighter purple on touch */
   }
 
   .messageContent {

@@ -38,3 +38,12 @@ lerna-debug.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# pnpm
+.pnpm-store/
+
+# Databases
+*.db
+
+# Uploads
+server/uploads/
