@@ -1,7 +1,7 @@
 .inputContainer {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 12px;
   padding: 1rem 0;
 }
 
@@ -12,7 +12,7 @@
 
 .inputRow {
   display: flex;
-  gap: 0.5rem;
+  gap: 12px;
   align-items: flex-end;
 }
 
@@ -93,10 +93,10 @@
 .input:focus {
   outline: none;
   border-color: var(--focus-color);
-  box-shadow:
-    var(--default-shadow-offset) var(--default-shadow-offset) 0px
-      var(--shadow-color),
-    0 0 0 var(--focus-outline-width) var(--focus-shadow);
+  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+    var(--shadow-color);
+  position: relative;
+  z-index: 1;
 }
 
 .input:disabled {
@@ -161,10 +161,10 @@
   .input {
     font-size: 1rem; /* Ensure 16px minimum to prevent iOS zoom */
     /* Inner height = 40px - 6px borders = 34px */
-    line-height: 34px; /* Match inner height for vertical centering */
+    line-height: 1.5; /* Relative line-height for better responsiveness */
     height: 40px;
     min-height: 40px;
-    padding: 0 0.75rem; /* Horizontal padding only */
+    padding: 0.5rem 0.75rem; /* Add vertical padding */
   }
 
   .attachButton {

@@ -7,6 +7,7 @@ import { useConversations } from "../../../hooks/useConversations";
 import { useChat } from "../../../hooks/useChat";
 import { useKeyboardShortcuts } from "../../../hooks/useKeyboardShortcuts";
 import { useAnnouncer, ANNOUNCEMENTS } from "../../../hooks/useAnnouncer";
+import { useAutoFocus } from "../../../hooks/useAutoFocus";
 import { Header, type HeaderRef } from "../../layout/Header/Header";
 import { ChatMessages } from "../ChatMessages/ChatMessages";
 import { ChatInput, type ChatInputRef } from "../ChatInput/ChatInput";
@@ -16,6 +17,10 @@ import { ChatHistoryModal } from "../../history/ChatHistoryModal/ChatHistoryModa
 import { ConfirmDialog } from "../../ui/ConfirmDialog/ConfirmDialog";
 import { KeyboardShortcutsModal } from "../../ui/KeyboardShortcutsModal/KeyboardShortcutsModal";
 import { Spinner } from "../../ui/Spinner/Spinner";
+
+// Timing constants for animations and delays
+const MODAL_CLOSE_ANIMATION_MS = 150;
+const FOCUS_AFTER_NEW_CHAT_MS = 50;
 
 export function ChatContent(): React.JSX.Element {
   const { conversationId } = useParams<{ conversationId?: string }>();
@@ -86,6 +91,13 @@ export function ChatContent(): React.JSX.Element {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat.messages]);
 
+  // Auto-focus input after assistant responds
+  useAutoFocus({
+    ref: chatInputRef,
+    enabled: !chat.isLoading && chat.messages.length > 0,
+    trigger: "change",
+  });
+
   // Auto-scroll when modal closes to accommodate file selection UI
   useEffect(() => {
     // Only scroll when modal closes (transitions from true to false)
@@ -93,7 +105,7 @@ export function ChatContent(): React.JSX.Element {
       // Delay to let modal close animation complete, then smooth scroll
       const timer = setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 150);
+      }, MODAL_CLOSE_ANIMATION_MS);
       return () => clearTimeout(timer);
     }
   }, [fileManager.isModalOpen, fileManager.selectedFileIds.length]);
@@ -218,7 +230,7 @@ export function ChatContent(): React.JSX.Element {
     // Focus input after modal animation completes
     setTimeout(() => {
       chatInputRef.current?.focus();
-    }, 50);
+    }, FOCUS_AFTER_NEW_CHAT_MS);
   }, [conversations]);
 
   return (
@@ -272,6 +284,7 @@ export function ChatContent(): React.JSX.Element {
                 messages={chat.messages}
                 isLoading={chat.isLoading}
                 messagesEndRef={messagesEndRef}
+                onViewFile={fileManager.viewFile}
               />
               <ChatInput
                 ref={chatInputRef}

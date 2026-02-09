@@ -25,6 +25,9 @@
   /* Border widths */
   --border-width: 3px;
   --border-width-thick: 4px;
+
+  /* Focus ring shorthand */
+  --focus-outline: var(--focus-outline-width) solid var(--focus-color);
 }
 
 /* Dark theme (default) */
@@ -69,6 +72,13 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Neobrutalist reset - sharp corners on all form elements */
+input, textarea, select, button {
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 html {

@@ -1,16 +1,16 @@
 import ReactMarkdown from 'react-markdown';
 import type { Message } from '../../../types';
 import { FileChip } from '../FileChip/FileChip';
-import * as api from '../../../utils/api';
 import styles from './MessageItem.module.css';
 
 export interface MessageItemProps {
   message: Message;
+  onViewFile?: (fileId: string) => void | Promise<void>;
 }
 
-export function MessageItem({ message }: MessageItemProps): React.JSX.Element {
+export function MessageItem({ message, onViewFile }: MessageItemProps): React.JSX.Element {
   const handleFileClick = (fileId: string) => {
-    api.viewFile(fileId);
+    onViewFile?.(fileId);
   };
 
   const messageLabel = message.role === 'user' ? 'User message' : 'Assistant message';
