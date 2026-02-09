@@ -138,6 +138,38 @@ body,
   scrollbar-color: var(--button-bg) var(--bg-primary);
 }
 
+/* Mobile scrollbar styling - narrower, purple, flush to edge */
+@media (max-width: 768px) {
+  body::-webkit-scrollbar,
+  .messages::-webkit-scrollbar,
+  .fileList::-webkit-scrollbar,
+  .fileChipsContainer::-webkit-scrollbar {
+    width: 4px; /* Narrow for mobile */
+  }
+
+  body::-webkit-scrollbar-track,
+  .messages::-webkit-scrollbar-track,
+  .fileList::-webkit-scrollbar-track,
+  .fileChipsContainer::-webkit-scrollbar-track {
+    background: transparent; /* Transparent track to stay flush */
+  }
+
+  body::-webkit-scrollbar-thumb,
+  .messages::-webkit-scrollbar-thumb,
+  .fileList::-webkit-scrollbar-thumb,
+  .fileChipsContainer::-webkit-scrollbar-thumb {
+    background: #6c5ce7; /* Explicit purple, no borders */
+    border-radius: 2px;
+  }
+
+  body::-webkit-scrollbar-thumb:active,
+  .messages::-webkit-scrollbar-thumb:active,
+  .fileList::-webkit-scrollbar-thumb:active,
+  .fileChipsContainer::-webkit-scrollbar-thumb:active {
+    background: #8b7ff5; /* Lighter purple on touch */
+  }
+}
+
 #root {
   height: 100vh;
   height: 100dvh;
