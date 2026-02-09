@@ -25,9 +25,6 @@
   /* Border widths */
   --border-width: 3px;
   --border-width-thick: 4px;
-
-  /* Focus ring shorthand */
-  --focus-outline: var(--focus-outline-width) solid var(--focus-color);
 }
 
 /* Dark theme (default) */
