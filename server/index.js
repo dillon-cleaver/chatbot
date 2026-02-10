@@ -19,7 +19,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" })); // Support base64 file content
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -335,7 +335,7 @@ app.post('/conversations/:id/messages', (req, res) => {
 
 app.post('/chat', async (req, res) => {
   try {
-    const { messages, fileIds, conversation_id } = req.body;
+    const { messages, conversation_id } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'Messages array is required' });
@@ -348,48 +348,28 @@ app.post('/chat', async (req, res) => {
     // Determine conversation ID
     let convId = conversation_id;
 
-    // Generate title from first user message before processing files
-    // (we need to do this before content is transformed to content blocks)
+    // Generate title from first user message
     let conversationTitle = null;
     if (!convId) {
-      const firstMessage = messages[messages.length - 1].content;
-      conversationTitle = typeof firstMessage === 'string' && firstMessage.length > 50
-        ? firstMessage.substring(0, 47) + '...'
-        : (typeof firstMessage === 'string' ? firstMessage : 'New Conversation');
-    }
-
-    // Process files if provided
-    if (fileIds && fileIds.length > 0) {
-      if (fileIds.length > 5) {
-        return res.status(400).json({ error: 'Maximum 5 files per message' });
-      }
-
       const lastMessage = messages[messages.length - 1];
-      const contentBlocks = [{ type: 'text', text: lastMessage.content }];
+      let firstMessageText = '';
 
-      for (const fileId of fileIds) {
-        const file = db.prepare('SELECT * FROM files WHERE id = ?').get(fileId);
-        if (!file) {
-          return res.status(400).json({ error: `File not found: ${fileId}` });
-        }
-
-        const filePath = path.join(__dirname, file.path);
-        if (!fs.existsSync(filePath)) {
-          return res.status(400).json({ error: `File not found on disk: ${file.original_name}` });
-        }
-
+      // Extract text from message content (could be string or content blocks)
+      if (typeof lastMessage.content === 'string') {
+        firstMessageText = lastMessage.content;
+      } else {
         try {
-          const contentBlock = await processFile(file, filePath);
-          contentBlocks.push(contentBlock);
-        } catch (error) {
-          return res.status(400).json({
-            error: `Failed to process ${file.original_name}`,
-            details: error.message
-          });
+          const contentBlocks = JSON.parse(lastMessage.content);
+          const textBlock = contentBlocks.find(block => block.type === 'text');
+          firstMessageText = textBlock?.text || 'New Conversation';
+        } catch {
+          firstMessageText = 'New Conversation';
         }
       }
 
-      messages[messages.length - 1].content = contentBlocks;
+      conversationTitle = firstMessageText.length > 50
+        ? firstMessageText.substring(0, 47) + '...'
+        : firstMessageText;
     }
 
     // If no conversation ID, create new conversation now
@@ -421,7 +401,7 @@ app.post('/chat', async (req, res) => {
         ? userMessage.content
         : JSON.stringify(userMessage.content),
       now,
-      fileIds ? JSON.stringify(fileIds) : null
+      null
     );
 
     // Call Claude API

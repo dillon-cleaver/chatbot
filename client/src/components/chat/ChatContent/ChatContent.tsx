@@ -77,10 +77,10 @@ export function ChatContent(): React.JSX.Element {
   // Initialize chat with conversation ID from App state
   const chat = useChat({
     conversationId: currentConversationId,
-    selectedFileIds: fileManager.selectedFileIds,
     selectedFiles,
     onConversationCreated: handleConversationCreated,
     onClearSelectedFiles: fileManager.clearSelectedFiles,
+    getFileObject: fileManager.getFileObject,
   });
 
   // Initialize conversations with navigation callback

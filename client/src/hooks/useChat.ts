@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import type { Message, UploadedFile } from '../types';
 import * as api from '../utils/api';
 import { generateUUID } from '../utils/uuid';
+import { processFile } from '../services/fileProcessor';
 
 export interface UseChatReturn {
   messages: Message[];
@@ -14,18 +15,18 @@ export interface UseChatReturn {
 
 interface UseChatProps {
   conversationId: string | null;
-  selectedFileIds: string[];
   selectedFiles: UploadedFile[];
   onConversationCreated: (conversationId: string) => void;
   onClearSelectedFiles: () => void;
+  getFileObject: (fileId: string) => File | undefined;
 }
 
 export function useChat({
   conversationId,
-  selectedFileIds,
   selectedFiles,
   onConversationCreated,
   onClearSelectedFiles,
+  getFileObject,
 }: UseChatProps): UseChatReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>('');
@@ -50,7 +51,65 @@ export function useChat({
     setIsLoading(true);
 
     try {
-      const data = await api.sendChatMessage(updatedMessages, conversationId, selectedFileIds);
+      // Process files into content blocks if any are attached
+      let finalMessages = updatedMessages;
+      if (selectedFiles.length > 0) {
+        const contentBlocks: Array<
+          | { type: "text"; text: string }
+          | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
+          | { type: "document"; source: { type: "base64"; media_type: string; data: string } }
+        > = [{ type: "text", text: input.trim() }];
+
+        // Get File objects from fileManager and process them
+        for (const uploadedFile of selectedFiles) {
+          const fileObject = getFileObject(uploadedFile.id);
+          if (!fileObject) {
+            throw new Error(`File not found: ${uploadedFile.original_name}`);
+          }
+
+          try {
+            const processedFile = await processFile(fileObject);
+
+            if (processedFile.type === "image") {
+              contentBlocks.push({
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: processedFile.mimeType!,
+                  data: processedFile.data
+                }
+              });
+            } else if (processedFile.type === "document") {
+              contentBlocks.push({
+                type: "document",
+                source: {
+                  type: "base64",
+                  media_type: processedFile.mimeType!,
+                  data: processedFile.data
+                }
+              });
+            } else {
+              // text type
+              contentBlocks.push({
+                type: "text",
+                text: processedFile.data
+              });
+            }
+          } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            throw new Error(`Failed to process ${uploadedFile.original_name}: ${errorMsg}`);
+          }
+        }
+
+        // Create modified messages array with content blocks
+        finalMessages = [...updatedMessages];
+        finalMessages[finalMessages.length - 1] = {
+          ...finalMessages[finalMessages.length - 1],
+          content: JSON.stringify(contentBlocks)
+        };
+      }
+
+      const data = await api.sendChatMessage(finalMessages, conversationId);
       setMessages([...updatedMessages, { id: crypto.randomUUID(), role: 'assistant', content: data.content }]);
 
       // Set conversation ID if it's a new conversation
@@ -67,7 +126,7 @@ export function useChat({
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages, conversationId, selectedFileIds, selectedFiles, onConversationCreated, onClearSelectedFiles]);
+  }, [input, isLoading, messages, conversationId, selectedFiles, onConversationCreated, onClearSelectedFiles, getFileObject]);
 
   return {
     messages,
