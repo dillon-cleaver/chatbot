@@ -61,6 +61,42 @@ export function FileAttachModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  // Remove deleted files from pending selections
+  useEffect(() => {
+    const validIds = new Set(files.map((f) => f.id));
+    setPendingFileIds((prev) => {
+      const filtered = prev.filter((id) => validIds.has(id));
+      return filtered.length === prev.length ? prev : filtered;
+    });
+  }, [files]);
+
+  // Auto-select newly uploaded files while the modal is open
+  const prevFileIdsRef = useRef<Set<string>>(new Set(files.map((f) => f.id)));
+
+  useEffect(() => {
+    const prevIds = prevFileIdsRef.current;
+    const newFileIds = files
+      .filter((f) => !prevIds.has(f.id))
+      .map((f) => f.id);
+
+    if (isOpen && newFileIds.length > 0) {
+      setPendingFileIds((prev) => {
+        const remaining = MAX_FILES_PER_MESSAGE - prev.length;
+        if (remaining <= 0) {
+          setShowLimitWarning(true);
+          return prev;
+        }
+        const toAdd = newFileIds.slice(0, remaining);
+        if (toAdd.length < newFileIds.length) {
+          setShowLimitWarning(true);
+        }
+        return [...prev, ...toAdd];
+      });
+    }
+
+    prevFileIdsRef.current = new Set(files.map((f) => f.id));
+  }, [files, isOpen]);
+
   // Local toggle handler for pending selections
   const handleTogglePending = (fileId: string): void => {
     setPendingFileIds((prev) => {
