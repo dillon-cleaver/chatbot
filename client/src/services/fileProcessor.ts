@@ -104,6 +104,34 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 /**
+ * Detect actual image MIME type from file magic bytes.
+ * Browsers sometimes report incorrect MIME types based on extension alone.
+ */
+function detectImageMimeType(buffer: ArrayBuffer): string | null {
+  const bytes = new Uint8Array(buffer.slice(0, 12));
+  // PNG: 89 50 4E 47
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
+    return "image/png";
+  }
+  // JPEG: FF D8 FF
+  if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
+    return "image/jpeg";
+  }
+  // GIF: 47 49 46 38 (GIF8)
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
+    return "image/gif";
+  }
+  // WebP: RIFF....WEBP
+  if (
+    bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+    bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50
+  ) {
+    return "image/webp";
+  }
+  return null;
+}
+
+/**
  * Process an image file into a Claude-compatible image content block
  */
 async function processImage(
@@ -115,12 +143,13 @@ async function processImage(
   }
 
   const buffer = await readFileAsArrayBuffer(file);
+  const actualMimeType = detectImageMimeType(buffer) ?? mimeType;
   const base64 = arrayBufferToBase64(buffer);
 
   return {
     type: "image",
     data: base64,
-    mimeType,
+    mimeType: actualMimeType,
   };
 }
 
