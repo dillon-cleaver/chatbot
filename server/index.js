@@ -20,7 +20,7 @@ const BASE_SYSTEM_PROMPT = `You're a helpful AI assistant with a realistic, down
 
 function getSystemPrompt() {
   const now = new Date();
-  return `${BASE_SYSTEM_PROMPT}\n\nCurrent date and time: ${now.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}`;
+  return `${BASE_SYSTEM_PROMPT}\n\nCurrent date and time: ${now.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}. Always account for the current date when answering time-sensitive questions — don't correct yourself mid-answer.`;
 }
 
 app.post('/chat', async (req, res) => {
