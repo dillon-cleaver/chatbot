@@ -87,6 +87,13 @@ function readFileAsText(file: File): Promise<string> {
 /**
  * Helper to convert ArrayBuffer to base64
  */
+/**
+ * Escape pipe and newline characters for markdown table cells
+ */
+function escapeCell(value: string): string {
+  return value.replace(/\|/g, "\\|").replace(/\n/g, " ");
+}
+
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = "";
@@ -248,10 +255,6 @@ async function processCSV(file: File): Promise<ProcessedFile> {
     skip_empty_lines: true,
   });
 
-  // Escape pipe and newline characters for markdown table cells
-  const escapeCell = (value: string): string =>
-    value.replace(/\|/g, "\\|").replace(/\n/g, " ");
-
   // Format as a readable table
   let formattedText = "CSV Data:\n\n";
   if (records.length > 0) {
@@ -339,7 +342,7 @@ async function processExcel(file: File): Promise<ProcessedFile> {
     for (let i = 0; i < rowsToShow; i++) {
       const row = data[i] as unknown[];
       if (row && row.length > 0) {
-        formattedText += row.join(" | ") + "\n";
+        formattedText += row.map((cell) => escapeCell(String(cell ?? ""))).join(" | ") + "\n";
       }
     }
 
@@ -427,10 +430,6 @@ async function processPowerPoint(file: File): Promise<ProcessedFile> {
   };
 }
 
-/**
- * Main file processor function that routes to the appropriate handler
- * based on file MIME type
- */
 /**
  * Infer MIME type from file extension when the browser provides an empty or unrecognized type
  */
