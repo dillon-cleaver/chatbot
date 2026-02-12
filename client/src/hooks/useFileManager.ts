@@ -216,7 +216,7 @@ export function useFileManager({
       try {
         const { blob } = await indexedDB.getFileBlob(fileId);
         const url = URL.createObjectURL(blob);
-        const popup = window.open(url, '_blank');
+        const popup = window.open(url, '_blank', 'noopener,noreferrer');
 
         // Revoke after 5 minutes
         const timer = setTimeout(() => URL.revokeObjectURL(url), BLOB_URL_REVOKE_MS);

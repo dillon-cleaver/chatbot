@@ -70,4 +70,4 @@ The system prompt is defined in the `SYSTEM_PROMPT` constant in `index.js`.
 - Uses `claude-haiku-4-5-20251001` model by default (configurable via `ANTHROPIC_MODEL` env var)
 - CORS enabled for cross-origin requests from client
 - Max tokens set to 2048
-- JSON body limit set to 10mb to support base64 file content in messages
+- JSON body limit set to 50mb to support multiple base64 file attachments in messages

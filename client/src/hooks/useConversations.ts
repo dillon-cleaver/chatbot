@@ -138,7 +138,7 @@ export function useConversations({
         }
       } finally {
         // Only clear loading if this request wasn't aborted
-        if (!abortControllerRef.current?.signal.aborted) {
+        if (!abortController.signal.aborted) {
           setIsLoadingConversation(false);
         }
       }

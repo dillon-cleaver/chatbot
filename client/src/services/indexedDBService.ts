@@ -17,6 +17,7 @@ interface MessageDB {
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
+  file_ids?: string[];
 }
 
 interface FileDB {
@@ -49,22 +50,27 @@ interface ChatbotDBSchema {
 const DB_NAME = 'chatbot-db';
 const DB_VERSION = 2;
 
+let dbPromise: Promise<IDBPDatabase<ChatbotDBSchema>> | null = null;
+
 function getDB(): Promise<IDBPDatabase<ChatbotDBSchema>> {
-  return openDB<ChatbotDBSchema>(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion) {
-      if (oldVersion < 1) {
-        const convStore = db.createObjectStore('conversations', { keyPath: 'id' });
-        convStore.createIndex('updated_at', 'updated_at');
+  if (!dbPromise) {
+    dbPromise = openDB<ChatbotDBSchema>(DB_NAME, DB_VERSION, {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const convStore = db.createObjectStore('conversations', { keyPath: 'id' });
+          convStore.createIndex('updated_at', 'updated_at');
 
-        const msgStore = db.createObjectStore('messages', { keyPath: 'id' });
-        msgStore.createIndex('conversation_id', 'conversation_id');
-        msgStore.createIndex('timestamp', 'timestamp');
+          const msgStore = db.createObjectStore('messages', { keyPath: 'id' });
+          msgStore.createIndex('conversation_id', 'conversation_id');
+          msgStore.createIndex('timestamp', 'timestamp');
 
-        db.createObjectStore('files', { keyPath: 'id' });
-      }
-      // V2 placeholder for future migrations
-    },
-  });
+          db.createObjectStore('files', { keyPath: 'id' });
+        }
+        // V2 placeholder for future migrations
+      },
+    });
+  }
+  return dbPromise;
 }
 
 // --- Conversations ---
@@ -93,6 +99,7 @@ export async function addMessage(
   conversationId: string,
   role: 'user' | 'assistant',
   content: string,
+  fileIds?: string[],
 ): Promise<Message> {
   const db = await getDB();
   const now = Date.now();
@@ -102,6 +109,7 @@ export async function addMessage(
     role,
     content,
     timestamp: now,
+    ...(fileIds && fileIds.length > 0 ? { file_ids: fileIds } : {}),
   };
   const tx = db.transaction(['messages', 'conversations'], 'readwrite');
   await tx.objectStore('messages').put(msg);
@@ -131,14 +139,40 @@ export async function loadConversation(conversationId: string): Promise<Conversa
   const allMessages = await db.getAllFromIndex('messages', 'conversation_id', conversationId);
   allMessages.sort((a, b) => a.timestamp - b.timestamp);
 
-  return {
-    id: conv.id,
-    title: conv.title,
-    messages: allMessages.map((m) => ({
+  // Look up file metadata for messages that have file_ids
+  const messages: Message[] = [];
+  for (const m of allMessages) {
+    let files: UploadedFile[] | undefined;
+    if (m.file_ids && m.file_ids.length > 0) {
+      const fileResults = await Promise.all(
+        m.file_ids.map((fid: string) => db.get('files', fid)),
+      );
+      const found = fileResults.filter(
+        (f): f is FileDB => f !== undefined,
+      );
+      if (found.length > 0) {
+        files = found.map((f) => ({
+          id: f.id,
+          original_name: f.original_name,
+          stored_name: f.stored_name,
+          mime_type: f.mime_type,
+          size: f.size,
+          uploaded_at: new Date(f.uploaded_at).toISOString(),
+        }));
+      }
+    }
+    messages.push({
       id: m.id,
       role: m.role,
       content: m.content,
-    })),
+      ...(files ? { files } : {}),
+    });
+  }
+
+  return {
+    id: conv.id,
+    title: conv.title,
+    messages,
     created_at: new Date(conv.created_at).toISOString(),
     updated_at: new Date(conv.updated_at).toISOString(),
   };

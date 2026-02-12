@@ -23,11 +23,12 @@ export async function sendChatMessage(
         throw new Error('File too large. Please reduce the file size and try again.');
       }
       let errorMessage = 'Failed to get response';
+      const text = await response.text();
       try {
-        const errorData = (await response.json()) as { error?: string };
+        const errorData = JSON.parse(text) as { error?: string };
         errorMessage = errorData.error || errorMessage;
       } catch {
-        errorMessage = await response.text() || errorMessage;
+        errorMessage = text || errorMessage;
       }
       throw new Error(errorMessage);
     }

@@ -67,8 +67,11 @@ export function useChat({
         onConversationCreated(conv.id);
       }
 
-      // Save user message to IndexedDB
-      await indexedDB.addMessage(activeConversationId, 'user', input.trim());
+      // Save user message to IndexedDB (with file IDs if any are attached)
+      const fileIds = selectedFiles.length > 0
+        ? selectedFiles.map((f) => f.id)
+        : undefined;
+      await indexedDB.addMessage(activeConversationId, 'user', input.trim(), fileIds);
 
       // Process files into content blocks if any are attached
       let finalMessages = updatedMessages;
