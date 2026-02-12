@@ -128,11 +128,12 @@ export const UploadSection = forwardRef<UploadSectionRef, UploadSectionProps>(
             <span className={styles.fileTypeSupported}>
               PDF, DOCX, XLSX, PPTX, PNG, JPEG, GIF, WebP, TXT, CSV
             </span>
-            . Legacy formats{" "}
+            . Unsupported:{" "}
             <span className={styles.fileTypeUnsupported}>
-              (.doc, .xls, .ppt)
-            </span>{" "}
-            are not supported.
+              .doc, .xls, .ppt, .avif, .heic, .tiff, .bmp, .svg, .odt,
+              .ods, .odp, .rtf, .pages, .numbers, .key
+            </span>
+            .
           </p>
           <p>
             <strong>Storage & Privacy:</strong> Files are stored locally on your
