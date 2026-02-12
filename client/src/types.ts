@@ -17,7 +17,6 @@ export interface UploadedFile {
   mime_type: string;
   size: number;
   uploaded_at: string;
-  path: string;
 }
 
 export interface Conversation {
@@ -41,16 +40,6 @@ export interface ChatResponse {
   conversation_id: string;
 }
 
-export interface ChatRequest {
-  message: string;
-  conversationId?: string;
-  fileIds?: string[];
-}
-
 export interface ErrorResponse {
   error: string;
-}
-
-export interface UpdateConversationTitleRequest {
-  title: string;
 }

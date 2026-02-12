@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { UploadedFile } from '../types';
-import * as api from '../utils/api';
+import * as indexedDB from '../services/indexedDBService';
 import { MAX_FILES_PER_MESSAGE } from '../constants';
 
 export interface UseFileManagerReturn {
@@ -47,6 +47,8 @@ const saveSelectedFiles = (conversationId: string | null, fileIds: string[]): vo
   }
 };
 
+const BLOB_URL_REVOKE_MS = 5 * 60 * 1000; // 5 minutes
+
 export interface UseFileManagerOptions {
   conversationId: string | null;
   onUploadSuccess?: (count: number) => void;
@@ -70,7 +72,7 @@ export function useFileManager({
   const fetchFiles = useCallback(async (): Promise<void> => {
     setError(null);
     try {
-      const data = await api.fetchFiles();
+      const data = await indexedDB.listFiles();
       setFiles(data);
     } catch (error) {
       console.error('Failed to fetch files:', error);
@@ -122,7 +124,16 @@ export function useFileManager({
     setError(null);
 
     try {
-      const newFiles = await api.uploadFiles(filesToUpload);
+      const newFiles: UploadedFile[] = [];
+      for (const file of filesToUpload) {
+        const uploaded = await indexedDB.addFile(
+          file.name,
+          file.type,
+          file.size,
+          file,
+        );
+        newFiles.push(uploaded);
+      }
       setFiles((prev) => [...newFiles, ...prev]);
 
       // Store File objects mapped by their new IDs
@@ -150,7 +161,7 @@ export function useFileManager({
 
     setError(null);
     try {
-      await api.deleteFile(fileId);
+      await indexedDB.deleteFileById(fileId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       setSelectedFileIds((prev) => prev.filter((id) => id !== fileId));
 
@@ -192,7 +203,6 @@ export function useFileManager({
 
   const commitPendingSelection = useCallback((fileIds: string[]): void => {
     if (fileIds.length > MAX_FILES_PER_MESSAGE) {
-      // Truncate to max and provide user feedback
       const truncated = fileIds.slice(0, MAX_FILES_PER_MESSAGE);
       setError(`Maximum ${MAX_FILES_PER_MESSAGE} files allowed. Keeping first ${MAX_FILES_PER_MESSAGE}.`);
       setSelectedFileIds(truncated);
@@ -202,7 +212,32 @@ export function useFileManager({
   }, []);
 
   const viewFile = useCallback((fileId: string): void => {
-    api.viewFile(fileId);
+    (async () => {
+      try {
+        const { blob } = await indexedDB.getFileBlob(fileId);
+        const url = URL.createObjectURL(blob);
+        const popup = window.open(url, '_blank');
+
+        // Revoke after 5 minutes
+        const timer = setTimeout(() => URL.revokeObjectURL(url), BLOB_URL_REVOKE_MS);
+
+        // Also revoke on beforeunload if popup accessible
+        if (popup) {
+          try {
+            popup.addEventListener('beforeunload', () => {
+              clearTimeout(timer);
+              URL.revokeObjectURL(url);
+            });
+          } catch {
+            // Cross-origin — timer handles cleanup
+          }
+        } else {
+          console.warn('Popup blocked — file URL will be revoked after 5 minutes');
+        }
+      } catch (error) {
+        console.error('Failed to view file:', error);
+      }
+    })();
   }, []);
 
   const openModal = useCallback((): void => {
