@@ -6,12 +6,15 @@ const MAX_TEXT_SIZE = 1 * 1024 * 1024; // 1MB
 // Rough estimate: 1 token ≈ 4 characters
 // Limit extracted text to ~50k tokens (200k chars) to leave room for conversation
 const MAX_EXTRACTED_TEXT_CHARS = 200000;
+const MAX_PDF_PAGES_TO_EXTRACT = 500;
 
 // Lazy-loaded libraries
 let pdfjsLib: typeof import("pdfjs-dist") | null = null;
 let mammoth: typeof import("mammoth") | null = null;
 let XLSX: typeof import("xlsx") | null = null;
 let csvParse: typeof import("csv-parse/sync") | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let JSZipCtor: any = null;
 
 async function getPdfjsLib() {
   if (!pdfjsLib) {
@@ -41,6 +44,14 @@ async function getCsvParse() {
     csvParse = await import("csv-parse/sync");
   }
   return csvParse;
+}
+
+async function getJSZip(): Promise<typeof import("jszip")> {
+  if (!JSZipCtor) {
+    const mod = await import("jszip");
+    JSZipCtor = mod.default ?? mod;
+  }
+  return JSZipCtor;
 }
 
 export interface ProcessedFile {
@@ -145,25 +156,30 @@ async function processPDF(file: File): Promise<ProcessedFile> {
 
   if (shouldExtractText) {
     let text = "";
+    let truncated = false;
+    const pagesToExtract = Math.min(numPages, MAX_PDF_PAGES_TO_EXTRACT);
 
-    // Extract text from all pages
-    for (let i = 1; i <= numPages; i++) {
-      const page = await pdfDoc.getPage(i);
-      const content = await page.getTextContent();
-      const pageText = content.items
-        .map((item) => ('str' in item ? item.str : ''))
-        .join(" ");
-      text += pageText + "\n";
+    try {
+      for (let i = 1; i <= pagesToExtract; i++) {
+        const page = await pdfDoc.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items
+          .map((item) => ('str' in item ? item.str : ''))
+          .join(" ");
+        text += pageText + "\n";
+
+        if (text.length > MAX_EXTRACTED_TEXT_CHARS) {
+          text = text.substring(0, MAX_EXTRACTED_TEXT_CHARS);
+          truncated = true;
+          break;
+        }
+      }
+    } finally {
+      try { (pdfDoc as unknown as { destroy?: () => void })?.destroy?.(); } catch { /* ignore */ }
+      URL.revokeObjectURL(url);
     }
 
-    // Clean up blob URL
-    URL.revokeObjectURL(url);
-
-    let truncated = false;
-
-    // Check if extracted text exceeds token limits
-    if (text.length > MAX_EXTRACTED_TEXT_CHARS) {
-      text = text.substring(0, MAX_EXTRACTED_TEXT_CHARS);
+    if (pagesToExtract < numPages) {
       truncated = true;
     }
 
@@ -182,6 +198,7 @@ async function processPDF(file: File): Promise<ProcessedFile> {
   // For PDFs under 100 pages, send as document
   // Read file as ArrayBuffer for base64 encoding
   const arrayBuffer = await file.arrayBuffer();
+  try { (pdfDoc as unknown as { destroy?: () => void })?.destroy?.(); } catch { /* ignore */ }
   URL.revokeObjectURL(url);
 
   const base64 = arrayBufferToBase64(arrayBuffer);
@@ -231,19 +248,23 @@ async function processCSV(file: File): Promise<ProcessedFile> {
     skip_empty_lines: true,
   });
 
+  // Escape pipe and newline characters for markdown table cells
+  const escapeCell = (value: string): string =>
+    value.replace(/\|/g, "\\|").replace(/\n/g, " ");
+
   // Format as a readable table
   let formattedText = "CSV Data:\n\n";
   if (records.length > 0) {
     // Add headers
     const headers = Object.keys(records[0]);
-    formattedText += headers.join(" | ") + "\n";
+    formattedText += headers.map(escapeCell).join(" | ") + "\n";
     formattedText += headers.map(() => "---").join(" | ") + "\n";
 
     // Add rows (limit to 100 rows for readability)
     const rowsToShow = Math.min(records.length, 100);
     for (let i = 0; i < rowsToShow; i++) {
       const row = records[i];
-      formattedText += headers.map((h) => row[h] || "").join(" | ") + "\n";
+      formattedText += headers.map((h) => escapeCell(row[h] || "")).join(" | ") + "\n";
     }
 
     if (records.length > 100) {
@@ -341,16 +362,68 @@ async function processExcel(file: File): Promise<ProcessedFile> {
 }
 
 /**
- * Process a PowerPoint file (PPTX) into a text content block
- * Note: This is a basic implementation. PowerPoint text extraction
- * requires more complex parsing. For now, we'll provide a placeholder.
+ * Process a PowerPoint file (PPTX) into a text content block.
+ * PPTX files are ZIP archives containing XML slides in ppt/slides/slide*.xml.
+ * Text content lives in <a:t> tags within the DrawingML namespace.
  */
-async function processPowerPoint(): Promise<ProcessedFile> {
-  // For MVP, we'll return a message explaining the limitation
-  // In a production system, you'd use a library like officegen or a similar parser
+async function processPowerPoint(file: File): Promise<ProcessedFile> {
+  if (file.size > MAX_TEXT_SIZE) {
+    throw new Error("PowerPoint file exceeds 1MB limit");
+  }
+
+  const buffer = await readFileAsArrayBuffer(file);
+  const JSZipLib = await getJSZip();
+  const zip = await JSZipLib.loadAsync(buffer);
+
+  // Find all slide XML files and sort by slide number
+  const slideFiles = Object.keys(zip.files)
+    .filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name))
+    .sort((a, b) => {
+      const numA = parseInt(a.match(/slide(\d+)/)?.[1] ?? "0");
+      const numB = parseInt(b.match(/slide(\d+)/)?.[1] ?? "0");
+      return numA - numB;
+    });
+
+  if (slideFiles.length === 0) {
+    throw new Error("No slides found in PowerPoint file");
+  }
+
+  const parser = new DOMParser();
+  let text = "";
+
+  for (const slidePath of slideFiles) {
+    const slideNum = slidePath.match(/slide(\d+)/)?.[1] ?? "?";
+    const xml = await zip.files[slidePath].async("text");
+    const doc = parser.parseFromString(xml, "application/xml");
+
+    // Extract text from <a:t> tags (DrawingML text elements)
+    const textNodes = doc.getElementsByTagNameNS(
+      "http://schemas.openxmlformats.org/drawingml/2006/main",
+      "t"
+    );
+
+    const slideTexts: string[] = [];
+    for (let i = 0; i < textNodes.length; i++) {
+      const content = textNodes[i].textContent?.trim();
+      if (content) slideTexts.push(content);
+    }
+
+    if (slideTexts.length > 0) {
+      text += `--- Slide ${slideNum} ---\n${slideTexts.join("\n")}\n\n`;
+    }
+
+    if (text.length > MAX_EXTRACTED_TEXT_CHARS) {
+      text = text.substring(0, MAX_EXTRACTED_TEXT_CHARS);
+      return {
+        type: "text",
+        data: `PowerPoint Presentation (${slideFiles.length} slides, truncated):\n\n${text}\n\n[Content truncated - presentation too large]`,
+      };
+    }
+  }
+
   return {
     type: "text",
-    data: "PowerPoint Presentation: [Text extraction from PowerPoint files is not yet fully implemented. Please export your presentation as a PDF for full content analysis.]",
+    data: `PowerPoint Presentation (${slideFiles.length} slides):\n\n${text}`,
   };
 }
 
@@ -358,8 +431,29 @@ async function processPowerPoint(): Promise<ProcessedFile> {
  * Main file processor function that routes to the appropriate handler
  * based on file MIME type
  */
+/**
+ * Infer MIME type from file extension when the browser provides an empty or unrecognized type
+ */
+function inferMimeType(fileName: string): string {
+  const ext = fileName.split(".").pop()?.toLowerCase();
+  const mimeMap: Record<string, string> = {
+    pdf: "application/pdf",
+    txt: "text/plain",
+    csv: "text/csv",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    gif: "image/gif",
+    webp: "image/webp",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  };
+  return ext ? (mimeMap[ext] ?? "") : "";
+}
+
 export async function processFile(file: File): Promise<ProcessedFile> {
-  const mimeType = file.type;
+  const mimeType = file.type || inferMimeType(file.name);
   const fileName = file.name;
 
   try {
@@ -404,10 +498,10 @@ export async function processFile(file: File): Promise<ProcessedFile> {
       mimeType ===
       "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     ) {
-      return await processPowerPoint();
+      return await processPowerPoint(file);
     }
 
-    throw new Error(`Unsupported file type: ${mimeType}`);
+    throw new Error(`Unsupported file type: ${mimeType || "(empty)"}`);
   } catch (error) {
     // Re-throw with file context
     throw new Error(

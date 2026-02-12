@@ -1,7 +1,12 @@
+export type ContentBlock =
+  | { type: "text"; text: string }
+  | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
+  | { type: "document"; source: { type: "base64"; media_type: string; data: string } };
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
-  content: string;
+  content: string | ContentBlock[];
   files?: UploadedFile[];
 }
 

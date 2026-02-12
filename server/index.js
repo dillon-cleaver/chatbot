@@ -19,7 +19,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json({ limit: "10mb" })); // Support base64 file content
+app.use(express.json({ limit: "50mb" })); // Support up to 5 base64-encoded file attachments (~6.7MB each)
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -354,17 +354,29 @@ app.post('/chat', async (req, res) => {
       const lastMessage = messages[messages.length - 1];
       let firstMessageText = '';
 
-      // Extract text from message content (could be string or content blocks)
-      if (typeof lastMessage.content === 'string') {
-        firstMessageText = lastMessage.content;
-      } else {
+      // Extract text from message content
+      // Content can be: plain string, array of content blocks, or JSON string of content blocks
+      const content = lastMessage.content;
+      if (typeof content === 'string') {
+        // Could be a plain string or a JSON-encoded array of content blocks
         try {
-          const contentBlocks = JSON.parse(lastMessage.content);
-          const textBlock = contentBlocks.find(block => block.type === 'text');
-          firstMessageText = textBlock?.text || 'New Conversation';
+          const parsed = JSON.parse(content);
+          if (Array.isArray(parsed)) {
+            const textBlock = parsed.find(block => block.type === 'text');
+            firstMessageText = textBlock?.text || 'New Conversation';
+          } else {
+            firstMessageText = content;
+          }
         } catch {
-          firstMessageText = 'New Conversation';
+          // Not JSON, treat as plain text
+          firstMessageText = content;
         }
+      } else if (Array.isArray(content)) {
+        // Content blocks array sent directly
+        const textBlock = content.find(block => block.type === 'text');
+        firstMessageText = textBlock?.text || 'New Conversation';
+      } else {
+        firstMessageText = 'New Conversation';
       }
 
       conversationTitle = firstMessageText.length > 50

@@ -24,7 +24,11 @@ export function MessageItem({ message, onViewFile }: MessageItemProps): React.JS
       aria-label={messageLabel}
     >
       <div className={styles.messageContent}>
-        <ReactMarkdown>{message.content}</ReactMarkdown>
+        <ReactMarkdown>
+          {typeof message.content === 'string'
+            ? message.content
+            : message.content.find(b => b.type === 'text')?.text ?? ''}
+        </ReactMarkdown>
       </div>
 
       {message.files && message.files.length > 0 && (

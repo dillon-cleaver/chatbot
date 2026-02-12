@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { Message, UploadedFile } from '../types';
+import type { Message, UploadedFile, ContentBlock } from '../types';
 import * as api from '../utils/api';
 import { generateUUID } from '../utils/uuid';
 import { processFile } from '../services/fileProcessor';
@@ -54,17 +54,14 @@ export function useChat({
       // Process files into content blocks if any are attached
       let finalMessages = updatedMessages;
       if (selectedFiles.length > 0) {
-        const contentBlocks: Array<
-          | { type: "text"; text: string }
-          | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
-          | { type: "document"; source: { type: "base64"; media_type: string; data: string } }
-        > = [{ type: "text", text: input.trim() }];
+        const contentBlocks: ContentBlock[] = [{ type: "text", text: input.trim() }];
 
         // Get File objects from fileManager and process them
         for (const uploadedFile of selectedFiles) {
           const fileObject = getFileObject(uploadedFile.id);
           if (!fileObject) {
-            throw new Error(`File not found: ${uploadedFile.original_name}`);
+            console.warn(`File object not found for "${uploadedFile.original_name}" (stale selection after refresh). Skipping.`);
+            continue;
           }
 
           try {
@@ -105,7 +102,7 @@ export function useChat({
         finalMessages = [...updatedMessages];
         finalMessages[finalMessages.length - 1] = {
           ...finalMessages[finalMessages.length - 1],
-          content: JSON.stringify(contentBlocks)
+          content: contentBlocks
         };
       }
 

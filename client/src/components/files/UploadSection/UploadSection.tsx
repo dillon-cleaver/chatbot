@@ -69,6 +69,7 @@ export const UploadSection = forwardRef<UploadSectionRef, UploadSectionProps>(
         <input
           type="file"
           multiple
+          accept=".pdf,.docx,.xlsx,.pptx,.png,.jpg,.jpeg,.gif,.webp,.txt,.csv"
           onChange={onUpload}
           className="visually-hidden"
           ref={fileInputRef}
