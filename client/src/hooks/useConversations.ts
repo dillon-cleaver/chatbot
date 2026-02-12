@@ -81,23 +81,28 @@ export function useConversations({
 
         // Set messages from conversation
         const messages = data.messages.map((msg) => {
-          // Parse content if it's JSON (from messages with file attachments)
-          let content = msg.content;
-          try {
-            const parsed = JSON.parse(msg.content) as unknown;
-            // If it's an array of content blocks, extract the text from the first block
-            if (
-              Array.isArray(parsed) &&
-              parsed[0] &&
-              typeof parsed[0] === "object" &&
-              "type" in parsed[0] &&
-              parsed[0].type === "text" &&
-              "text" in parsed[0]
-            ) {
-              content = String(parsed[0].text);
+          // Extract display text from content (could be string, JSON string, or content block array)
+          let content: string;
+          if (Array.isArray(msg.content)) {
+            const textBlock = msg.content.find(b => b.type === 'text');
+            content = textBlock && 'text' in textBlock ? textBlock.text : '';
+          } else {
+            content = msg.content;
+            try {
+              const parsed = JSON.parse(msg.content) as unknown;
+              if (
+                Array.isArray(parsed) &&
+                parsed[0] &&
+                typeof parsed[0] === "object" &&
+                "type" in parsed[0] &&
+                parsed[0].type === "text" &&
+                "text" in parsed[0]
+              ) {
+                content = String(parsed[0].text);
+              }
+            } catch {
+              // Content is already a plain string, use as-is
             }
-          } catch {
-            // Content is already a plain string, use as-is
           }
 
           return {

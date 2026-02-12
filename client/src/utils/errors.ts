@@ -58,22 +58,28 @@ export function validateMessages(messages: Message[]): void {
       );
     }
 
-    // Must have non-empty string content
+    // Must have non-empty content (string or content block array)
     if (message.content === undefined || message.content === null) {
       throw new ValidationError(
         `Message at index ${index} is missing required 'content' property`
       );
     }
 
-    if (typeof message.content !== 'string') {
+    if (typeof message.content === 'string') {
+      if (message.content.trim().length === 0) {
+        throw new ValidationError(
+          `Message at index ${index} cannot have empty content`
+        );
+      }
+    } else if (Array.isArray(message.content)) {
+      if (message.content.length === 0) {
+        throw new ValidationError(
+          `Message at index ${index} cannot have empty content`
+        );
+      }
+    } else {
       throw new ValidationError(
-        `Message at index ${index} must have string content (received: ${typeof message.content})`
-      );
-    }
-
-    if (message.content.trim().length === 0) {
-      throw new ValidationError(
-        `Message at index ${index} cannot have empty content`
+        `Message at index ${index} must have string or array content (received: ${typeof message.content})`
       );
     }
   });

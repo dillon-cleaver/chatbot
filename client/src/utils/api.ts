@@ -106,8 +106,7 @@ export async function updateConversationTitle(conversationId: string, title: str
 // Chat API
 export async function sendChatMessage(
   messages: Message[],
-  conversationId: string | null,
-  fileIds?: string[]
+  conversationId: string | null
 ): Promise<ChatResponse> {
   const response = await fetch(`${API_BASE_URL}/chat`, {
     method: 'POST',
@@ -116,7 +115,6 @@ export async function sendChatMessage(
     },
     body: JSON.stringify({
       messages,
-      fileIds: fileIds && fileIds.length > 0 ? fileIds : undefined,
       conversation_id: conversationId,
     }),
   });

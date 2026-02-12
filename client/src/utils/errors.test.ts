@@ -83,11 +83,17 @@ describe('validateMessages', () => {
       expect(() => validateMessages([message])).toThrow("missing required 'content' property");
     });
 
-    it('should throw ValidationError for non-string content and show type', () => {
+    it('should throw ValidationError for non-string/non-array content and show type', () => {
       const message = { role: 'user', content: 123 } as any;
       expect(() => validateMessages([message])).toThrow(ValidationError);
-      expect(() => validateMessages([message])).toThrow('must have string content');
+      expect(() => validateMessages([message])).toThrow('must have string or array content');
       expect(() => validateMessages([message])).toThrow('received: number');
+    });
+
+    it('should throw ValidationError for empty content block array', () => {
+      const message = { id: '1', role: 'user', content: [] } as any;
+      expect(() => validateMessages([message])).toThrow(ValidationError);
+      expect(() => validateMessages([message])).toThrow('cannot have empty content');
     });
 
     it('should throw ValidationError for empty/whitespace content', () => {
@@ -117,6 +123,13 @@ describe('validateMessages', () => {
     it('should accept content with whitespace if trimmed content is non-empty', () => {
       const messages: Message[] = [
         { id: '1', role: 'user', content: '  Hello  ' },
+      ];
+      expect(() => validateMessages(messages)).not.toThrow();
+    });
+
+    it('should not throw for content block arrays', () => {
+      const messages: Message[] = [
+        { id: '1', role: 'user', content: [{ type: 'text', text: 'Hello' }] },
       ];
       expect(() => validateMessages(messages)).not.toThrow();
     });

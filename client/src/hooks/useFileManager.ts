@@ -20,6 +20,7 @@ export interface UseFileManagerReturn {
   openModal: () => void;
   closeModal: () => void;
   removeSelectedFile: (fileId: string) => void;
+  getFileObject: (fileId: string) => File | undefined;
 }
 
 // Helper to get localStorage key for a specific conversation
@@ -64,6 +65,7 @@ export function useFileManager({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const prevConversationIdRef = useRef<string | null>(conversationId);
+  const [fileObjects, setFileObjects] = useState<Map<string, File>>(new Map());
 
   const fetchFiles = useCallback(async (): Promise<void> => {
     setError(null);
@@ -122,6 +124,16 @@ export function useFileManager({
     try {
       const newFiles = await api.uploadFiles(filesToUpload);
       setFiles((prev) => [...newFiles, ...prev]);
+
+      // Store File objects mapped by their new IDs
+      setFileObjects((prev) => {
+        const updated = new Map(prev);
+        filesToUpload.forEach((file, index) => {
+          updated.set(newFiles[index].id, file);
+        });
+        return updated;
+      });
+
       setUploadError(null);
       onUploadSuccess?.(newFiles.length);
     } catch (error) {
@@ -141,6 +153,14 @@ export function useFileManager({
       await api.deleteFile(fileId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       setSelectedFileIds((prev) => prev.filter((id) => id !== fileId));
+
+      // Remove from File objects map
+      setFileObjects((prev) => {
+        const updated = new Map(prev);
+        updated.delete(fileId);
+        return updated;
+      });
+
       onDeleteSuccess?.();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -211,5 +231,6 @@ export function useFileManager({
     openModal,
     closeModal,
     removeSelectedFile,
+    getFileObject: (fileId: string) => fileObjects.get(fileId),
   };
 }
