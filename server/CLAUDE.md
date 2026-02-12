@@ -1,6 +1,6 @@
 # Server
 
-Express API that proxies chat messages to Claude.
+Stateless Express proxy that forwards chat messages to Claude.
 
 ## Stack
 
@@ -19,6 +19,8 @@ pnpm start    # Start server on port 3000
 
 - `index.js` - Single file Express server with `/chat` endpoint
 
+The server is stateless: no database, no file storage. All persistence is handled client-side via IndexedDB.
+
 ## API
 
 ### POST /chat
@@ -28,22 +30,27 @@ Request:
 {
   "messages": [
     { "role": "user", "content": "Hello" }
-  ]
+  ],
+  "conversation_id": "optional-uuid"
 }
 ```
 
 Response:
 ```json
 {
-  "content": "Hi! How can I help you today?"
+  "content": "Hi! How can I help you today?",
+  "conversation_id": "uuid"
 }
 ```
+
+The `content` field in messages can be a plain string or a JSON-stringified array of content blocks (text, image, document). The server parses JSON-stringified content blocks before passing to Claude.
 
 ## Environment
 
 Requires `.env` file with:
 ```
 ANTHROPIC_API_KEY=your-api-key
+ANTHROPIC_MODEL=claude-haiku-4-5-20251001  # optional, defaults to claude-haiku-4-5-20251001
 PORT=3000  # optional, defaults to 3000
 ```
 
@@ -60,7 +67,7 @@ The system prompt is defined in the `SYSTEM_PROMPT` constant in `index.js`.
 
 ## Notes
 
-- Uses `claude-sonnet-4-5` model
+- Uses `claude-haiku-4-5-20251001` model by default (configurable via `ANTHROPIC_MODEL` env var)
 - CORS enabled for cross-origin requests from client
 - Max tokens set to 2048
-- System prompt configured for Gen X/90s Sega Genesis-inspired personality
+- JSON body limit set to 50mb to support multiple base64 file attachments in messages

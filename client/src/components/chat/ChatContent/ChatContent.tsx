@@ -52,9 +52,10 @@ export function ChatContent(): React.JSX.Element {
     onDeleteSuccess: () => announce(ANNOUNCEMENTS.FILE_DELETED),
   });
 
-  // Navigate to conversation when created
+  // Navigate to conversation when created (null = rollback, stay on current page)
   const handleConversationCreated = useCallback(
-    (id: string): void => {
+    (id: string | null): void => {
+      if (!id) return;
       justCreatedConversationRef.current = true;
       navigate(`/chat/${id}`);
     },

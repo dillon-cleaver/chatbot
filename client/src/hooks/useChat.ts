@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { Message, UploadedFile, ContentBlock } from '../types';
-import * as api from '../utils/api';
+import { sendChatMessage } from '../utils/api';
+import * as indexedDB from '../services/indexedDBService';
 import { generateUUID } from '../utils/uuid';
 import { processFile } from '../services/fileProcessor';
 
@@ -16,7 +17,7 @@ export interface UseChatReturn {
 interface UseChatProps {
   conversationId: string | null;
   selectedFiles: UploadedFile[];
-  onConversationCreated: (conversationId: string) => void;
+  onConversationCreated: (conversationId: string | null) => void;
   onClearSelectedFiles: () => void;
   getFileObject: (fileId: string) => File | undefined;
 }
@@ -50,76 +51,107 @@ export function useChat({
 
     setIsLoading(true);
 
+    // Track whether this is a new conversation for rollback
+    let newConversationId: string | null = null;
+
     try {
+      // Create conversation in IndexedDB on first message
+      let activeConversationId = conversationId;
+      if (!activeConversationId) {
+        const title = input.trim().length > 50
+          ? input.trim().substring(0, 47) + '...'
+          : input.trim();
+        const conv = await indexedDB.createConversation(title);
+        activeConversationId = conv.id;
+        newConversationId = conv.id;
+        onConversationCreated(conv.id);
+      }
+
+      // Save user message to IndexedDB (with file IDs if any are attached)
+      const fileIds = selectedFiles.length > 0
+        ? selectedFiles.map((f) => f.id)
+        : undefined;
+      await indexedDB.addMessage(activeConversationId, 'user', input.trim(), fileIds);
+
       // Process files into content blocks if any are attached
       let finalMessages = updatedMessages;
       if (selectedFiles.length > 0) {
         const contentBlocks: ContentBlock[] = [{ type: "text", text: input.trim() }];
 
-        // Get File objects from fileManager and process them
         for (const uploadedFile of selectedFiles) {
-          const fileObject = getFileObject(uploadedFile.id);
+          // Try in-memory first, fall back to IndexedDB for prior-session files
+          let fileObject = getFileObject(uploadedFile.id);
           if (!fileObject) {
-            console.warn(`File object not found for "${uploadedFile.original_name}" (stale selection after refresh). Skipping.`);
-            continue;
+            try {
+              const { blob } = await indexedDB.getFileBlob(uploadedFile.id);
+              fileObject = new File([blob], uploadedFile.original_name, {
+                type: uploadedFile.mime_type,
+              });
+            } catch {
+              console.warn(`File not found for "${uploadedFile.original_name}". Skipping.`);
+              continue;
+            }
           }
 
-          try {
-            const processedFile = await processFile(fileObject);
+          const processedFile = await processFile(fileObject);
 
-            if (processedFile.type === "image") {
-              contentBlocks.push({
-                type: "image",
-                source: {
-                  type: "base64",
-                  media_type: processedFile.mimeType!,
-                  data: processedFile.data
-                }
-              });
-            } else if (processedFile.type === "document") {
-              contentBlocks.push({
-                type: "document",
-                source: {
-                  type: "base64",
-                  media_type: processedFile.mimeType!,
-                  data: processedFile.data
-                }
-              });
-            } else {
-              // text type
-              contentBlocks.push({
-                type: "text",
-                text: processedFile.data
-              });
-            }
-          } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-            throw new Error(`Failed to process ${uploadedFile.original_name}: ${errorMsg}`);
+          if (processedFile.type === "image") {
+            contentBlocks.push({
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: processedFile.mimeType!,
+                data: processedFile.data
+              }
+            });
+          } else if (processedFile.type === "document") {
+            contentBlocks.push({
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: processedFile.mimeType!,
+                data: processedFile.data
+              }
+            });
+          } else {
+            contentBlocks.push({
+              type: "text",
+              text: processedFile.data
+            });
           }
         }
 
-        // Create modified messages array with content blocks
+        // Create modified messages array with JSON-stringified content blocks
         finalMessages = [...updatedMessages];
         finalMessages[finalMessages.length - 1] = {
           ...finalMessages[finalMessages.length - 1],
-          content: contentBlocks
+          content: JSON.stringify(contentBlocks)
         };
       }
 
-      const data = await api.sendChatMessage(finalMessages, conversationId);
-      setMessages([...updatedMessages, { id: crypto.randomUUID(), role: 'assistant', content: data.content }]);
+      const data = await sendChatMessage(finalMessages, activeConversationId);
 
-      // Set conversation ID if it's a new conversation
-      if (!conversationId && onConversationCreated) {
-        onConversationCreated(data.conversation_id);
-      }
+      // Save assistant message to IndexedDB
+      await indexedDB.addMessage(activeConversationId, 'assistant', data.content);
+
+      setMessages([...updatedMessages, { id: generateUUID(), role: 'assistant', content: data.content }]);
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setMessages([
         ...updatedMessages,
-        { id: crypto.randomUUID(), role: 'assistant', content: `Sorry, I encountered an error: ${errorMessage}` },
+        { id: generateUUID(), role: 'assistant', content: `Sorry, I encountered an error: ${errorMessage}` },
       ]);
+
+      // Rollback: if we just created a new conversation and the API call failed, clean up
+      if (newConversationId) {
+        try {
+          await indexedDB.deleteConversation(newConversationId);
+        } catch {
+          // Best effort cleanup
+        }
+        onConversationCreated(null);
+      }
     } finally {
       setIsLoading(false);
     }
