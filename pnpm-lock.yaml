@@ -10,9 +10,6 @@ importers:
 
   client:
     dependencies:
-      csv-parse:
-        specifier: ^5.6.0
-        version: 5.6.0
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
@@ -22,6 +19,9 @@ importers:
       mammoth:
         specifier: ^1.11.0
         version: 1.11.0
+      papaparse:
+        specifier: ^5.5.3
+        version: 5.5.3
       pdfjs-dist:
         specifier: ^5.4.624
         version: 5.4.624
@@ -53,6 +53,9 @@ importers:
       '@types/node':
         specifier: ^25.2.1
         version: 25.2.1
+      '@types/papaparse':
+        specifier: ^5.5.2
+        version: 5.5.2
       '@types/react':
         specifier: ^19.2.5
         version: 19.2.9
@@ -813,6 +816,9 @@ packages:
 
   '@types/node@25.2.1':
     resolution: {integrity: sha512-CPrnr8voK8vC6eEtyRzvMpgp3VyVRhgclonE7qYi6P9sXwYb59ucfrnmFBTaP0yUi8Gk4yZg/LlTJULGxvTNsg==}
+
+  '@types/papaparse@5.5.2':
+    resolution: {integrity: sha512-gFnFp/JMzLHCwRf7tQHrNnfhN4eYBVYYI897CGX4MY1tzY9l2aLkVyx2IlKZ/SAqDbB3I1AOZW5gTMGGsqWliA==}
 
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
@@ -1928,6 +1934,9 @@ packages:
 
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
+
+  papaparse@5.5.3:
+    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -3083,6 +3092,10 @@ snapshots:
   '@types/node@25.2.1':
     dependencies:
       undici-types: 7.16.0
+
+  '@types/papaparse@5.5.2':
+    dependencies:
+      '@types/node': 25.2.1
 
   '@types/react-dom@19.2.3(@types/react@19.2.9)':
     dependencies:
@@ -4410,6 +4423,8 @@ snapshots:
       p-limit: 3.1.0
 
   pako@1.0.11: {}
+
+  papaparse@5.5.3: {}
 
   parent-module@1.0.1:
     dependencies:

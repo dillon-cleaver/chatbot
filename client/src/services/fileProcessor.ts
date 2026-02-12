@@ -12,7 +12,7 @@ const MAX_PDF_PAGES_TO_EXTRACT = 500;
 let pdfjsLib: typeof import("pdfjs-dist") | null = null;
 let mammoth: typeof import("mammoth") | null = null;
 let XLSX: typeof import("xlsx") | null = null;
-let csvParse: typeof import("csv-parse/sync") | null = null;
+let Papa: typeof import("papaparse") | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let JSZipCtor: any = null;
 
@@ -39,11 +39,11 @@ async function getXLSX() {
   return XLSX;
 }
 
-async function getCsvParse() {
-  if (!csvParse) {
-    csvParse = await import("csv-parse/sync");
+async function getPapa() {
+  if (!Papa) {
+    Papa = await import("papaparse");
   }
-  return csvParse;
+  return Papa;
 }
 
 async function getJSZip(): Promise<typeof import("jszip")> {
@@ -248,12 +248,13 @@ async function processCSV(file: File): Promise<ProcessedFile> {
   }
 
   const content = await readFileAsText(file);
-  const csvParse = await getCsvParse();
+  const Papa = await getPapa();
 
-  const records = csvParse.parse(content, {
-    columns: true,
-    skip_empty_lines: true,
+  const parsed = Papa.parse<Record<string, string>>(content, {
+    header: true,
+    skipEmptyLines: true,
   });
+  const records = parsed.data;
 
   // Format as a readable table
   let formattedText = "CSV Data:\n\n";
