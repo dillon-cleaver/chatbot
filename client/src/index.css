@@ -82,6 +82,12 @@ html {
   overflow: hidden;
 }
 
+::selection {
+  background-color: rgba(108, 92, 231, 0.4);
+}
+
+
+
 body {
   margin: 0;
   font-family: "Roboto", sans-serif;
