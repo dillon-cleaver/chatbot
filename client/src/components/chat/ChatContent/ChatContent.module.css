@@ -43,6 +43,7 @@
   font-weight: 400;
   margin: 0;
   color: var(--text-secondary);
+  transition: transform 0.4s ease;
 }
 
 .loadingConversation {
@@ -83,12 +84,7 @@
   }
 
   .emptySubtitle {
-    font-size: 0.95rem; /* Slightly reduce from 1rem */
-  }
-}
-
-@media (max-width: 480px) {
-  .emptySubtitle {
-    font-size: 0.9rem;
+    font-size: 1.25rem;
+    letter-spacing: 2px;
   }
 }

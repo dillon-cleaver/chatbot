@@ -63,6 +63,11 @@
   .emptyContent > :last-child {
     flex-shrink: 0; /* Don't shrink */
   }
+
+  /* Slide subtitle toward visible center when keyboard is open */
+  .emptyContent:focus-within > :first-child > :last-child {
+    transform: translateY(15dvh);
+  }
 }
 
 /* Very small screens - maximize width */
