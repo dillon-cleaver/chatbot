@@ -6,7 +6,7 @@ interface DailyCreationData {
 }
 
 function getTodayDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Date().toLocaleDateString('en-CA');
 }
 
 export function getDailyCreationCount(): number {

@@ -237,6 +237,13 @@ export function ChatContent(): React.JSX.Element {
     },
   });
 
+  // Check daily chat limit when history modal opens
+  const dailyLimitReached = useMemo(
+    () => getDailyCreationCount() >= MAX_DAILY_CHATS,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [conversations.isHistoryModalOpen],
+  );
+
   // Show empty state only when truly at home with no conversation to load
   const isEmpty =
     chat.messages.length === 0 &&
@@ -363,7 +370,7 @@ export function ChatContent(): React.JSX.Element {
         storageUsage={storageUsage}
         storageQuota={MAX_STORAGE_BYTES}
         maxConversations={MAX_CONVERSATIONS}
-        dailyLimitReached={getDailyCreationCount() >= MAX_DAILY_CHATS}
+        dailyLimitReached={dailyLimitReached}
       />
 
       <ConfirmDialog

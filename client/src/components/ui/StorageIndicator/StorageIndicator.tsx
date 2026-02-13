@@ -29,7 +29,7 @@ export function StorageIndicator({
             aria-valuenow={storagePercent}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label="Storage usage"
+            aria-label={`${label} usage`}
           >
             <div
               className={`${styles.barFill}${storagePercent > 80 ? ` ${styles.warning}` : ""}`}
