@@ -65,7 +65,7 @@
   }
 
   /* Slide subtitle toward visible center when keyboard is open */
-  .emptyContent:focus-within > :first-child > :last-child {
+  .emptyContent:focus-within :global(.slide-on-focus) {
     transform: translateY(15dvh);
   }
 }

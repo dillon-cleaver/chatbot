@@ -287,7 +287,7 @@ export function ChatContent(): React.JSX.Element {
             <>
               <div className={styles.emptyGreeting}>
                 <h1 className={styles.emptyTitle}>CHATBOT</h1>
-                <p className={styles.emptySubtitle}>type, type, type</p>
+                <p className={`${styles.emptySubtitle} slide-on-focus`}>type, type, type</p>
               </div>
               <ChatInput
                 ref={chatInputRef}
