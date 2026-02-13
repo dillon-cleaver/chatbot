@@ -18,36 +18,10 @@
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
-.sectionHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem 0.75rem 1.5rem;
-  border-bottom: 3px solid var(--border-color);
-  flex-shrink: 0;
-}
-
 .scrollableContent {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-}
-
-.sectionHeading {
-  font-family: "Fraunces", serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.fileSlotsInfo {
-  font-family: "Roboto", sans-serif;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin: 0;
 }
 
 .selectionCounterWrapper {
@@ -74,32 +48,12 @@
 
 .localFilesHint {
   padding: 1rem 1.5rem;
-  text-align: center;
+  text-align: left;
   border-top: 1px solid var(--border-color);
   margin-top: auto;
 }
 
-.localFilesHint p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-family: "Roboto", sans-serif;
-}
-
 @media (max-width: 768px) {
-  .sectionHeader {
-    padding: 0.75rem 1rem 0.5rem 1rem; /* Reduce from 1rem 1.5rem 0.75rem */
-  }
-
-  .sectionHeading {
-    font-size: 1rem; /* Reduce from 1.25rem */
-    letter-spacing: 1px; /* Reduce from 1.5px */
-  }
-
-  .fileSlotsInfo {
-    font-size: 0.75rem; /* Reduce from 0.85rem */
-  }
-
   .selectionCounterWrapper.visible {
     padding: 0.75rem 1rem 0.5rem 1rem; /* Reduce from 1rem 1.5rem 0.5rem */
   }

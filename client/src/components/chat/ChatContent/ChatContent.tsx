@@ -17,6 +17,9 @@ import { ChatHistoryModal } from "../../history/ChatHistoryModal/ChatHistoryModa
 import { ConfirmDialog } from "../../ui/ConfirmDialog/ConfirmDialog";
 import { KeyboardShortcutsModal } from "../../ui/KeyboardShortcutsModal/KeyboardShortcutsModal";
 import { Spinner } from "../../ui/Spinner/Spinner";
+import { getStorageEstimate } from "../../../utils/fileUtils";
+import { MAX_CONVERSATIONS, MAX_DAILY_CHATS, MAX_STORAGE_BYTES } from "../../../constants";
+import { getDailyCreationCount } from "../../../utils/dailyChatLimit";
 
 // Timing constants for animations and delays
 const MODAL_CLOSE_ANIMATION_MS = 150;
@@ -30,6 +33,7 @@ export function ChatContent(): React.JSX.Element {
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] =
     useState<boolean>(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
+  const [storageUsage, setStorageUsage] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatInputRef = useRef<ChatInputRef>(null);
@@ -93,6 +97,15 @@ export function ChatContent(): React.JSX.Element {
     onDeleteSuccess: () => announce(ANNOUNCEMENTS.CONVERSATION_DELETED),
     onError: handleError,
   });
+
+  // Fetch storage estimate when either modal opens
+  useEffect(() => {
+    if (conversations.isHistoryModalOpen || fileManager.isModalOpen) {
+      getStorageEstimate().then(({ usage }) => {
+        setStorageUsage(usage);
+      });
+    }
+  }, [conversations.isHistoryModalOpen, fileManager.isModalOpen]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -333,6 +346,8 @@ export function ChatContent(): React.JSX.Element {
         onClearSelection={fileManager.clearSelectedFiles}
         onCommitSelection={fileManager.commitPendingSelection}
         fileInputRef={fileInputRef}
+        storageUsage={storageUsage}
+        storageQuota={MAX_STORAGE_BYTES}
       />
 
       <ChatHistoryModal
@@ -344,6 +359,10 @@ export function ChatContent(): React.JSX.Element {
         onStartNewChat={handleStartNewChat}
         onDeleteAllClick={() => setIsDeleteAllModalOpen(true)}
         onUpdateTitle={conversations.updateConversationTitle}
+        storageUsage={storageUsage}
+        storageQuota={MAX_STORAGE_BYTES}
+        maxConversations={MAX_CONVERSATIONS}
+        dailyLimitReached={getDailyCreationCount() >= MAX_DAILY_CHATS}
       />
 
       <ConfirmDialog

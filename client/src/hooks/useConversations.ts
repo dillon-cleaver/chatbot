@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Conversation, Message } from '../types';
 import * as indexedDB from '../services/indexedDBService';
 import { generateUUID } from '../utils/uuid';
+import { MAX_CONVERSATIONS, MAX_DAILY_CHATS } from '../constants';
+import { getDailyCreationCount } from '../utils/dailyChatLimit';
 
 export interface UseConversationsReturn {
   conversations: Conversation[];
@@ -163,11 +165,19 @@ export function useConversations({
   }, [refreshConversations]);
 
   const startNewConversation = useCallback((): void => {
+    if (getDailyCreationCount() >= MAX_DAILY_CHATS) {
+      reportError(`Daily chat limit reached (${MAX_DAILY_CHATS}). Try again tomorrow.`);
+      return;
+    }
+    if (conversations.length >= MAX_CONVERSATIONS) {
+      reportError(`Chat limit reached (${MAX_CONVERSATIONS}). Delete an existing conversation to start a new one.`);
+      return;
+    }
     onMessagesLoad([]);
     onClearSelectedFiles();
     setIsHistoryModalOpen(false);
     onNewChat();
-  }, [onMessagesLoad, onClearSelectedFiles, onNewChat]);
+  }, [conversations.length, onMessagesLoad, onClearSelectedFiles, onNewChat, reportError]);
 
   const deleteConversation = async (conversationId: string): Promise<void> => {
     if (!confirm("Delete this conversation? This cannot be undone.")) return;

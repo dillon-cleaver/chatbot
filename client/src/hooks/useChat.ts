@@ -4,6 +4,8 @@ import { sendChatMessage } from '../utils/api';
 import * as indexedDB from '../services/indexedDBService';
 import { generateUUID } from '../utils/uuid';
 import { processFile } from '../services/fileProcessor';
+import { MAX_CONVERSATIONS, MAX_DAILY_CHATS } from '../constants';
+import { getDailyCreationCount, recordDailyCreation } from '../utils/dailyChatLimit';
 
 export interface UseChatReturn {
   messages: Message[];
@@ -58,6 +60,13 @@ export function useChat({
       // Create conversation in IndexedDB on first message
       let activeConversationId = conversationId;
       if (!activeConversationId) {
+        if (getDailyCreationCount() >= MAX_DAILY_CHATS) {
+          throw new Error(`Daily chat limit reached (${MAX_DAILY_CHATS}). Try again tomorrow.`);
+        }
+        const existing = await indexedDB.listConversations();
+        if (existing.length >= MAX_CONVERSATIONS) {
+          throw new Error(`Chat limit reached (${MAX_CONVERSATIONS}). Delete an existing conversation to start a new one.`);
+        }
         const title = input.trim().length > 50
           ? input.trim().substring(0, 47) + '...'
           : input.trim();
@@ -65,6 +74,7 @@ export function useChat({
         activeConversationId = conv.id;
         newConversationId = conv.id;
         onConversationCreated(conv.id);
+        recordDailyCreation();
       }
 
       // Save user message to IndexedDB (with file IDs if any are attached)
