@@ -222,8 +222,8 @@ export function FileAttachModal({
             />
             <div className={styles.localFilesHint}>
               <p>
-                Uploaded files and message content may be sent to and processed
-                on our servers.
+                File contents and messages are sent to Anthropic for processing
+                when you send a message.
               </p>
             </div>
           </div>

@@ -4,97 +4,87 @@ A modern, context-aware chatbot powered by Claude with file upload and analysis 
 
 ## Features
 
-### 💬 Conversational AI
-- Powered by Claude Sonnet 4.5 (Anthropic)
+### Conversational AI
+- Powered by Claude (Anthropic) — configurable model via environment variable
 - Markdown-formatted responses with syntax highlighting
-- Conversation history maintained throughout the session
+- Persistent conversation history stored locally in IndexedDB
 - Dark/light theme toggle
 
-### 📎 File Upload & Management
+### File Upload & Management
 - Upload multiple file types: PDF, images (PNG/JPEG/GIF/WebP), Word docs, Excel spreadsheets, PowerPoint, CSV, and plain text
-- Persistent storage using SQLite database
-- View uploaded files in modal interface
-- Delete files when no longer needed
+- Files stored locally in the browser via IndexedDB — nothing leaves your machine until you send a message
+- View, select, and delete uploaded files in a modal interface
 
-### 🎯 Selective File Attachment
+### Selective File Attachment
 - Choose which files to include with each message
 - Visual file chips show selected files below chat input
 - Maximum 5 files per message for optimal performance
-- Files cleared after sending to prevent accidental reuse
+- Selections persist per-conversation across page reloads
 
-### 🤖 Intelligent File Processing
-- **PDFs**: Native Claude document understanding (up to 20,000 pages)
-- **Images**: Claude's vision capabilities analyze visual content
-- **Word/Excel/PowerPoint**: Text extraction and formatting
-- **CSV**: Parsed and formatted as readable tables
-- Automatic content type detection and validation
+### Intelligent File Processing
+- **PDFs**: Small PDFs sent as native document blocks; large PDFs (100+ pages or 100KB+) have text extracted
+- **Images**: Sent as base64 image blocks for Claude's vision capabilities
+- **Word (.docx)**: Text extraction via Mammoth
+- **Excel (.xlsx)**: Formatted as markdown tables per sheet
+- **PowerPoint (.pptx)**: Slide text extracted from XML
+- **CSV**: Parsed and formatted as markdown tables
+- **Text**: Read directly (max 1MB)
+- All processing happens client-side before sending to the API
 
-### 🎨 Brutalist Design
+### Brutalist Design
 - Clean, bold aesthetic with chunky borders and shadows
 - Custom fonts: Fraunces (headings) and Roboto (body)
 - Responsive layout optimized for chat interfaces
 
+### Accessibility
+- Skip link for keyboard users to bypass header
+- Semantic landmarks and ARIA live regions
+- Roving tabindex for file and conversation lists
+- `prefers-reduced-motion` support
+- Full keyboard navigation (press `?` to see shortcuts)
+
 ## Architecture
 
 ```
-┌─────────────────┐         ┌──────────────────┐
-│  React Frontend │ ◄─────► │  Express Backend │
-│   (Vite + CSS)  │  HTTP   │   (Node + ESM)   │
-└─────────────────┘         └──────────────────┘
-                                      │
-                            ┌─────────┴─────────┐
-                            ▼                   ▼
-                    ┌──────────────┐    ┌─────────────┐
-                    │   SQLite DB  │    │ Anthropic   │
-                    │ (File Metadata)│   │  Claude API │
-                    └──────────────┘    └─────────────┘
-                            │
-                            ▼
-                    ┌──────────────┐
-                    │ File System  │
-                    │  (uploads/)  │
-                    └──────────────┘
+┌──────────────────────────────────┐
+│         React Frontend           │
+│        (Vite + TypeScript)       │
+│                                  │
+│  ┌────────────┐  ┌────────────┐  │         ┌──────────────────┐
+│  │  IndexedDB  │  │    File    │  │         │  Express Backend  │
+│  │             │  │ Processor  │  │ ──────► │  (Stateless Proxy) │
+│  │ - files     │  │ (client)   │  │  HTTP   │                    │
+│  │ - messages  │  │            │  │ ◄────── │  POST /chat only   │
+│  │ - convos    │  └────────────┘  │         └────────┬───────────┘
+│  └────────────┘                   │                  │
+└──────────────────────────────────┘                  ▼
+                                               ┌─────────────┐
+                                               │  Anthropic   │
+                                               │  Claude API  │
+                                               └─────────────┘
 ```
+
+The server is a stateless proxy — no database, no file storage. All persistence (files, conversations, messages) is handled client-side via IndexedDB.
 
 ## How It Works
 
 ### File Upload Flow
-1. User selects files via the 📎 button in the header
-2. Files uploaded to Express server via `multer`
-3. Metadata stored in SQLite database (original name, MIME type, size, upload timestamp)
-4. Physical files saved to `server/uploads/` directory
-5. Files appear in modal for selection
+1. User selects files via the attach button or `Shift+Ctrl/Cmd+U`
+2. Files are stored in IndexedDB as Blobs alongside metadata
+3. Files appear in the attach modal for selection
 
 ### Chat with Files Flow
-1. User checks boxes next to files in the modal to select them
-2. Selected files appear as "chips" below the chat input
-3. User types a message and clicks Send
-4. Frontend sends message + array of selected file IDs to backend
-5. Backend processes each file based on type:
-   - **PDFs & Images**: Encoded as base64 and sent as `document` or `image` content blocks
-   - **Text files**: Read and sent as `text` content blocks
-   - **Office docs**: Parsed and extracted text sent as `text` content blocks
-6. All content blocks (message text + file contents) sent to Claude API
-7. Claude analyzes the message in context of the files
-8. Response rendered with markdown formatting
-9. Selected files cleared for next message
-
-### File Processing Details
-
-**PDF & Image Processing** (`fileProcessor.js:14-45`)
-```javascript
-// PDFs sent as native document blocks
-{ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: '...' }}
-
-// Images sent as vision-compatible blocks
-{ type: 'image', source: { type: 'base64', media_type: 'image/png', data: '...' }}
-```
-
-**Text Extraction** (`fileProcessor.js:106-177`)
-- Word docs parsed with `mammoth` library
-- Excel sheets converted to tables with `xlsx`
-- CSV parsed with `csv-parse` into formatted tables
-- Plain text read directly
+1. User selects files in the modal (pending state prevents background updates while browsing)
+2. Selected files appear as chips below the chat input
+3. User types a message and sends it
+4. Client processes each selected file based on type:
+   - **PDFs & Images**: Encoded as base64 content blocks
+   - **Office docs**: Text extracted and sent as text content blocks
+   - **Text/CSV**: Read and formatted as text content blocks
+5. Message + content blocks sent as JSON to server
+6. Server passes the content through to Claude API
+7. Response rendered with markdown formatting
+8. Selected files cleared for next message
 
 ## Prerequisites
 
@@ -120,7 +110,8 @@ A modern, context-aware chatbot powered by Claude with file upload and analysis 
    Create `server/.env`:
    ```env
    ANTHROPIC_API_KEY=your-api-key-here
-   PORT=3000  # optional, defaults to 3000
+   ANTHROPIC_MODEL=claude-haiku-4-5-20251001  # optional
+   PORT=3000                                   # optional, defaults to 3000
    ```
 
 4. **Start the application**
@@ -155,50 +146,67 @@ pnpm start            # Run server only (port 3000)
 
 ```
 chatbot/
-├── client/              # React 19 frontend
+├── client/                  # React 19 + TypeScript frontend
 │   ├── src/
-│   │   ├── App.jsx           # Main chat component
-│   │   ├── App.module.css    # Component styles
-│   │   ├── index.css         # Global styles + theme
-│   │   └── main.jsx          # React entry point
+│   │   ├── App.tsx                # Main app with routing
+│   │   ├── main.tsx               # React entry point
+│   │   ├── index.css              # Global styles + theme variables
+│   │   ├── types.ts               # TypeScript type definitions
+│   │   ├── components/
+│   │   │   ├── chat/              # Chat UI (messages, input, layout)
+│   │   │   ├── files/             # File modal, chips, list
+│   │   │   ├── history/           # Conversation history modal
+│   │   │   ├── layout/            # Header, skip link
+│   │   │   └── ui/                # Shared UI primitives (Modal, etc.)
+│   │   ├── hooks/                 # Custom React hooks
+│   │   │   ├── useChat.ts         # Message sending + conversation state
+│   │   │   ├── useConversations.ts # Conversation CRUD
+│   │   │   ├── useFileManager.ts  # File upload, selection, persistence
+│   │   │   └── useKeyboardShortcuts.ts
+│   │   ├── services/
+│   │   │   ├── indexedDBService.ts # IndexedDB wrapper (files, messages, convos)
+│   │   │   └── fileProcessor.ts   # Client-side file extraction
+│   │   └── utils/                 # Helpers (API, errors, UUID, file utils)
 │   ├── package.json
-│   └── vite.config.js
+│   └── vite.config.ts
 │
-├── server/              # Express 5 backend
-│   ├── index.js              # Express server + API endpoints
-│   ├── fileProcessor.js      # File type processing logic
+├── server/                  # Express 5 backend (stateless proxy)
+│   ├── index.js             # Single-file server with POST /chat
 │   ├── package.json
-│   ├── .env                  # Environment variables (create this)
-│   ├── database.db           # SQLite database (auto-created)
-│   └── uploads/              # File storage (auto-created)
+│   └── .env                 # Environment variables (create this)
 │
-├── package.json         # Root workspace config
-├── pnpm-workspace.yaml  # pnpm workspace definition
-└── README.md           # This file
+├── package.json             # Root workspace config
+├── pnpm-workspace.yaml      # pnpm workspace definition
+└── README.md
 ```
 
 ## Technology Stack
 
 ### Frontend
 - **React 19** - UI library
+- **TypeScript** - Type safety
 - **Vite 7** - Build tool and dev server
+- **React Router 7** - Client-side routing
 - **react-markdown** - Markdown rendering
 - **CSS Modules** - Scoped styling
+- **idb** - IndexedDB wrapper for persistence
+- **pdfjs-dist** - PDF text extraction
+- **mammoth** - Word document parsing
+- **xlsx** - Excel spreadsheet parsing
+- **papaparse** - CSV parsing
+- **jszip** - ZIP/PPTX extraction
 
 ### Backend
 - **Express 5** - Web framework
 - **Anthropic SDK** - Claude API client
-- **better-sqlite3** - Database for file metadata
-- **multer** - File upload handling
-- **pdf-parse** - PDF text extraction
-- **mammoth** - Word document parsing
-- **xlsx** - Excel spreadsheet parsing
-- **csv-parse** - CSV file parsing
 
-## API Endpoints
+## API
+
+The server exposes a single endpoint:
 
 ### `POST /chat`
-Send a message to Claude, optionally with attached files.
+
+Send a message to Claude.
 
 **Request:**
 ```json
@@ -206,63 +214,38 @@ Send a message to Claude, optionally with attached files.
   "messages": [
     { "role": "user", "content": "What's in this document?" }
   ],
-  "fileIds": ["uuid-1", "uuid-2"]  // optional, max 5
+  "conversation_id": "optional-uuid"
 }
 ```
+
+The `content` field can be a plain string or a JSON-stringified array of content blocks (text, image, document) when files are attached.
 
 **Response:**
 ```json
 {
-  "content": "This document discusses..."
+  "content": "This document discusses...",
+  "conversation_id": "uuid"
 }
 ```
-
-### `POST /upload`
-Upload one or more files.
-
-**Request:** `multipart/form-data` with `files` field
-
-**Response:**
-```json
-[
-  {
-    "id": "uuid",
-    "original_name": "document.pdf",
-    "mime_type": "application/pdf",
-    "size": 102400,
-    "uploaded_at": "2024-01-20T10:30:00.000Z"
-  }
-]
-```
-
-### `GET /files`
-List all uploaded files.
-
-### `GET /files/:id`
-View/download a specific file.
-
-### `DELETE /files/:id`
-Delete a file from storage and database.
 
 ## Configuration
 
 ### Supported File Types
-- **Documents**: PDF, Word (.doc, .docx)
+- **Documents**: PDF, Word (.docx)
 - **Images**: PNG, JPEG, GIF, WebP
-- **Spreadsheets**: Excel (.xls, .xlsx), CSV
-- **Presentations**: PowerPoint (.ppt, .pptx) - basic support
+- **Spreadsheets**: Excel (.xlsx), CSV
+- **Presentations**: PowerPoint (.pptx)
 - **Text**: Plain text (.txt)
 
 ### File Size Limits
 - PDFs and images: 5MB per file
 - Text-based files: 1MB per file
-- Upload limit: 10MB per request
 - Maximum files per message: 5
 
 ### Model Configuration
-- Model: `claude-sonnet-4-5`
+- Default model: `claude-haiku-4-5-20251001`
+- Configurable via `ANTHROPIC_MODEL` environment variable in `server/.env`
 - Max tokens: 2048
-- Adjustable in `server/index.js:136`
 
 ## Git Conventions
 
@@ -278,22 +261,10 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 
 ## Development Notes
 
-- The SQLite database (`database.db`) is created automatically on first run
-- Uploaded files persist in `server/uploads/` directory
-- The `uploads/` directory is created automatically if it doesn't exist
-- File selections are cleared after each message to prevent accidental context pollution
-- Conversation history is maintained in browser memory (clears on refresh)
-
-## Future Enhancements
-
-- [ ] Persistent conversation history across sessions
-- [ ] User authentication and multi-user support
-- [ ] Full PowerPoint text extraction
-- [ ] File previews in modal
-- [ ] Drag-and-drop file upload
-- [ ] Export conversation as markdown/PDF
-- [ ] Streaming responses from Claude
-- [ ] File size optimization/compression
+- All data is stored client-side in IndexedDB (conversations, messages, and file blobs)
+- The server is completely stateless — it only proxies requests to the Claude API
+- File processing (text extraction, base64 encoding) happens in the browser before sending
+- File selections persist per-conversation via localStorage and survive page reloads
 
 ## License
 
