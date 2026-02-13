@@ -81,6 +81,9 @@ export const Header = forwardRef<HeaderRef, HeaderProps>(function Header(
   return (
     <header className={styles.header} role="banner">
       <div className={styles.headerLeft}>
+        <a href="#message-input" className="skip-link visually-hidden">
+          Skip to message input
+        </a>
         <button
           className={styles.titleButton}
           onClick={onTitleClick}
