@@ -128,8 +128,9 @@ export function ChatContent(): React.JSX.Element {
   useEffect(() => {
     // Only scroll when modal closes (transitions from true to false)
     if (!fileManager.isModalOpen && fileManager.selectedFileIds.length > 0) {
-      // Delay to let modal close animation complete, then smooth scroll
+      // Delay to let modal close animation complete, then focus input and scroll
       const timer = setTimeout(() => {
+        chatInputRef.current?.focus();
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, MODAL_CLOSE_ANIMATION_MS);
       return () => clearTimeout(timer);

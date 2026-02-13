@@ -86,10 +86,9 @@ html {
   background-color: rgba(108, 92, 231, 0.4);
 }
 
-
-
 body {
   margin: 0;
+  overflow: hidden;
   font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -97,7 +96,6 @@ body {
     --header-bg
   ); /* Changed from --bg-primary to match header in safe area */
   color: var(--text-primary);
-  overflow: hidden;
   position: relative;
 }
 
