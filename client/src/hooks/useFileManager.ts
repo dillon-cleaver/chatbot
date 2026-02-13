@@ -61,6 +61,7 @@ export function useFileManager({
   onDeleteSuccess,
 }: UseFileManagerOptions): UseFileManagerReturn {
   const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [filesLoaded, setFilesLoaded] = useState(false);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>(() => loadSelectedFiles(conversationId));
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -74,6 +75,7 @@ export function useFileManager({
     try {
       const data = await indexedDB.listFiles();
       setFiles(data);
+      setFilesLoaded(true);
     } catch (error) {
       console.error('Failed to fetch files:', error);
       setError('Failed to load files. Please try again.');
@@ -89,6 +91,8 @@ export function useFileManager({
 
   // Validate selected file IDs against actual files (remove orphaned selections)
   useEffect(() => {
+    if (!filesLoaded) return;
+
     const validFileIds = new Set(files.map(f => f.id));
     const orphanedIds = selectedFileIds.filter(id => !validFileIds.has(id));
 
@@ -96,7 +100,7 @@ export function useFileManager({
       console.warn(`Removing ${orphanedIds.length} orphaned file selections:`, orphanedIds);
       setSelectedFileIds(prev => prev.filter(id => validFileIds.has(id)));
     }
-  }, [files, selectedFileIds]);
+  }, [files, filesLoaded, selectedFileIds]);
 
   // Save current selections when conversation changes (before switching)
   useEffect(() => {
