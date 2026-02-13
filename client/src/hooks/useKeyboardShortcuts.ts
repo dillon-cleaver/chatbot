@@ -19,7 +19,9 @@ export interface UseKeyboardShortcutsOptions {
  *
  * Shortcuts:
  * - Ctrl/Cmd + Enter: Send message (alternative to Enter in textarea)
- * - Ctrl/Cmd + U: Open file attach modal
+ * - Shift + Ctrl/Cmd + U: Open file attach modal
+ * - Shift + Ctrl/Cmd + Y: Open chat history
+ * - Shift + Ctrl/Cmd + O: Start new chat
  * - Escape: Close modals / return focus to input
  * - ?: Show keyboard shortcuts help (when not typing)
  */
@@ -45,15 +47,15 @@ export function useKeyboardShortcuts({
         return;
       }
 
-      // Ctrl/Cmd + U: Open attach modal
-      if (isMod && e.key === "u") {
+      // Shift + Ctrl/Cmd + U: Open attach modal
+      if (isMod && e.shiftKey && e.key.toLowerCase() === "u") {
         e.preventDefault();
         handlers.onAttach?.();
         return;
       }
 
-      // Ctrl/Cmd + Y: Open history modal (avoid Cmd+H which hides window on macOS)
-      if (isMod && e.key === "y") {
+      // Shift + Ctrl/Cmd + Y: Open history modal
+      if (isMod && e.shiftKey && e.key.toLowerCase() === "y") {
         e.preventDefault();
         handlers.onHistory?.();
         return;
@@ -106,11 +108,11 @@ export const KEYBOARD_SHORTCUTS = [
     description: "Send message (even without input focus)",
   },
   {
-    keys: ["Ctrl/⌘", "U"],
+    keys: ["Shift", "Ctrl/⌘", "U"],
     description: "Open file attach modal",
   },
   {
-    keys: ["Ctrl/⌘", "Y"],
+    keys: ["Shift", "Ctrl/⌘", "Y"],
     description: "Open chat history",
   },
   {
