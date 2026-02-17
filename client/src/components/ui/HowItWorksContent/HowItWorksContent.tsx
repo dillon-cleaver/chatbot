@@ -11,6 +11,11 @@ export function HowItWorksContent(): React.JSX.Element {
         documents, find patterns, search efficiently, and connect information.
       </p>
       <p>
+        This chatbot intentionally has a Gen X attitude, with design inspired
+        by the Sega Genesis (Mega Drive) era. Its favorite movies are{" "}
+        <em>Reality Bites</em>, <em>Office Space</em>, and <em>Clerks</em>.
+      </p>
+      <p>
         <strong>Context Window:</strong> The chatbot processes approximately
         150,000 words at once (200K tokens, roughly 500 pages of text),
         including both attached files and conversation history. You can attach up
