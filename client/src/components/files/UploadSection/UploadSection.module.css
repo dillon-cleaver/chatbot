@@ -141,4 +141,11 @@
     font-size: 0.9rem; /* Reduce from 1rem */
   }
 
+  .infoSection [role="region"] {
+    position: static;
+    border: none;
+    box-shadow: none;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
 }
