@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Conversation, Message } from '../types';
 import * as indexedDB from '../services/indexedDBService';
 import { generateUUID } from '../utils/uuid';
-
 export interface UseConversationsReturn {
   conversations: Conversation[];
   isHistoryModalOpen: boolean;

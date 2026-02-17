@@ -6,6 +6,7 @@ import {
   ConversationItem,
   type ConversationItemRef,
 } from "../ConversationItem/ConversationItem";
+import { StorageIndicator } from "../../ui/StorageIndicator/StorageIndicator";
 import styles from "./ChatHistoryModal.module.css";
 
 export interface ChatHistoryModalProps {
@@ -17,6 +18,10 @@ export interface ChatHistoryModalProps {
   onStartNewChat: () => void;
   onDeleteAllClick: () => void;
   onUpdateTitle: (conversationId: string, newTitle: string) => void;
+  storageUsage: number;
+  storageQuota: number;
+  maxConversations: number;
+  dailyLimitReached: boolean;
 }
 
 // Inner component that handles focus state - will reset when key changes
@@ -167,6 +172,10 @@ export function ChatHistoryModal({
   onStartNewChat,
   onDeleteAllClick,
   onUpdateTitle,
+  storageUsage,
+  storageQuota,
+  maxConversations,
+  dailyLimitReached,
 }: ChatHistoryModalProps): React.JSX.Element {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const newChatButtonRef = useRef<HTMLButtonElement>(null);
@@ -225,6 +234,8 @@ export function ChatHistoryModal({
     newChatButtonRef.current?.focus();
   }, []);
 
+  const atLimit = conversations.length >= maxConversations || dailyLimitReached;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -240,6 +251,8 @@ export function ChatHistoryModal({
           className={styles.newChatButton}
           onClick={onStartNewChat}
           onKeyDown={handleNewChatKeyDown}
+          disabled={atLimit}
+          title={atLimit ? (dailyLimitReached ? 'Daily chat limit reached' : `Chat limit reached (${maxConversations})`) : undefined}
         >
           + New Chat
         </Button>
@@ -269,6 +282,14 @@ export function ChatHistoryModal({
           />
         </div>
       )}
+
+      <div className={styles.storageFooter}>
+        <StorageIndicator
+          label={`${conversations.length} / ${maxConversations} chats`}
+          storageUsage={storageUsage}
+          storageQuota={storageQuota}
+        />
+      </div>
     </Modal>
   );
 }

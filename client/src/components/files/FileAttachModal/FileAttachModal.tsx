@@ -9,6 +9,7 @@ import type { UploadSectionRef } from "../UploadSection/UploadSection";
 import { FileList } from "../FileList/FileList";
 import type { FileListRef } from "../FileList/FileList";
 import { AlertDialog } from "../../ui/AlertDialog/AlertDialog";
+import { StorageIndicator } from "../../ui/StorageIndicator/StorageIndicator";
 import styles from "./FileAttachModal.module.css";
 
 export interface FileAttachModalProps {
@@ -25,6 +26,8 @@ export interface FileAttachModalProps {
   onClearSelection: () => void;
   onCommitSelection: (fileIds: string[]) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
+  storageUsage: number;
+  storageQuota: number;
 }
 
 export function FileAttachModal({
@@ -39,6 +42,8 @@ export function FileAttachModal({
   uploadError,
   onCommitSelection,
   fileInputRef,
+  storageUsage,
+  storageQuota,
 }: FileAttachModalProps): React.JSX.Element {
   // Local pending selection state
   const [pendingFileIds, setPendingFileIds] =
@@ -190,12 +195,6 @@ export function FileAttachModal({
         />
 
         <div className={styles.fileListSection}>
-          <div className={styles.sectionHeader}>
-            <h3 className={styles.sectionHeading}>Local File Library</h3>
-            <span className={styles.fileSlotsInfo}>
-              {files.length}/{MAX_TOTAL_FILES} file slots used
-            </span>
-          </div>
           <div className={styles.scrollableContent}>
             <div
               className={`${styles.selectionCounterWrapper} ${pendingFileIds.length > 0 ? styles.visible : ""}`}
@@ -221,10 +220,11 @@ export function FileAttachModal({
               onNavigateUp={handleNavigateUpFromList}
             />
             <div className={styles.localFilesHint}>
-              <p>
-                File contents and messages are sent to Anthropic for processing
-                when you send a message.
-              </p>
+              <StorageIndicator
+                label={`${files.length} / ${MAX_TOTAL_FILES} files`}
+                storageUsage={storageUsage}
+                storageQuota={storageQuota}
+              />
             </div>
           </div>
         </div>

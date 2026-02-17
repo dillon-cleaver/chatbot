@@ -107,8 +107,11 @@ export const UploadSection = forwardRef<UploadSectionRef, UploadSectionProps>(
           onKeyDown={handleCollapsibleKeyDown}
         >
           <p>
-            Attach files to analyze content across multiple documents, find
-            patterns, search efficiently, and connect information.
+            This chatbot is powered by <strong>Claude Haiku 4.5</strong> from
+            Anthropic. Your files are stored locally in your browser — nothing
+            is uploaded to a server. Attach them to analyze content across
+            multiple documents, find patterns, search efficiently, and connect
+            information.
           </p>
           <p>
             <strong>Context Window:</strong> The chatbot processes approximately

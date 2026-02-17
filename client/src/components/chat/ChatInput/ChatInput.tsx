@@ -149,6 +149,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
             )}
           </button>
           <textarea
+            id="message-input"
             ref={textareaRef}
             className={styles.input}
             value={value}

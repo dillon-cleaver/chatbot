@@ -4,6 +4,8 @@ import { sendChatMessage } from '../utils/api';
 import * as indexedDB from '../services/indexedDBService';
 import { generateUUID } from '../utils/uuid';
 import { processFile } from '../services/fileProcessor';
+import { MAX_CONVERSATIONS, MAX_DAILY_CHATS } from '../constants';
+import { getDailyCreationCount, recordDailyCreation } from '../utils/dailyChatLimit';
 
 export interface UseChatReturn {
   messages: Message[];
@@ -20,6 +22,7 @@ interface UseChatProps {
   onConversationCreated: (conversationId: string | null) => void;
   onClearSelectedFiles: () => void;
   getFileObject: (fileId: string) => File | undefined;
+  onLimitError: (title: string, message: string) => void;
 }
 
 export function useChat({
@@ -28,6 +31,7 @@ export function useChat({
   onConversationCreated,
   onClearSelectedFiles,
   getFileObject,
+  onLimitError,
 }: UseChatProps): UseChatReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>('');
@@ -35,6 +39,19 @@ export function useChat({
 
   const sendMessage = useCallback(async (): Promise<void> => {
     if (!input.trim() || isLoading) return;
+
+    // Check limits before any UI updates so we don't need to roll back
+    if (!conversationId) {
+      if (getDailyCreationCount() >= MAX_DAILY_CHATS) {
+        onLimitError('Daily Limit Reached', `You've reached the daily limit of ${MAX_DAILY_CHATS} new chats. Try again tomorrow.`);
+        return;
+      }
+      const existing = await indexedDB.listConversations();
+      if (existing.length >= MAX_CONVERSATIONS) {
+        onLimitError('Chat Limit Reached', `You've reached the maximum of ${MAX_CONVERSATIONS} conversations. Delete an existing conversation to start a new one.`);
+        return;
+      }
+    }
 
     const userMessage: Message = {
       id: generateUUID(),
@@ -65,6 +82,7 @@ export function useChat({
         activeConversationId = conv.id;
         newConversationId = conv.id;
         onConversationCreated(conv.id);
+        recordDailyCreation();
       }
 
       // Save user message to IndexedDB (with file IDs if any are attached)
@@ -155,7 +173,7 @@ export function useChat({
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages, conversationId, selectedFiles, onConversationCreated, onClearSelectedFiles, getFileObject]);
+  }, [input, isLoading, messages, conversationId, selectedFiles, onConversationCreated, onClearSelectedFiles, getFileObject, onLimitError]);
 
   return {
     messages,

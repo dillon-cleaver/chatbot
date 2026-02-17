@@ -93,7 +93,7 @@
 .input:focus {
   outline: none;
   border-color: var(--focus-color);
-  box-shadow: var(--default-shadow-offset) var(--default-shadow-offset) 0px
+  box-shadow: var(--hover-shadow-offset) var(--hover-shadow-offset) 0px
     var(--shadow-color);
   position: relative;
   z-index: 1;

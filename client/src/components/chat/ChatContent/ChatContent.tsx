@@ -14,9 +14,13 @@ import { ChatInput, type ChatInputRef } from "../ChatInput/ChatInput";
 import { ChatContainer } from "../ChatContainer/ChatContainer";
 import { FileAttachModal } from "../../files/FileAttachModal/FileAttachModal";
 import { ChatHistoryModal } from "../../history/ChatHistoryModal/ChatHistoryModal";
+import { AlertDialog } from "../../ui/AlertDialog/AlertDialog";
 import { ConfirmDialog } from "../../ui/ConfirmDialog/ConfirmDialog";
 import { KeyboardShortcutsModal } from "../../ui/KeyboardShortcutsModal/KeyboardShortcutsModal";
 import { Spinner } from "../../ui/Spinner/Spinner";
+import { getStorageEstimate } from "../../../utils/fileUtils";
+import { MAX_CONVERSATIONS, MAX_DAILY_CHATS, MAX_STORAGE_BYTES } from "../../../constants";
+import { getDailyCreationCount } from "../../../utils/dailyChatLimit";
 
 // Timing constants for animations and delays
 const MODAL_CLOSE_ANIMATION_MS = 150;
@@ -30,6 +34,8 @@ export function ChatContent(): React.JSX.Element {
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] =
     useState<boolean>(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
+  const [limitError, setLimitError] = useState<{ title: string; message: string } | null>(null);
+  const [storageUsage, setStorageUsage] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatInputRef = useRef<ChatInputRef>(null);
@@ -76,12 +82,19 @@ export function ChatContent(): React.JSX.Element {
   );
 
   // Initialize chat with conversation ID from App state
+  const handleLimitError = useCallback(
+    (title: string, message: string) => setLimitError({ title, message }),
+    [],
+  );
+  const clearLimitError = useCallback(() => setLimitError(null), []);
+
   const chat = useChat({
     conversationId: currentConversationId,
     selectedFiles,
     onConversationCreated: handleConversationCreated,
     onClearSelectedFiles: fileManager.clearSelectedFiles,
     getFileObject: fileManager.getFileObject,
+    onLimitError: handleLimitError,
   });
 
   // Initialize conversations with navigation callback
@@ -93,6 +106,15 @@ export function ChatContent(): React.JSX.Element {
     onDeleteSuccess: () => announce(ANNOUNCEMENTS.CONVERSATION_DELETED),
     onError: handleError,
   });
+
+  // Fetch storage estimate when either modal opens
+  useEffect(() => {
+    if (conversations.isHistoryModalOpen || fileManager.isModalOpen) {
+      getStorageEstimate().then(({ usage }) => {
+        setStorageUsage(usage);
+      });
+    }
+  }, [conversations.isHistoryModalOpen, fileManager.isModalOpen]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -115,8 +137,9 @@ export function ChatContent(): React.JSX.Element {
   useEffect(() => {
     // Only scroll when modal closes (transitions from true to false)
     if (!fileManager.isModalOpen && fileManager.selectedFileIds.length > 0) {
-      // Delay to let modal close animation complete, then smooth scroll
+      // Delay to let modal close animation complete, then focus input and scroll
       const timer = setTimeout(() => {
+        chatInputRef.current?.focus();
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, MODAL_CLOSE_ANIMATION_MS);
       return () => clearTimeout(timer);
@@ -223,6 +246,13 @@ export function ChatContent(): React.JSX.Element {
     },
   });
 
+  // Check daily chat limit when history modal opens
+  const dailyLimitReached = useMemo(
+    () => getDailyCreationCount() >= MAX_DAILY_CHATS,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [conversations.isHistoryModalOpen],
+  );
+
   // Show empty state only when truly at home with no conversation to load
   const isEmpty =
     chat.messages.length === 0 &&
@@ -259,14 +289,14 @@ export function ChatContent(): React.JSX.Element {
         onNavigateDown={handleNavigateToInput}
       />
 
-      <main id="main-content" className={styles.mainContent} tabIndex={-1}>
+      <main className={styles.mainContent}>
         <ChatContainer
           isEmpty={isEmpty}
           emptyContent={
             <>
               <div className={styles.emptyGreeting}>
                 <h1 className={styles.emptyTitle}>CHATBOT</h1>
-                <p className={styles.emptySubtitle}>type, type, type</p>
+                <p className={`${styles.emptySubtitle} slide-on-focus`}>type, type, type</p>
               </div>
               <ChatInput
                 ref={chatInputRef}
@@ -333,6 +363,8 @@ export function ChatContent(): React.JSX.Element {
         onClearSelection={fileManager.clearSelectedFiles}
         onCommitSelection={fileManager.commitPendingSelection}
         fileInputRef={fileInputRef}
+        storageUsage={storageUsage}
+        storageQuota={MAX_STORAGE_BYTES}
       />
 
       <ChatHistoryModal
@@ -344,6 +376,10 @@ export function ChatContent(): React.JSX.Element {
         onStartNewChat={handleStartNewChat}
         onDeleteAllClick={() => setIsDeleteAllModalOpen(true)}
         onUpdateTitle={conversations.updateConversationTitle}
+        storageUsage={storageUsage}
+        storageQuota={MAX_STORAGE_BYTES}
+        maxConversations={MAX_CONVERSATIONS}
+        dailyLimitReached={dailyLimitReached}
       />
 
       <ConfirmDialog
@@ -357,6 +393,13 @@ export function ChatContent(): React.JSX.Element {
       <KeyboardShortcutsModal
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
+      />
+
+      <AlertDialog
+        isOpen={limitError !== null}
+        onClose={clearLimitError}
+        title={limitError?.title ?? ''}
+        message={limitError?.message ?? ''}
       />
     </div>
   );

@@ -1,0 +1,34 @@
+.storageIndicator {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  margin: 0 0 0.35rem;
+  font-family: "Roboto", sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.bar {
+  height: 6px;
+  background-color: var(--border-color);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background-color: var(--button-bg);
+  transition: width 0.3s ease;
+}
+
+.barFill.warning {
+  background-color: var(--warning-color);
+}
+
+.text {
+  margin: 0.35rem 0 0;
+  font-family: "Roboto", sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
