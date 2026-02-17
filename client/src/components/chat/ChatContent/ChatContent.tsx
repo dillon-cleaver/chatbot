@@ -86,6 +86,7 @@ export function ChatContent(): React.JSX.Element {
     (title: string, message: string) => setLimitError({ title, message }),
     [],
   );
+  const clearLimitError = useCallback(() => setLimitError(null), []);
 
   const chat = useChat({
     conversationId: currentConversationId,
@@ -396,7 +397,7 @@ export function ChatContent(): React.JSX.Element {
 
       <AlertDialog
         isOpen={limitError !== null}
-        onClose={() => setLimitError(null)}
+        onClose={clearLimitError}
         title={limitError?.title ?? ''}
         message={limitError?.message ?? ''}
       />

@@ -23,7 +23,7 @@
 }
 
 .barFill.warning {
-  background-color: #ff4444;
+  background-color: var(--warning-color);
 }
 
 .text {
