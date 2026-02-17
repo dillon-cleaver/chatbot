@@ -2,7 +2,6 @@
   background-color: var(--header-bg);
   border: 3px solid var(--border-color);
   box-shadow: 4px 4px 0px var(--shadow-color);
-  opacity: 0.9;
 }
 
 .header {
