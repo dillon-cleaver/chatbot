@@ -17,6 +17,7 @@ import { ChatHistoryModal } from "../../history/ChatHistoryModal/ChatHistoryModa
 import { AlertDialog } from "../../ui/AlertDialog/AlertDialog";
 import { ConfirmDialog } from "../../ui/ConfirmDialog/ConfirmDialog";
 import { KeyboardShortcutsModal } from "../../ui/KeyboardShortcutsModal/KeyboardShortcutsModal";
+import { FileChipsDisplay } from "../FileChipsDisplay/FileChipsDisplay";
 import { Spinner } from "../../ui/Spinner/Spinner";
 import { getStorageEstimate } from "../../../utils/fileUtils";
 import { MAX_CONVERSATIONS, MAX_DAILY_CHATS, MAX_STORAGE_BYTES } from "../../../constants";
@@ -297,6 +298,15 @@ export function ChatContent(): React.JSX.Element {
               <div className={styles.emptyGreeting}>
                 <h1 className={styles.emptyTitle}>CHATBOT</h1>
                 <p className={`${styles.emptySubtitle} slide-on-focus`}>type, type, type</p>
+                {selectedFiles.length > 0 && !fileManager.isModalOpen && (
+                  <div className={styles.fileChipsWrapper}>
+                    <FileChipsDisplay
+                      files={selectedFiles}
+                      onRemoveFile={fileManager.removeSelectedFile}
+                      onClearAll={fileManager.clearSelectedFiles}
+                    />
+                  </div>
+                )}
               </div>
               <ChatInput
                 ref={chatInputRef}
@@ -312,6 +322,7 @@ export function ChatContent(): React.JSX.Element {
                 showTopBorder={false}
                 isModalOpen={fileManager.isModalOpen}
                 autoFocus={true}
+                hideFileChips={true}
                 onNavigateUp={handleNavigateToHeader}
               />
             </>

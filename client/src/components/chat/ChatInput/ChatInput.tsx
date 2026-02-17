@@ -18,6 +18,7 @@ export interface ChatInputProps {
   showTopBorder?: boolean;
   isModalOpen?: boolean;
   autoFocus?: boolean;
+  hideFileChips?: boolean;
   onNavigateUp?: () => void;
 }
 
@@ -40,6 +41,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
       showTopBorder = true,
       isModalOpen = false,
       autoFocus = false,
+      hideFileChips = false,
       onNavigateUp,
     },
     ref,
@@ -122,7 +124,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
       <div
         className={`${styles.inputContainer} ${showTopBorder ? styles.withBorder : ""}`}
       >
-        {!isModalOpen && (
+        {!isModalOpen && !hideFileChips && (
           <FileChipsDisplay
             files={selectedFiles}
             onRemoveFile={onRemoveFile}

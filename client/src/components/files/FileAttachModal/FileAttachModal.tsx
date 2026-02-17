@@ -196,20 +196,6 @@ export function FileAttachModal({
 
         <div className={styles.fileListSection}>
           <div className={styles.scrollableContent}>
-            <div
-              className={`${styles.selectionCounterWrapper} ${pendingFileIds.length > 0 ? styles.visible : ""}`}
-            >
-              <FileChipsDisplay
-                ref={fileChipsRef}
-                files={selectedFiles}
-                onRemoveFile={handleTogglePending}
-                onClearAll={handleClearPending}
-                onAdd={handleClose}
-                showFileChips={false}
-                showHelperText={false}
-                onNavigateToList={handleNavigateToList}
-              />
-            </div>
             <FileList
               ref={fileListRef}
               files={files}
@@ -219,14 +205,29 @@ export function FileAttachModal({
               onDeleteFile={onDeleteFile}
               onNavigateUp={handleNavigateUpFromList}
             />
-            <div className={styles.localFilesHint}>
-              <StorageIndicator
-                label={`${files.length} / ${MAX_TOTAL_FILES} files`}
-                storageUsage={storageUsage}
-                storageQuota={storageQuota}
-              />
-            </div>
           </div>
+          <div
+            className={`${styles.selectionCounterWrapper} ${pendingFileIds.length > 0 ? styles.visible : ""}`}
+          >
+            <FileChipsDisplay
+              ref={fileChipsRef}
+              files={selectedFiles}
+              onRemoveFile={handleTogglePending}
+              onClearAll={handleClearPending}
+              onAdd={handleClose}
+              showFileChips={false}
+              showHelperText={false}
+              onNavigateToList={handleNavigateToList}
+            />
+          </div>
+        </div>
+
+        <div className={styles.localFilesHint}>
+          <StorageIndicator
+            label={`${files.length} / ${MAX_TOTAL_FILES} files`}
+            storageUsage={storageUsage}
+            storageQuota={storageQuota}
+          />
         </div>
       </div>
 

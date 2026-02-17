@@ -19,6 +19,7 @@
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
 }
 
@@ -72,6 +73,12 @@
   to {
     opacity: 1;
   }
+}
+
+.fileChipsWrapper {
+  animation: fadeIn 0.12s ease-out;
+  width: 100%;
+  margin-top: 1rem;
 }
 
 @media (max-width: 768px) {
