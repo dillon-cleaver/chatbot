@@ -77,7 +77,7 @@
 }
 
 .addButton:hover {
-  background-color: #6c5ce7;
+  background-color: var(--focus-color);
   color: white;
 }
 

@@ -19,7 +19,7 @@
 .attachButton {
   background-color: var(--button-bg);
   border: var(--border-width) solid var(--border-color);
-  color: var(--text-primary);
+  color: var(--button-text);
   font-size: 1.5rem;
   height: 50px;
   width: 50px;
@@ -109,7 +109,7 @@
   padding: 0 1.5rem;
   border: var(--border-width) solid var(--border-color);
   background-color: var(--button-bg);
-  color: var(--text-primary);
+  color: var(--button-text);
   font-family: "Fraunces", serif;
   font-size: 1rem;
   font-weight: 600;

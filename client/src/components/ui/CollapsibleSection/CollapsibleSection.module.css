@@ -23,12 +23,13 @@
 
 .header:focus-visible {
   outline: var(--focus-outline-width) solid var(--focus-color);
-  outline-offset: calc(-1 * var(--focus-outline-offset));
+  outline-offset: var(--focus-outline-offset);
 }
 
 .label {
   font-size: 0.7rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  opacity: 0.7;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -38,7 +39,8 @@
 .chevron {
   display: flex;
   align-items: center;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  opacity: 0.7;
 }
 
 .content {

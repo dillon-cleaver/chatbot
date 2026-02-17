@@ -46,11 +46,11 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
-  background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 35%, #b0b0b0 65%, #808080 100%);
+  background: var(--title-gradient);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(2px 3px 0px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(2px 3px 0px var(--title-shadow));
   transition:
     opacity var(--transition-fast),
     transform var(--transition-fast);
@@ -70,7 +70,7 @@
   justify-content: center;
   background-color: var(--button-bg);
   border: var(--border-width) solid var(--border-color);
-  color: var(--text-primary);
+  color: var(--button-text);
   font-size: 1.5rem;
   padding: 0.75rem;
   cursor: pointer;

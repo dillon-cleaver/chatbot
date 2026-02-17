@@ -41,7 +41,7 @@
 @media (hover: hover) and (pointer: fine) {
   .fileCheckbox:hover {
     transform: scale(1.2);
-    background-color: #6c5ce7;
+    background-color: var(--button-bg);
   }
 
   .fileCheckbox:hover::after {

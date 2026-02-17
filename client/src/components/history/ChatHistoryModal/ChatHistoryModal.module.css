@@ -11,7 +11,7 @@
   border: var(--border-width) solid var(--border-color);
   border-radius: 0;
   background-color: var(--button-bg);
-  color: var(--text-primary);
+  color: var(--button-text);
   font-family: "Fraunces", serif;
   font-size: 0.95rem;
   font-weight: 600;
