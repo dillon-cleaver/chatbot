@@ -1,4 +1,7 @@
 declare const styles: {
+  readonly helpContent: string;
+  readonly infoSection: string;
+  readonly sectionLabel: string;
   readonly shortcutsList: string;
   readonly shortcutItem: string;
   readonly keys: string;

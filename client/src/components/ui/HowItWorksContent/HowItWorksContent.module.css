@@ -1,0 +1,21 @@
+.fileTypes {
+  line-height: 1.7;
+}
+
+.fileTypeSupported {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .fileTypeSupported {
+  color: #22c55e;
+}
+
+.fileTypeUnsupported {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .fileTypeUnsupported {
+  color: #ef4444;
+}
