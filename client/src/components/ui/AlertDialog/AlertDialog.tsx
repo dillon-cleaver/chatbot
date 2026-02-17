@@ -17,13 +17,14 @@ export function AlertDialog({
   message,
 }: AlertDialogProps): React.JSX.Element | null {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const okButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // Store previous focus and restore on close
+  // Store previous focus and auto-focus the OK button on open
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement;
-      dialogRef.current?.focus();
+      okButtonRef.current?.focus();
     } else if (previousFocusRef.current) {
       previousFocusRef.current.focus();
     }
@@ -92,6 +93,7 @@ export function AlertDialog({
         <p id="alert-dialog-message">{message}</p>
         <div className={styles.alertActions}>
           <Button
+            ref={okButtonRef}
             variant="chunky"
             className={styles.okButton}
             onClick={onClose}

@@ -22,6 +22,7 @@ interface UseChatProps {
   onConversationCreated: (conversationId: string | null) => void;
   onClearSelectedFiles: () => void;
   getFileObject: (fileId: string) => File | undefined;
+  onLimitError: (title: string, message: string) => void;
 }
 
 export function useChat({
@@ -30,6 +31,7 @@ export function useChat({
   onConversationCreated,
   onClearSelectedFiles,
   getFileObject,
+  onLimitError,
 }: UseChatProps): UseChatReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>('');
@@ -37,6 +39,19 @@ export function useChat({
 
   const sendMessage = useCallback(async (): Promise<void> => {
     if (!input.trim() || isLoading) return;
+
+    // Check limits before any UI updates so we don't need to roll back
+    if (!conversationId) {
+      if (getDailyCreationCount() >= MAX_DAILY_CHATS) {
+        onLimitError('Daily Limit Reached', `You've reached the daily limit of ${MAX_DAILY_CHATS} new chats. Try again tomorrow.`);
+        return;
+      }
+      const existing = await indexedDB.listConversations();
+      if (existing.length >= MAX_CONVERSATIONS) {
+        onLimitError('Chat Limit Reached', `You've reached the maximum of ${MAX_CONVERSATIONS} conversations. Delete an existing conversation to start a new one.`);
+        return;
+      }
+    }
 
     const userMessage: Message = {
       id: generateUUID(),
@@ -60,13 +75,6 @@ export function useChat({
       // Create conversation in IndexedDB on first message
       let activeConversationId = conversationId;
       if (!activeConversationId) {
-        if (getDailyCreationCount() >= MAX_DAILY_CHATS) {
-          throw new Error(`Daily chat limit reached (${MAX_DAILY_CHATS}). Try again tomorrow.`);
-        }
-        const existing = await indexedDB.listConversations();
-        if (existing.length >= MAX_CONVERSATIONS) {
-          throw new Error(`Chat limit reached (${MAX_CONVERSATIONS}). Delete an existing conversation to start a new one.`);
-        }
         const title = input.trim().length > 50
           ? input.trim().substring(0, 47) + '...'
           : input.trim();
@@ -165,7 +173,7 @@ export function useChat({
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages, conversationId, selectedFiles, onConversationCreated, onClearSelectedFiles, getFileObject]);
+  }, [input, isLoading, messages, conversationId, selectedFiles, onConversationCreated, onClearSelectedFiles, getFileObject, onLimitError]);
 
   return {
     messages,

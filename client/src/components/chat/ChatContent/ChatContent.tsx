@@ -14,6 +14,7 @@ import { ChatInput, type ChatInputRef } from "../ChatInput/ChatInput";
 import { ChatContainer } from "../ChatContainer/ChatContainer";
 import { FileAttachModal } from "../../files/FileAttachModal/FileAttachModal";
 import { ChatHistoryModal } from "../../history/ChatHistoryModal/ChatHistoryModal";
+import { AlertDialog } from "../../ui/AlertDialog/AlertDialog";
 import { ConfirmDialog } from "../../ui/ConfirmDialog/ConfirmDialog";
 import { KeyboardShortcutsModal } from "../../ui/KeyboardShortcutsModal/KeyboardShortcutsModal";
 import { Spinner } from "../../ui/Spinner/Spinner";
@@ -33,6 +34,7 @@ export function ChatContent(): React.JSX.Element {
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] =
     useState<boolean>(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
+  const [limitError, setLimitError] = useState<{ title: string; message: string } | null>(null);
   const [storageUsage, setStorageUsage] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,12 +82,18 @@ export function ChatContent(): React.JSX.Element {
   );
 
   // Initialize chat with conversation ID from App state
+  const handleLimitError = useCallback(
+    (title: string, message: string) => setLimitError({ title, message }),
+    [],
+  );
+
   const chat = useChat({
     conversationId: currentConversationId,
     selectedFiles,
     onConversationCreated: handleConversationCreated,
     onClearSelectedFiles: fileManager.clearSelectedFiles,
     getFileObject: fileManager.getFileObject,
+    onLimitError: handleLimitError,
   });
 
   // Initialize conversations with navigation callback
@@ -384,6 +392,13 @@ export function ChatContent(): React.JSX.Element {
       <KeyboardShortcutsModal
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
+      />
+
+      <AlertDialog
+        isOpen={limitError !== null}
+        onClose={() => setLimitError(null)}
+        title={limitError?.title ?? ''}
+        message={limitError?.message ?? ''}
       />
     </div>
   );
