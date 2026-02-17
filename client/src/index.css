@@ -10,10 +10,9 @@
   --transition-normal: 0.2s;
   --transition-slow: 0.3s;
 
-  /* Focus styles */
+  /* Focus styles (shared across themes) */
   --focus-outline-width: 2px;
   --focus-outline-offset: 2px;
-  --focus-outline-offset-lg: 4px;
 
   /* Neobrutalist button transforms */
   --hover-translate: translate(-2px, -2px);
@@ -44,6 +43,9 @@
   --button-bg: #6c5ce7;
   --focus-color: #6c5ce7;
   --focus-shadow: rgba(108, 92, 231, 0.3);
+  --title-gradient: linear-gradient(180deg, #ffffff 0%, #e0e0e0 35%, #b0b0b0 65%, #808080 100%);
+  --title-shadow: rgba(0, 0, 0, 0.6);
+  --button-text: #ffffff;
 }
 
 /* Light theme */
@@ -51,7 +53,7 @@
   --bg-primary: #ebe5d5;
   --header-bg: #e8e2d0;
   --text-primary: #1a1a1a;
-  --text-secondary: #666666;
+  --text-secondary: #555555;
   --border-color: #000000;
   --shadow-color: #000000;
   --message-bg: #f8f4e8;
@@ -60,9 +62,12 @@
   --assistant-message-bg: #e6dfc8;
   --assistant-border-color: #c4bfb4;
   --input-bg: #f8f4e8;
-  --button-bg: #6c5ce7;
-  --focus-color: #6c5ce7;
-  --focus-shadow: rgba(108, 92, 231, 0.3);
+  --button-bg: #2d6a4f;
+  --focus-color: #b45309;
+  --focus-shadow: rgba(180, 83, 9, 0.35);
+  --title-gradient: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 35%, #2a2a2a 65%, #1a1a1a 100%);
+  --title-shadow: rgba(0, 0, 0, 0.15);
+  --button-text: #ffffff;
 }
 
 * {
@@ -83,7 +88,7 @@ html {
 }
 
 ::selection {
-  background-color: rgba(108, 92, 231, 0.4);
+  background-color: var(--focus-shadow);
 }
 
 body {
