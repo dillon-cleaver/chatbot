@@ -45,6 +45,10 @@
   flex-shrink: 0;
 }
 
+.fileListSection:has(.selectionCounterWrapper.visible) .scrollableContent {
+  padding-bottom: 90px;
+}
+
 @media (max-width: 768px) {
   .scrollableContent {
     max-height: 400px;
@@ -53,10 +57,18 @@
   .selectionCounterWrapper {
     padding: 0.5rem 1rem;
   }
+
+  .fileListSection:has(.selectionCounterWrapper.visible) .scrollableContent {
+    padding-bottom: 75px;
+  }
 }
 
 @media (max-width: 480px) {
   .scrollableContent {
     max-height: 320px;
+  }
+
+  .fileListSection:has(.selectionCounterWrapper.visible) .scrollableContent {
+    padding-bottom: 70px;
   }
 }

@@ -96,13 +96,15 @@ export function KeyboardShortcutsModal({
           <HowItWorksContent />
         </CollapsibleSection>
 
-        <div className={styles.sectionLabel}>Keyboard Shortcuts</div>
+        <div id="keyboard-shortcuts-label" className={styles.sectionLabel}>
+          Keyboard Shortcuts
+        </div>
 
         <div
           ref={listRef}
           className={styles.shortcutsList}
           role="list"
-          aria-label="Keyboard shortcuts"
+          aria-labelledby="keyboard-shortcuts-label"
           onKeyDown={handleListKeyDown}
         >
           {KEYBOARD_SHORTCUTS.map((shortcut, index) => (

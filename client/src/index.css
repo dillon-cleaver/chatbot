@@ -48,6 +48,8 @@
   --button-text: #ffffff;
   --user-message-text: var(--text-primary);
   --warning-color: #ff4444;
+  --success-color: #22c55e;
+  --error-color: #ef4444;
 }
 
 /* Light theme */
@@ -72,6 +74,8 @@
   --button-text: #ffffff;
   --user-message-text: #ffffff;
   --warning-color: #cc3333;
+  --success-color: #16a34a;
+  --error-color: #dc2626;
 }
 
 * {

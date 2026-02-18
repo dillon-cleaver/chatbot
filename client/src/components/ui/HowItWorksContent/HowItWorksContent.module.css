@@ -3,19 +3,11 @@
 }
 
 .fileTypeSupported {
-  color: #16a34a;
+  color: var(--success-color);
   font-weight: 500;
-}
-
-[data-theme="dark"] .fileTypeSupported {
-  color: #22c55e;
 }
 
 .fileTypeUnsupported {
-  color: #dc2626;
+  color: var(--error-color);
   font-weight: 500;
-}
-
-[data-theme="dark"] .fileTypeUnsupported {
-  color: #ef4444;
 }
