@@ -1,8 +1,5 @@
 import { forwardRef, useRef, useImperativeHandle } from "react";
 import { AlertTriangle } from "lucide-react";
-import { CollapsibleSection } from "../../ui/CollapsibleSection/CollapsibleSection";
-import type { CollapsibleSectionRef } from "../../ui/CollapsibleSection/CollapsibleSection";
-import { HowItWorksContent } from "../../ui/HowItWorksContent";
 import styles from "./UploadSection.module.css";
 
 export interface UploadSectionProps {
@@ -17,7 +14,6 @@ export interface UploadSectionProps {
 
 export interface UploadSectionRef {
   focusUploadButton: () => void;
-  focusCollapsible: () => void;
 }
 
 export const UploadSection = forwardRef<UploadSectionRef, UploadSectionProps>(
@@ -33,14 +29,10 @@ export const UploadSection = forwardRef<UploadSectionRef, UploadSectionProps>(
     ref,
   ): React.JSX.Element {
     const uploadButtonRef = useRef<HTMLButtonElement>(null);
-    const collapsibleRef = useRef<CollapsibleSectionRef>(null);
 
     useImperativeHandle(ref, () => ({
       focusUploadButton: () => {
         uploadButtonRef.current?.focus();
-      },
-      focusCollapsible: () => {
-        collapsibleRef.current?.focus();
       },
     }));
 
@@ -48,16 +40,6 @@ export const UploadSection = forwardRef<UploadSectionRef, UploadSectionProps>(
       if (e.key === "ArrowUp") {
         e.preventDefault();
         onNavigateUp?.();
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        collapsibleRef.current?.focus();
-      }
-    };
-
-    const handleCollapsibleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        uploadButtonRef.current?.focus();
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         onNavigateToList?.();
@@ -98,16 +80,6 @@ export const UploadSection = forwardRef<UploadSectionRef, UploadSectionProps>(
             <span className={styles.errorMessage}>{uploadError}</span>
           </div>
         )}
-
-        <CollapsibleSection
-          ref={collapsibleRef}
-          label="How Chatbot Works"
-          defaultOpen={false}
-          className={styles.infoSection}
-          onKeyDown={handleCollapsibleKeyDown}
-        >
-          <HowItWorksContent />
-        </CollapsibleSection>
       </div>
     );
   },

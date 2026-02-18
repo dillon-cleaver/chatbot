@@ -91,40 +91,13 @@
   }
 }
 
-
-.infoSection {
-  position: relative;
-  z-index: 1;
-}
-
-/* Only the expanded content overlays — header stays in flow */
-.infoSection [role="region"] {
-  position: absolute;
-  top: 100%;
-  left: -3px;
-  right: -3px;
-  background-color: var(--header-bg);
-  border: 3px solid var(--border-color);
-  border-top: none;
-  box-shadow: 4px 4px 0px var(--shadow-color);
-  z-index: 1;
-}
-
 @media (max-width: 768px) {
   .uploadSection {
-    padding: 0.75rem 1rem; /* Reduce from 1rem 1.5rem */
+    padding: 0.75rem 1rem;
   }
 
   .uploadButton {
-    padding: 0.625rem 1.5rem; /* Reduce from 0.75rem 2rem */
-    font-size: 0.9rem; /* Reduce from 1rem */
-  }
-
-  .infoSection [role="region"] {
-    position: static;
-    border: none;
-    box-shadow: none;
-    max-height: 40vh;
-    overflow-y: auto;
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9rem;
   }
 }

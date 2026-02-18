@@ -149,12 +149,12 @@ export function FileAttachModal({
     fileListRef.current?.focusFirstItem();
   }, []);
 
-  // Navigate up from file list - go to selection bar if files selected, otherwise to collapsible
+  // Navigate up from file list - go to selection bar if files selected, otherwise to upload button
   const handleNavigateUpFromList = useCallback(() => {
     if (pendingFileIds.length > 0) {
       fileChipsRef.current?.focusAttachButton();
     } else {
-      uploadSectionRef.current?.focusCollapsible();
+      uploadSectionRef.current?.focusUploadButton();
     }
   }, [pendingFileIds.length]);
 

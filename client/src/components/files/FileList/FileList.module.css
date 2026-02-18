@@ -6,10 +6,15 @@
 }
 
 .emptyFiles {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
   text-align: center;
   color: var(--text-secondary);
   font-size: 1rem;
-  padding: 2rem;
+  padding: 0 1.5rem;
 }
 
 @media (max-width: 768px) {
@@ -19,7 +24,6 @@
   }
 
   .emptyFiles {
-    padding: 1.5rem; /* Reduce from 2rem */
-    font-size: 0.9rem; /* Reduce from 1rem */
+    font-size: 0.9rem;
   }
 }
