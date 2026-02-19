@@ -7,6 +7,7 @@ import {
   type ConversationItemRef,
 } from "../ConversationItem/ConversationItem";
 import { StorageIndicator } from "../../ui/StorageIndicator/StorageIndicator";
+import { EmptyState } from "../../ui/EmptyState/EmptyState";
 import styles from "./ChatHistoryModal.module.css";
 
 export interface ChatHistoryModalProps {
@@ -129,9 +130,7 @@ function ConversationListInner({
 
   if (conversations.length === 0) {
     return (
-      <p className={styles.emptyConversations} role="status">
-        No conversations yet
-      </p>
+      <EmptyState>No conversations yet</EmptyState>
     );
   }
 
@@ -241,54 +240,59 @@ export function ChatHistoryModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Chat History"
+      bodyClassName={styles.noScrollBody}
       closeButtonRef={closeButtonRef}
       onCloseButtonKeyDown={handleCloseButtonKeyDown}
     >
-      <div className={styles.historyActions}>
-        <Button
-          ref={newChatButtonRef}
-          variant="chunky"
-          className={styles.newChatButton}
-          onClick={onStartNewChat}
-          onKeyDown={handleNewChatKeyDown}
-          disabled={atLimit}
-          title={atLimit ? (dailyLimitReached ? 'Daily chat limit reached' : `Chat limit reached (${maxConversations})`) : undefined}
-        >
-          + New Chat
-        </Button>
-        {conversations.length > 0 && (
+      <div className={styles.modalBodyContent}>
+        <div className={styles.historyActions}>
           <Button
-            ref={deleteAllButtonRef}
+            ref={newChatButtonRef}
             variant="chunky"
-            destructive
-            className={styles.deleteAllButton}
-            onClick={onDeleteAllClick}
-            onKeyDown={handleDeleteAllKeyDown}
+            className={styles.newChatButton}
+            onClick={onStartNewChat}
+            onKeyDown={handleNewChatKeyDown}
+            disabled={atLimit}
+            title={atLimit ? (dailyLimitReached ? 'Daily chat limit reached' : `Chat limit reached (${maxConversations})`) : undefined}
           >
-            Delete All
+            + New Chat
           </Button>
-        )}
-      </div>
+          {conversations.length > 0 && (
+            <Button
+              ref={deleteAllButtonRef}
+              variant="chunky"
+              destructive
+              className={styles.deleteAllButton}
+              onClick={onDeleteAllClick}
+              onKeyDown={handleDeleteAllKeyDown}
+            >
+              Delete All
+            </Button>
+          )}
+        </div>
 
-      {isOpen && (
-        <div ref={listContainerRef}>
-          <ConversationListInner
-            conversations={conversations}
-            currentConversationId={currentConversationId}
-            onClose={onClose}
-            onDeleteConversation={onDeleteConversation}
-            onUpdateTitle={onUpdateTitle}
-            onNavigateToButtons={handleNavigateToButtons}
+        <div className={styles.scrollableContent}>
+          {isOpen && (
+            <div ref={listContainerRef}>
+              <ConversationListInner
+                conversations={conversations}
+                currentConversationId={currentConversationId}
+                onClose={onClose}
+                onDeleteConversation={onDeleteConversation}
+                onUpdateTitle={onUpdateTitle}
+                onNavigateToButtons={handleNavigateToButtons}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className={styles.storageFooter}>
+          <StorageIndicator
+            label={`${conversations.length} / ${maxConversations} chats`}
+            storageUsage={storageUsage}
+            storageQuota={storageQuota}
           />
         </div>
-      )}
-
-      <div className={styles.storageFooter}>
-        <StorageIndicator
-          label={`${conversations.length} / ${maxConversations} chats`}
-          storageUsage={storageUsage}
-          storageQuota={storageQuota}
-        />
       </div>
     </Modal>
   );

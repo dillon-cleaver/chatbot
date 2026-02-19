@@ -1,9 +1,11 @@
 .uploadSection {
+  position: relative;
   padding: 1rem 1.5rem;
   border-bottom: var(--border-width) solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  z-index: 1;
 }
 
 .uploadButton {
@@ -89,39 +91,13 @@
   }
 }
 
-.fileTypes {
-  line-height: 1.7;
-}
-
-.fileTypeSupported {
-  color: #16a34a;
-  font-weight: 500;
-}
-
-[data-theme="dark"] .fileTypeSupported {
-  color: #22c55e;
-}
-
-.fileTypeUnsupported {
-  color: #dc2626;
-  font-weight: 500;
-}
-
-[data-theme="dark"] .fileTypeUnsupported {
-  color: #ef4444;
-}
-
-.infoSection {
-  margin-top: 0.5rem;
-}
-
 @media (max-width: 768px) {
   .uploadSection {
-    padding: 0.75rem 1rem; /* Reduce from 1rem 1.5rem */
+    padding: 0.75rem 1rem;
   }
 
   .uploadButton {
-    padding: 0.625rem 1.5rem; /* Reduce from 0.75rem 2rem */
-    font-size: 0.9rem; /* Reduce from 1rem */
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9rem;
   }
 }

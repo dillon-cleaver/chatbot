@@ -1,8 +1,41 @@
+.helpContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.infoSection {
+  position: relative;
+  z-index: 1;
+}
+
+/* Only the expanded content overlays — header stays in flow */
+.infoSection [role="region"] {
+  position: absolute;
+  top: 100%;
+  left: -3px;
+  right: -3px;
+  background-color: var(--header-bg);
+  border: 3px solid var(--border-color);
+  border-top: none;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+  z-index: 1;
+}
+
+.sectionLabel {
+  font-family: "Fraunces", serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+}
+
 .shortcutsList {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: 1.5rem;
 }
 
 .shortcutItem {
@@ -55,8 +88,22 @@
 }
 
 @media (max-width: 768px) {
-  .shortcutsList {
+  .infoSection [role="region"] {
+    position: static;
+    border: none;
+    box-shadow: none;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+
+  .helpContent {
     padding: 1rem;
+    gap: 1rem;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .shortcutsList {
     gap: 0.5rem;
   }
 

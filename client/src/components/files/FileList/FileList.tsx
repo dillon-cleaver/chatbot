@@ -8,6 +8,7 @@ import {
 import type { UploadedFile } from "../../../types";
 import { FileItem } from "../FileItem/FileItem";
 import type { FileItemRef } from "../FileItem/FileItem";
+import { EmptyState } from "../../ui/EmptyState/EmptyState";
 import styles from "./FileList.module.css";
 
 export interface FileListProps {
@@ -106,17 +107,7 @@ export const FileList = forwardRef<FileListRef, FileListProps>(
     );
 
     if (files.length === 0) {
-      return (
-        <div
-          className={styles.fileList}
-          role="list"
-          aria-label="Uploaded files"
-        >
-          <p className={styles.emptyFiles} role="status">
-            Upload files to attach them to your messages
-          </p>
-        </div>
-      );
+      return <EmptyState>Upload files to attach them to your messages</EmptyState>;
     }
 
     return (

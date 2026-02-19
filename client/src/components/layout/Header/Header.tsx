@@ -98,7 +98,7 @@ export const Header = forwardRef<HeaderRef, HeaderProps>(function Header(
           className={styles.helpButton}
           onClick={onHelpClick}
           onKeyDown={handleHelpKeyDown}
-          aria-label="Keyboard shortcuts"
+          aria-label="Help"
         >
           <HelpCircle size={20} />
         </button>

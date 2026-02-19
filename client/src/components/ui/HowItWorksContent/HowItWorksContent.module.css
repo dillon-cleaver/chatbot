@@ -1,0 +1,13 @@
+.fileTypes {
+  line-height: 1.7;
+}
+
+.fileTypeSupported {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+.fileTypeUnsupported {
+  color: var(--error-color);
+  font-weight: 500;
+}

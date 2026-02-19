@@ -149,12 +149,12 @@ export function FileAttachModal({
     fileListRef.current?.focusFirstItem();
   }, []);
 
-  // Navigate up from file list - go to selection bar if files selected, otherwise to collapsible
+  // Navigate up from file list - go to selection bar if files selected, otherwise to upload button
   const handleNavigateUpFromList = useCallback(() => {
     if (pendingFileIds.length > 0) {
       fileChipsRef.current?.focusAttachButton();
     } else {
-      uploadSectionRef.current?.focusCollapsible();
+      uploadSectionRef.current?.focusUploadButton();
     }
   }, [pendingFileIds.length]);
 
@@ -195,21 +195,7 @@ export function FileAttachModal({
         />
 
         <div className={styles.fileListSection}>
-          <div className={styles.scrollableContent}>
-            <div
-              className={`${styles.selectionCounterWrapper} ${pendingFileIds.length > 0 ? styles.visible : ""}`}
-            >
-              <FileChipsDisplay
-                ref={fileChipsRef}
-                files={selectedFiles}
-                onRemoveFile={handleTogglePending}
-                onClearAll={handleClearPending}
-                onAdd={handleClose}
-                showFileChips={false}
-                showHelperText={false}
-                onNavigateToList={handleNavigateToList}
-              />
-            </div>
+          <div className={`${styles.scrollableContent}${files.length > 0 ? ` ${styles.hasFiles}` : ""}`}>
             <FileList
               ref={fileListRef}
               files={files}
@@ -219,14 +205,29 @@ export function FileAttachModal({
               onDeleteFile={onDeleteFile}
               onNavigateUp={handleNavigateUpFromList}
             />
-            <div className={styles.localFilesHint}>
-              <StorageIndicator
-                label={`${files.length} / ${MAX_TOTAL_FILES} files`}
-                storageUsage={storageUsage}
-                storageQuota={storageQuota}
-              />
-            </div>
           </div>
+          <div
+            className={`${styles.selectionCounterWrapper} ${pendingFileIds.length > 0 ? styles.visible : ""}`}
+          >
+            <FileChipsDisplay
+              ref={fileChipsRef}
+              files={selectedFiles}
+              onRemoveFile={handleTogglePending}
+              onClearAll={handleClearPending}
+              onAdd={handleClose}
+              showFileChips={false}
+              showHelperText={false}
+              onNavigateToList={handleNavigateToList}
+            />
+          </div>
+        </div>
+
+        <div className={styles.localFilesHint}>
+          <StorageIndicator
+            label={`${files.length} / ${MAX_TOTAL_FILES} files`}
+            storageUsage={storageUsage}
+            storageQuota={storageQuota}
+          />
         </div>
       </div>
 

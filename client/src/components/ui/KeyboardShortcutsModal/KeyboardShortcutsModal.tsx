@@ -1,5 +1,8 @@
 import { useRef, useState, useCallback } from "react";
 import { Modal } from "../Modal/Modal";
+import { CollapsibleSection } from "../CollapsibleSection/CollapsibleSection";
+import type { CollapsibleSectionRef } from "../CollapsibleSection/CollapsibleSection";
+import { HowItWorksContent } from "../HowItWorksContent";
 import { KEYBOARD_SHORTCUTS } from "../../../hooks/useKeyboardShortcuts";
 import styles from "./KeyboardShortcutsModal.module.css";
 
@@ -13,12 +16,23 @@ export function KeyboardShortcutsModal({
   onClose,
 }: KeyboardShortcutsModalProps): React.JSX.Element {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const collapsibleRef = useRef<CollapsibleSectionRef>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [focusedIndex, setFocusedIndex] = useState(0);
 
   const handleCloseButtonKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
+      e.preventDefault();
+      collapsibleRef.current?.focus();
+    }
+  }, []);
+
+  const handleCollapsibleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      closeButtonRef.current?.focus();
+    } else if (e.key === "ArrowDown") {
       e.preventDefault();
       setFocusedIndex(0);
       itemRefs.current[0]?.focus();
@@ -38,7 +52,7 @@ export function KeyboardShortcutsModal({
         case "ArrowUp":
           e.preventDefault();
           if (focusedIndex === 0) {
-            closeButtonRef.current?.focus();
+            collapsibleRef.current?.focus();
             return;
           }
           newIndex = Math.max(focusedIndex - 1, 0);
@@ -67,42 +81,57 @@ export function KeyboardShortcutsModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Keyboard Shortcuts"
-      subtitle="Use these shortcuts to navigate the app faster"
+      title="Help"
       closeButtonRef={closeButtonRef}
       onCloseButtonKeyDown={handleCloseButtonKeyDown}
     >
-      <div
-        ref={listRef}
-        className={styles.shortcutsList}
-        role="list"
-        aria-label="Keyboard shortcuts"
-        onKeyDown={handleListKeyDown}
-      >
-        {KEYBOARD_SHORTCUTS.map((shortcut, index) => (
-          <div
-            key={index}
-            ref={(el) => {
-              itemRefs.current[index] = el;
-            }}
-            className={styles.shortcutItem}
-            role="listitem"
-            tabIndex={index === focusedIndex ? 0 : -1}
-            onFocus={() => setFocusedIndex(index)}
-          >
-            <div className={styles.keys}>
-              {shortcut.keys.map((key, keyIndex) => (
-                <span key={keyIndex}>
-                  <kbd className={styles.key}>{key}</kbd>
-                  {keyIndex < shortcut.keys.length - 1 && (
-                    <span className={styles.separator}> + </span>
-                  )}
-                </span>
-              ))}
+      <div className={styles.helpContent}>
+        <CollapsibleSection
+          ref={collapsibleRef}
+          label="How Chatbot Works"
+          defaultOpen={false}
+          className={styles.infoSection}
+          onKeyDown={handleCollapsibleKeyDown}
+        >
+          <HowItWorksContent />
+        </CollapsibleSection>
+
+        <div id="keyboard-shortcuts-label" className={styles.sectionLabel}>
+          Keyboard Shortcuts
+        </div>
+
+        <div
+          ref={listRef}
+          className={styles.shortcutsList}
+          role="list"
+          aria-labelledby="keyboard-shortcuts-label"
+          onKeyDown={handleListKeyDown}
+        >
+          {KEYBOARD_SHORTCUTS.map((shortcut, index) => (
+            <div
+              key={index}
+              ref={(el) => {
+                itemRefs.current[index] = el;
+              }}
+              className={styles.shortcutItem}
+              role="listitem"
+              tabIndex={index === focusedIndex ? 0 : -1}
+              onFocus={() => setFocusedIndex(index)}
+            >
+              <div className={styles.keys}>
+                {shortcut.keys.map((key, keyIndex) => (
+                  <span key={keyIndex}>
+                    <kbd className={styles.key}>{key}</kbd>
+                    {keyIndex < shortcut.keys.length - 1 && (
+                      <span className={styles.separator}> + </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+              <span className={styles.description}>{shortcut.description}</span>
             </div>
-            <span className={styles.description}>{shortcut.description}</span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </Modal>
   );
