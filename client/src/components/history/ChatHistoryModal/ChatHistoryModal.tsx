@@ -7,6 +7,7 @@ import {
   type ConversationItemRef,
 } from "../ConversationItem/ConversationItem";
 import { StorageIndicator } from "../../ui/StorageIndicator/StorageIndicator";
+import { EmptyState } from "../../ui/EmptyState/EmptyState";
 import styles from "./ChatHistoryModal.module.css";
 
 export interface ChatHistoryModalProps {
@@ -129,9 +130,7 @@ function ConversationListInner({
 
   if (conversations.length === 0) {
     return (
-      <p className={styles.emptyConversations} role="status">
-        No conversations yet
-      </p>
+      <EmptyState>No conversations yet</EmptyState>
     );
   }
 

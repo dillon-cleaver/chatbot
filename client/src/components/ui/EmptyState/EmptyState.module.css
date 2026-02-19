@@ -1,0 +1,8 @@
+.emptyState {
+  text-align: center;
+  color: var(--text-secondary);
+  font-family: "Roboto", sans-serif;
+  font-size: 1rem;
+  padding: 2rem;
+  margin: 0;
+}
