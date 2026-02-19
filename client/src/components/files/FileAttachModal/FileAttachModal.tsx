@@ -195,7 +195,7 @@ export function FileAttachModal({
         />
 
         <div className={styles.fileListSection}>
-          <div className={styles.scrollableContent}>
+          <div className={`${styles.scrollableContent}${files.length > 0 ? ` ${styles.hasFiles}` : ""}`}>
             <FileList
               ref={fileListRef}
               files={files}

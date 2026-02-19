@@ -26,7 +26,10 @@
   min-height: 0;
   /* 6 items on desktop: each ~72px + 16px gap, plus 3rem padding */
   max-height: 560px;
-  /* Reserve space so the absolute selection counter never overlaps file items */
+}
+
+/* Reserve space so the absolute selection counter never overlaps file items */
+.scrollableContent.hasFiles {
   padding-bottom: 80px;
 }
 
@@ -55,6 +58,9 @@
 @media (max-width: 768px) {
   .scrollableContent {
     max-height: 400px;
+  }
+
+  .scrollableContent.hasFiles {
     padding-bottom: 65px;
   }
 
@@ -66,6 +72,9 @@
 @media (max-width: 480px) {
   .scrollableContent {
     max-height: 320px;
+  }
+
+  .scrollableContent.hasFiles {
     padding-bottom: 60px;
   }
 }

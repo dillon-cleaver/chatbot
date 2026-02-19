@@ -107,11 +107,7 @@ export const FileList = forwardRef<FileListRef, FileListProps>(
     );
 
     if (files.length === 0) {
-      return (
-        <div className={styles.emptyWrapper}>
-          <EmptyState>Upload files to attach them to your messages</EmptyState>
-        </div>
-      );
+      return <EmptyState>Upload files to attach them to your messages</EmptyState>;
     }
 
     return (
