@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { Message, UploadedFile, ContentBlock } from '../types';
-import { sendChatMessage } from '../utils/api';
+import { sendChatMessageStream } from '../utils/api';
 import * as indexedDB from '../services/indexedDBService';
 import { generateUUID } from '../utils/uuid';
 import { processFile } from '../services/fileProcessor';
@@ -11,6 +11,7 @@ export interface UseChatReturn {
   messages: Message[];
   input: string;
   isLoading: boolean;
+  activeToolUse: string | null;
   sendMessage: () => Promise<void>;
   setInput: (input: string) => void;
   setMessages: (messages: Message[]) => void;
@@ -23,6 +24,7 @@ interface UseChatProps {
   onClearSelectedFiles: () => void;
   getFileObject: (fileId: string) => File | undefined;
   onLimitError: (title: string, message: string) => void;
+  onToolUse?: (toolName: string) => void;
 }
 
 export function useChat({
@@ -32,10 +34,12 @@ export function useChat({
   onClearSelectedFiles,
   getFileObject,
   onLimitError,
+  onToolUse,
 }: UseChatProps): UseChatReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [activeToolUse, setActiveToolUse] = useState<string | null>(null);
 
   const sendMessage = useCallback(async (): Promise<void> => {
     if (!input.trim() || isLoading) return;
@@ -147,12 +151,30 @@ export function useChat({
         };
       }
 
-      const data = await sendChatMessage(finalMessages, activeConversationId);
-
-      // Save assistant message to IndexedDB
-      await indexedDB.addMessage(activeConversationId, 'assistant', data.content);
-
-      setMessages([...updatedMessages, { id: generateUUID(), role: 'assistant', content: data.content }]);
+      await sendChatMessageStream(finalMessages, activeConversationId, {
+        onToolUse: (event) => {
+          setActiveToolUse(event.tool);
+          onToolUse?.(event.tool);
+        },
+        onToolResult: () => {
+          setActiveToolUse(null);
+        },
+        onDone: async (event) => {
+          // Save assistant message to IndexedDB
+          await indexedDB.addMessage(activeConversationId!, 'assistant', event.content);
+          setMessages([...updatedMessages, { id: generateUUID(), role: 'assistant', content: event.content }]);
+          setIsLoading(false);
+          setActiveToolUse(null);
+        },
+        onError: (event) => {
+          setMessages([
+            ...updatedMessages,
+            { id: generateUUID(), role: 'assistant', content: `Sorry, I encountered an error: ${event.error}` },
+          ]);
+          setIsLoading(false);
+          setActiveToolUse(null);
+        },
+      });
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -160,6 +182,8 @@ export function useChat({
         ...updatedMessages,
         { id: generateUUID(), role: 'assistant', content: `Sorry, I encountered an error: ${errorMessage}` },
       ]);
+      setIsLoading(false);
+      setActiveToolUse(null);
 
       // Rollback: if we just created a new conversation and the API call failed, clean up
       if (newConversationId) {
@@ -170,15 +194,14 @@ export function useChat({
         }
         onConversationCreated(null);
       }
-    } finally {
-      setIsLoading(false);
     }
-  }, [input, isLoading, messages, conversationId, selectedFiles, onConversationCreated, onClearSelectedFiles, getFileObject, onLimitError]);
+  }, [input, isLoading, messages, conversationId, selectedFiles, onConversationCreated, onClearSelectedFiles, getFileObject, onLimitError, onToolUse]);
 
   return {
     messages,
     input,
     isLoading,
+    activeToolUse,
     sendMessage,
     setInput,
     setMessages,

@@ -43,3 +43,24 @@ export interface ChatResponse {
 export interface ErrorResponse {
   error: string;
 }
+
+// SSE event types for tool calling
+export interface ToolUseEvent {
+  tool: string;
+  input: Record<string, unknown>;
+}
+
+export interface ToolResultEvent {
+  tool: string;
+  success: boolean;
+  error?: string;
+}
+
+export interface ChatDoneEvent {
+  content: string;
+  conversation_id: string;
+}
+
+export interface ChatErrorEvent {
+  error: string;
+}

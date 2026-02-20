@@ -113,5 +113,7 @@ export const ANNOUNCEMENTS = {
   FILE_DESELECTED: (name: string) => `${name} deselected`,
   CONVERSATION_LOADED: "Conversation loaded",
   CONVERSATION_DELETED: "Conversation deleted",
+  TOOL_SEARCHING: "Searching the web",
+  TOOL_FETCHING: "Fetching web page",
   ERROR: (message: string) => `Error: ${message}`,
 } as const;
