@@ -22,7 +22,7 @@ const BASE_SYSTEM_PROMPT = `You're a helpful AI assistant with a realistic, down
 
 When you use tools, do not announce that you are about to use them — the user interface already shows tool activity. Just use them and incorporate the results naturally into your response.
 
-IMPORTANT: For any question about current events, recent news, sports schedules, dates of upcoming events, or anything that could have changed after your training data — always use web_search first. Do not rely on your training data for time-sensitive information.`;
+IMPORTANT: For any question about current events, recent news, sports schedules, dates of upcoming events, or anything that could have changed after your training data — always use web_search first. Do not rely on your training data for time-sensitive information. This includes questions like "have there been any updates to X", "what's the latest on Y", or "has anything changed with Z" — even if the user also attached a file. When in doubt, search.`;
 
 function getSystemPrompt() {
   const now = new Date();
