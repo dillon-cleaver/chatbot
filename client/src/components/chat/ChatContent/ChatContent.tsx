@@ -89,6 +89,17 @@ export function ChatContent(): React.JSX.Element {
   );
   const clearLimitError = useCallback(() => setLimitError(null), []);
 
+  const handleToolUse = useCallback(
+    (toolName: string) => {
+      if (toolName === 'web_search') {
+        announce(ANNOUNCEMENTS.TOOL_SEARCHING);
+      } else if (toolName === 'fetch_url') {
+        announce(ANNOUNCEMENTS.TOOL_FETCHING);
+      }
+    },
+    [announce],
+  );
+
   const chat = useChat({
     conversationId: currentConversationId,
     selectedFiles,
@@ -96,6 +107,7 @@ export function ChatContent(): React.JSX.Element {
     onClearSelectedFiles: fileManager.clearSelectedFiles,
     getFileObject: fileManager.getFileObject,
     onLimitError: handleLimitError,
+    onToolUse: handleToolUse,
   });
 
   // Initialize conversations with navigation callback
@@ -338,6 +350,7 @@ export function ChatContent(): React.JSX.Element {
               <ChatMessages
                 messages={chat.messages}
                 isLoading={chat.isLoading}
+                activeToolUse={chat.activeToolUse}
                 messagesEndRef={messagesEndRef}
                 onViewFile={fileManager.viewFile}
               />

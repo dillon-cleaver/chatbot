@@ -10,9 +10,15 @@ const LOADING_MESSAGES = [
   "HOLD ON...",
 ];
 
+const TOOL_LOADING_MESSAGES: Record<string, string> = {
+  web_search: "SURFING THE WEB...",
+  fetch_url: "DOWNLOADING PAGE...",
+};
+
 export interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
+  activeToolUse?: string | null;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   onViewFile?: (fileId: string) => void | Promise<void>;
 }
@@ -20,6 +26,7 @@ export interface ChatMessagesProps {
 export function ChatMessages({
   messages,
   isLoading,
+  activeToolUse,
   messagesEndRef,
   onViewFile,
 }: ChatMessagesProps): React.JSX.Element {
@@ -29,6 +36,10 @@ export function ChatMessages({
       Math.floor(Math.random() * LOADING_MESSAGES.length)
     ];
   });
+
+  const displayMessage = activeToolUse
+    ? (TOOL_LOADING_MESSAGES[activeToolUse] ?? "USING TOOLS...")
+    : loadingMessage;
 
   return (
     <div className={styles.messagesWrapper}>
@@ -47,7 +58,7 @@ export function ChatMessages({
             role="status"
             aria-live="polite"
           >
-            <div className={styles.messageContent}>{loadingMessage}</div>
+            <div className={styles.messageContent}>{displayMessage}</div>
           </div>
         )}
         <div ref={messagesEndRef} />
