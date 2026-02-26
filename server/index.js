@@ -85,8 +85,11 @@ app.post('/chat', async (req, res) => {
     }
   });
 
+  const debug = process.env.DEBUG === 'true';
+
   try {
     const apiMessages = messages.map(parseMessageContent);
+    const totalUsage = { input_tokens: 0, output_tokens: 0 };
 
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
       if (clientDisconnected) return;
@@ -115,6 +118,14 @@ app.post('/chat', async (req, res) => {
 
       const response = await stream.finalMessage();
       activeStream = null;
+
+      if (response.usage) {
+        totalUsage.input_tokens += response.usage.input_tokens;
+        totalUsage.output_tokens += response.usage.output_tokens;
+        if (debug) {
+          console.log(`[Token Usage] Iteration ${i + 1}: input=${response.usage.input_tokens}, output=${response.usage.output_tokens}`);
+        }
+      }
 
       if (clientDisconnected) return;
 
@@ -160,7 +171,10 @@ app.post('/chat', async (req, res) => {
         .filter((b) => b.type === 'text')
         .map((b) => b.text)
         .join('');
-      sendSSE(res, 'done', { content: text, conversation_id: convId });
+      if (debug) {
+        console.log(`[Token Usage] Total: input=${totalUsage.input_tokens}, output=${totalUsage.output_tokens}`);
+      }
+      sendSSE(res, 'done', { content: text, conversation_id: convId, usage: totalUsage });
       res.end();
       return;
     }

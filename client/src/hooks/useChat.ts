@@ -162,7 +162,23 @@ export function useChat({
         onDone: async (event) => {
           // Save assistant message to IndexedDB
           await indexedDB.addMessage(activeConversationId!, 'assistant', event.content);
-          setMessages([...updatedMessages, { id: generateUUID(), role: 'assistant', content: event.content }]);
+
+          if (import.meta.env.DEV && event.usage) {
+            console.group('[Token Usage]');
+            console.table({
+              input: { tokens: event.usage.input_tokens },
+              output: { tokens: event.usage.output_tokens },
+              total: { tokens: event.usage.input_tokens + event.usage.output_tokens },
+            });
+            console.groupEnd();
+          }
+
+          setMessages([...updatedMessages, {
+            id: generateUUID(),
+            role: 'assistant',
+            content: event.content,
+            usage: event.usage,
+          }]);
           setIsLoading(false);
           setActiveToolUse(null);
         },

@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import type { Message } from '../../../types';
 import { FileChip } from '../FileChip/FileChip';
+import { TokenBadge } from '../TokenBadge/TokenBadge';
 import styles from './MessageItem.module.css';
 
 export interface MessageItemProps {
@@ -30,6 +31,10 @@ export function MessageItem({ message, onViewFile }: MessageItemProps): React.JS
             : message.content.find(b => b.type === 'text')?.text ?? ''}
         </ReactMarkdown>
       </div>
+
+      {message.role === 'assistant' && message.usage && (
+        <TokenBadge usage={message.usage} />
+      )}
 
       {message.files && message.files.length > 0 && (
         <div className={styles.attachedFiles} role="region" aria-label="Attached files">
