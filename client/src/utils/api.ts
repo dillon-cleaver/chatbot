@@ -62,6 +62,7 @@ export async function sendChatMessageStream(
 
   const decoder = new TextDecoder();
   let buffer = '';
+  let receivedTerminalEvent = false;
 
   try {
     while (true) {
@@ -92,7 +93,16 @@ export async function sendChatMessageStream(
 
         if (!eventType || !data) continue;
 
-        const parsed = JSON.parse(data);
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(data);
+        } catch {
+          callbacks.onError({
+            error: 'Received malformed data from server.',
+          } as ChatErrorEvent);
+          receivedTerminalEvent = true;
+          continue;
+        }
 
         switch (eventType) {
           case 'tool_use':
@@ -103,12 +113,21 @@ export async function sendChatMessageStream(
             break;
           case 'done':
             callbacks.onDone(parsed as ChatDoneEvent);
+            receivedTerminalEvent = true;
             break;
           case 'error':
             callbacks.onError(parsed as ChatErrorEvent);
+            receivedTerminalEvent = true;
             break;
         }
       }
+    }
+
+    // Stream ended without a done/error event — server likely crashed or connection dropped
+    if (!receivedTerminalEvent) {
+      callbacks.onError({
+        error: 'Connection lost. Please try again.',
+      } as ChatErrorEvent);
     }
   } finally {
     reader.releaseLock();

@@ -75,10 +75,22 @@ app.post('/chat', async (req, res) => {
 
   const convId = conversation_id || crypto.randomUUID();
 
+  // Track client disconnect to abort in-flight work
+  let clientDisconnected = false;
+  let activeStream = null;
+  req.on('close', () => {
+    clientDisconnected = true;
+    if (activeStream) {
+      activeStream.abort();
+    }
+  });
+
   try {
     const apiMessages = messages.map(parseMessageContent);
 
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+      if (clientDisconnected) return;
+
       // Use streaming to detect server-side tool activity (web search) in real time
       const stream = anthropic.messages.stream({
         model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
@@ -87,9 +99,11 @@ app.post('/chat', async (req, res) => {
         tools: allTools,
         messages: apiMessages,
       });
+      activeStream = stream;
 
       // Relay server-side tool events (built-in web search) to client via SSE
       stream.on('streamEvent', (event) => {
+        if (clientDisconnected) return;
         if (event.type !== 'content_block_start') return;
         const block = event.content_block;
         if (block.type === 'server_tool_use') {
@@ -100,6 +114,9 @@ app.post('/chat', async (req, res) => {
       });
 
       const response = await stream.finalMessage();
+      activeStream = null;
+
+      if (clientDisconnected) return;
 
       if (response.stop_reason === 'tool_use') {
         // Append assistant's full content (includes tool_use blocks)
@@ -109,6 +126,7 @@ app.post('/chat', async (req, res) => {
 
         for (const block of response.content) {
           if (block.type !== 'tool_use') continue;
+          if (clientDisconnected) return;
 
           sendSSE(res, 'tool_use', { tool: block.name, input: block.input });
 
@@ -151,6 +169,7 @@ app.post('/chat', async (req, res) => {
     sendSSE(res, 'error', { error: 'Too many tool calls. Please try again.' });
     res.end();
   } catch (error) {
+    if (clientDisconnected) return;
     console.error('Error calling Claude API:', error);
     sendSSE(res, 'error', {
       error: 'Failed to get response from Claude',

@@ -1,6 +1,51 @@
+import { URL } from 'url';
+
 const TIMEOUT_MS = 15_000;
 const MAX_CONTENT_LENGTH = 10_000;
+const MAX_DOWNLOAD_BYTES = 2 * 1024 * 1024; // 2MB raw download limit
 const USER_AGENT = 'ChatBot/1.0 (Web Content Fetcher)';
+
+// Private/reserved IP ranges that should be blocked (SSRF protection)
+const BLOCKED_IP_PATTERNS = [
+  /^127\./, // loopback
+  /^10\./, // RFC1918
+  /^172\.(1[6-9]|2\d|3[01])\./, // RFC1918
+  /^192\.168\./, // RFC1918
+  /^169\.254\./, // link-local
+  /^0\./, // current network
+  /^::1$/, // IPv6 loopback
+  /^fc00:/i, // IPv6 unique local
+  /^fe80:/i, // IPv6 link-local
+];
+
+const BLOCKED_HOSTNAMES = ['localhost', 'metadata.google.internal'];
+
+function isBlockedUrl(urlString) {
+  let parsed;
+  try {
+    parsed = new URL(urlString);
+  } catch {
+    return 'Invalid URL format.';
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return `Only http and https URLs are supported (got ${parsed.protocol}).`;
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  if (BLOCKED_HOSTNAMES.includes(hostname)) {
+    return 'Access to this host is not allowed.';
+  }
+
+  for (const pattern of BLOCKED_IP_PATTERNS) {
+    if (pattern.test(hostname)) {
+      return 'Access to private/internal network addresses is not allowed.';
+    }
+  }
+
+  return null;
+}
 
 export const definition = {
   name: 'fetch_url',
@@ -40,7 +85,45 @@ function stripHtml(html) {
     .trim();
 }
 
+async function readBodyWithLimit(response, maxBytes) {
+  const reader = response.body.getReader();
+  const chunks = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      totalBytes += value.length;
+      if (totalBytes > maxBytes) {
+        reader.cancel();
+        // Keep only what fits within the limit
+        const excess = totalBytes - maxBytes;
+        chunks.push(value.slice(0, value.length - excess));
+        break;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const combined = new Uint8Array(
+    chunks.reduce((acc, c) => acc + c.length, 0),
+  );
+  let offset = 0;
+  for (const chunk of chunks) {
+    combined.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return new TextDecoder().decode(combined);
+}
+
 export async function execute({ url }) {
+  const blocked = isBlockedUrl(url);
+  if (blocked) return blocked;
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -60,8 +143,14 @@ export async function execute({ url }) {
       return `Cannot read content of type "${contentType}". This tool works best with HTML and plain text pages.`;
     }
 
-    const html = await response.text();
-    let text = contentType.includes('text/plain') ? html : stripHtml(html);
+    // Pre-check Content-Length if available
+    const contentLength = parseInt(response.headers.get('content-length') ?? '', 10);
+    if (contentLength > MAX_DOWNLOAD_BYTES) {
+      return `Page is too large (${Math.round(contentLength / 1024)}KB). Maximum supported size is ${MAX_DOWNLOAD_BYTES / 1024}KB.`;
+    }
+
+    const raw = await readBodyWithLimit(response, MAX_DOWNLOAD_BYTES);
+    let text = contentType.includes('text/plain') ? raw : stripHtml(raw);
 
     if (text.length > MAX_CONTENT_LENGTH) {
       text = text.slice(0, MAX_CONTENT_LENGTH) + '\n\n[Content truncated]';

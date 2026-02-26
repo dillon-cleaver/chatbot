@@ -87,7 +87,7 @@ The system prompt is defined in the `BASE_SYSTEM_PROMPT` constant in `index.js`.
 
 - Uses `claude-haiku-4-5-20251001` model by default (configurable via `ANTHROPIC_MODEL` env var)
 - CORS enabled for cross-origin requests from client
-- Max tokens set to 2048
+- Max tokens set to 4096
 - JSON body limit set to 50mb to support multiple base64 file attachments in messages
 - Uses streaming Anthropic API (`messages.stream()`) to detect built-in tool activity in real time
 - Custom tool execution loop limited to 10 iterations to prevent runaway tool chains
