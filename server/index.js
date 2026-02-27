@@ -66,19 +66,24 @@ app.post('/chat', async (req, res) => {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
   }
 
-  // Switch to SSE
+  // Switch to SSE — flushHeaders() is required in Express 5 to send
+  // headers immediately, otherwise the client never receives them and
+  // the connection appears to hang until the first res.write().
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     Connection: 'keep-alive',
   });
+  res.flushHeaders();
 
   const convId = conversation_id || crypto.randomUUID();
 
-  // Track client disconnect to abort in-flight work
+  // Track client disconnect to abort in-flight work.
+  // Listen on `res` (not `req`) because in Express 5 `req` emits 'close'
+  // once the request body is consumed, not when the client disconnects.
   let clientDisconnected = false;
   let activeStream = null;
-  req.on('close', () => {
+  res.on('close', () => {
     clientDisconnected = true;
     if (activeStream) {
       activeStream.abort();
