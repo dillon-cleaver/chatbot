@@ -161,7 +161,7 @@ export function useChat({
         },
         onDone: async (event) => {
           // Save assistant message to IndexedDB
-          await indexedDB.addMessage(activeConversationId!, 'assistant', event.content);
+          await indexedDB.addMessage(activeConversationId!, 'assistant', event.content, undefined, event.usage);
 
           if (import.meta.env.DEV && event.usage) {
             console.group('[Token Usage]');

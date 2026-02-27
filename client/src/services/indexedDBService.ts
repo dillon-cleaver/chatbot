@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Conversation, ConversationDetail, Message, UploadedFile } from '../types';
+import type { Conversation, ConversationDetail, Message, TokenUsage, UploadedFile } from '../types';
 import { generateUUID } from '../utils/uuid';
 
 // Internal DB types — epoch ms timestamps, converted to ISO strings in return values
@@ -18,6 +18,7 @@ interface MessageDB {
   content: string;
   timestamp: number;
   file_ids?: string[];
+  usage?: TokenUsage;
 }
 
 interface FileDB {
@@ -100,6 +101,7 @@ export async function addMessage(
   role: 'user' | 'assistant',
   content: string,
   fileIds?: string[],
+  usage?: TokenUsage,
 ): Promise<Message> {
   const db = await getDB();
   const now = Date.now();
@@ -110,6 +112,7 @@ export async function addMessage(
     content,
     timestamp: now,
     ...(fileIds && fileIds.length > 0 ? { file_ids: fileIds } : {}),
+    ...(usage ? { usage } : {}),
   };
   const tx = db.transaction(['messages', 'conversations'], 'readwrite');
   await tx.objectStore('messages').put(msg);
@@ -166,6 +169,7 @@ export async function loadConversation(conversationId: string): Promise<Conversa
       role: m.role,
       content: m.content,
       ...(files ? { files } : {}),
+      ...(m.usage ? { usage: m.usage } : {}),
     });
   }
 
