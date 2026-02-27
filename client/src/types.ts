@@ -8,6 +8,7 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string | ContentBlock[];
   files?: UploadedFile[];
+  usage?: TokenUsage;
 }
 
 export interface UploadedFile {
@@ -44,6 +45,11 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface TokenUsage {
+  input_tokens: number;
+  output_tokens: number;
+}
+
 // SSE event types for tool calling
 export interface ToolUseEvent {
   tool: string;
@@ -59,6 +65,7 @@ export interface ToolResultEvent {
 export interface ChatDoneEvent {
   content: string;
   conversation_id: string;
+  usage?: TokenUsage;
 }
 
 export interface ChatErrorEvent {
