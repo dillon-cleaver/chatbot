@@ -1,9 +1,9 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import Anthropic from '@anthropic-ai/sdk';
-import crypto from 'crypto';
-import { toolDefinitions, toolExecutors } from './tools/index.js';
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import Anthropic from "@anthropic-ai/sdk";
+import crypto from "crypto";
+import { toolDefinitions, toolExecutors } from "./tools/index.js";
 
 dotenv.config();
 
@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 const MAX_TOOL_ITERATIONS = 10;
 
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: "50mb" }));
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -26,7 +26,7 @@ IMPORTANT: For any question about current events, recent news, sports schedules,
 
 function getSystemPrompt() {
   const now = new Date();
-  return `${BASE_SYSTEM_PROMPT}\n\nCurrent date and time: ${now.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}. Always account for the current date when answering time-sensitive questions — don't correct yourself mid-answer.`;
+  return `${BASE_SYSTEM_PROMPT}\n\nCurrent date and time: ${now.toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })}. Always account for the current date when answering time-sensitive questions — don't correct yourself mid-answer.`;
 }
 
 function sendSSE(res, event, data) {
@@ -35,7 +35,7 @@ function sendSSE(res, event, data) {
 
 function parseMessageContent(msg) {
   let content = msg.content;
-  if (typeof content === 'string') {
+  if (typeof content === "string") {
     try {
       const parsed = JSON.parse(content);
       if (Array.isArray(parsed) && parsed[0]?.type) {
@@ -50,29 +50,29 @@ function parseMessageContent(msg) {
 
 // All tools: Anthropic built-in web search + custom tools
 const allTools = [
-  { type: 'web_search_20250305', name: 'web_search' },
+  { type: "web_search_20250305", name: "web_search" },
   ...toolDefinitions,
 ];
 
-app.post('/chat', async (req, res) => {
+app.post("/chat", async (req, res) => {
   const { messages, conversation_id } = req.body;
 
   // Validate before switching to SSE (these return JSON errors)
   if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Messages array is required' });
+    return res.status(400).json({ error: "Messages array is required" });
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+    return res.status(500).json({ error: "ANTHROPIC_API_KEY not configured" });
   }
 
   // Switch to SSE — flushHeaders() is required in Express 5 to send
   // headers immediately, otherwise the client never receives them and
   // the connection appears to hang until the first res.write().
   res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive',
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
   });
   res.flushHeaders();
 
@@ -83,14 +83,14 @@ app.post('/chat', async (req, res) => {
   // once the request body is consumed, not when the client disconnects.
   let clientDisconnected = false;
   let activeStream = null;
-  res.on('close', () => {
+  res.on("close", () => {
     clientDisconnected = true;
     if (activeStream) {
       activeStream.abort();
     }
   });
 
-  const debug = process.env.DEBUG === 'true';
+  const debug = process.env.DEBUG === "true";
 
   try {
     const apiMessages = messages.map(parseMessageContent);
@@ -101,7 +101,7 @@ app.post('/chat', async (req, res) => {
 
       // Use streaming to detect server-side tool activity (web search) in real time
       const stream = anthropic.messages.stream({
-        model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
+        model: process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001",
         max_tokens: 4096,
         system: getSystemPrompt(),
         tools: allTools,
@@ -110,14 +110,17 @@ app.post('/chat', async (req, res) => {
       activeStream = stream;
 
       // Relay server-side tool events (built-in web search) to client via SSE
-      stream.on('streamEvent', (event) => {
+      stream.on("streamEvent", (event) => {
         if (clientDisconnected) return;
-        if (event.type !== 'content_block_start') return;
+        if (event.type !== "content_block_start") return;
         const block = event.content_block;
-        if (block.type === 'server_tool_use') {
-          sendSSE(res, 'tool_use', { tool: block.name, input: block.input ?? {} });
-        } else if (block.type === 'web_search_tool_result') {
-          sendSSE(res, 'tool_result', { tool: 'web_search', success: true });
+        if (block.type === "server_tool_use") {
+          sendSSE(res, "tool_use", {
+            tool: block.name,
+            input: block.input ?? {},
+          });
+        } else if (block.type === "web_search_tool_result") {
+          sendSSE(res, "tool_result", { tool: "web_search", success: true });
         }
       });
 
@@ -128,32 +131,34 @@ app.post('/chat', async (req, res) => {
         totalUsage.input_tokens += response.usage.input_tokens;
         totalUsage.output_tokens += response.usage.output_tokens;
         if (debug) {
-          console.log(`[Token Usage] Iteration ${i + 1}: input=${response.usage.input_tokens}, output=${response.usage.output_tokens}`);
+          console.log(
+            `[Token Usage] Iteration ${i + 1}: input=${response.usage.input_tokens}, output=${response.usage.output_tokens}`,
+          );
         }
       }
 
       if (clientDisconnected) return;
 
-      if (response.stop_reason === 'tool_use') {
+      if (response.stop_reason === "tool_use") {
         // Append assistant's full content (includes tool_use blocks)
-        apiMessages.push({ role: 'assistant', content: response.content });
+        apiMessages.push({ role: "assistant", content: response.content });
 
         const toolResultBlocks = [];
 
         for (const block of response.content) {
-          if (block.type !== 'tool_use') continue;
+          if (block.type !== "tool_use") continue;
           if (clientDisconnected) return;
 
-          sendSSE(res, 'tool_use', { tool: block.name, input: block.input });
+          sendSSE(res, "tool_use", { tool: block.name, input: block.input });
 
           const executor = toolExecutors[block.name];
           let result;
           if (executor) {
             result = await executor(block.input);
-            sendSSE(res, 'tool_result', { tool: block.name, success: true });
+            sendSSE(res, "tool_result", { tool: block.name, success: true });
           } else {
             result = `Unknown tool: ${block.name}`;
-            sendSSE(res, 'tool_result', {
+            sendSSE(res, "tool_result", {
               tool: block.name,
               success: false,
               error: result,
@@ -161,37 +166,43 @@ app.post('/chat', async (req, res) => {
           }
 
           toolResultBlocks.push({
-            type: 'tool_result',
+            type: "tool_result",
             tool_use_id: block.id,
             content: result,
           });
         }
 
-        apiMessages.push({ role: 'user', content: toolResultBlocks });
+        apiMessages.push({ role: "user", content: toolResultBlocks });
         continue;
       }
 
       // stop_reason is 'end_turn' or 'max_tokens' — extract final text
       const text = response.content
-        .filter((b) => b.type === 'text')
+        .filter((b) => b.type === "text")
         .map((b) => b.text)
-        .join('');
+        .join("");
       if (debug) {
-        console.log(`[Token Usage] Total: input=${totalUsage.input_tokens}, output=${totalUsage.output_tokens}`);
+        console.log(
+          `[Token Usage] Total: input=${totalUsage.input_tokens}, output=${totalUsage.output_tokens}`,
+        );
       }
-      sendSSE(res, 'done', { content: text, conversation_id: convId, usage: totalUsage });
+      sendSSE(res, "done", {
+        content: text,
+        conversation_id: convId,
+        usage: totalUsage,
+      });
       res.end();
       return;
     }
 
     // Exhausted tool iterations — send whatever text we have
-    sendSSE(res, 'error', { error: 'Too many tool calls. Please try again.' });
+    sendSSE(res, "error", { error: "Too many tool calls. Please try again." });
     res.end();
   } catch (error) {
     if (clientDisconnected) return;
-    console.error('Error calling Claude API:', error);
-    sendSSE(res, 'error', {
-      error: 'Failed to get response from Claude',
+    console.error("Error calling Claude API:", error);
+    sendSSE(res, "error", {
+      error: "Failed to get response from Claude",
     });
     res.end();
   }
@@ -201,9 +212,11 @@ const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Try a different port or stop the other process.`);
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(
+      `Port ${PORT} is already in use. Try a different port or stop the other process.`,
+    );
     process.exit(1);
   }
   throw err;
