@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import Anthropic from "@anthropic-ai/sdk";
 import crypto from "crypto";
+import path from "path";
+import { fileURLToPath } from "url";
 import { toolDefinitions, toolExecutors } from "./tools/index.js";
 
 dotenv.config();
@@ -206,6 +208,14 @@ app.post("/chat", async (req, res) => {
     });
     res.end();
   }
+});
+
+// Serve client static files in production
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientDist = path.join(__dirname, "..", "client", "dist");
+app.use(express.static(clientDist));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(clientDist, "index.html"));
 });
 
 const server = app.listen(PORT, () => {
