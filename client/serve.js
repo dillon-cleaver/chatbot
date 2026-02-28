@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,8 +21,27 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2',
 };
 
+// Check dist directory on startup
+try {
+  const files = await readdir(DIST);
+  console.log(`dist/ contains: ${files.join(', ')}`);
+} catch (err) {
+  console.error(`ERROR: dist/ not found at ${DIST}:`, err.message);
+  console.log(`__dirname is: ${__dirname}`);
+  // List what's actually in __dirname
+  try {
+    const parentFiles = await readdir(__dirname);
+    console.log(`Files in ${__dirname}: ${parentFiles.join(', ')}`);
+  } catch (e) {
+    console.error(`Cannot list ${__dirname}:`, e.message);
+  }
+}
+
 const server = createServer(async (req, res) => {
-  let filePath = join(DIST, req.url === '/' ? 'index.html' : req.url);
+  const urlPath = new URL(req.url, `http://${req.headers.host}`).pathname;
+  const filePath = join(DIST, urlPath === '/' ? 'index.html' : urlPath);
+
+  console.log(`${req.method} ${urlPath} -> ${filePath}`);
 
   try {
     const data = await readFile(filePath);
@@ -35,7 +54,8 @@ const server = createServer(async (req, res) => {
       const data = await readFile(join(DIST, 'index.html'));
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(data);
-    } catch {
+    } catch (err) {
+      console.error(`Failed to serve index.html fallback:`, err.message);
       res.writeHead(500);
       res.end('Internal Server Error');
     }
