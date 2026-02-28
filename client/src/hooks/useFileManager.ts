@@ -11,7 +11,7 @@ export interface UseFileManagerReturn {
   uploadError: string | null;
   error: string | null;
   clearError: () => void;
-  uploadFiles: (files: File[]) => Promise<void>;
+  uploadFiles: (files: File[]) => Promise<UploadedFile[]>;
   deleteFile: (fileId: string) => Promise<void>;
   toggleFileSelection: (fileId: string) => void;
   clearSelectedFiles: () => void;
@@ -122,7 +122,7 @@ export function useFileManager({
     saveSelectedFiles(conversationId, selectedFileIds);
   }, [conversationId, selectedFileIds]);
 
-  const uploadFiles = async (filesToUpload: File[]): Promise<void> => {
+  const uploadFiles = async (filesToUpload: File[]): Promise<UploadedFile[]> => {
     setIsUploading(true);
     setUploadError(null);
     setError(null);
@@ -151,10 +151,12 @@ export function useFileManager({
 
       setUploadError(null);
       onUploadSuccess?.(newFiles.length);
+      return newFiles;
     } catch (error) {
       console.error('Upload failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload files. Please try again.';
       setUploadError(errorMessage);
+      return [];
     } finally {
       setIsUploading(false);
     }

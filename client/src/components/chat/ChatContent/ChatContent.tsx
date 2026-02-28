@@ -8,6 +8,7 @@ import { useChat } from "../../../hooks/useChat";
 import { useKeyboardShortcuts } from "../../../hooks/useKeyboardShortcuts";
 import { useAnnouncer, ANNOUNCEMENTS } from "../../../hooks/useAnnouncer";
 import { useAutoFocus } from "../../../hooks/useAutoFocus";
+import { useDropZone } from "../../../hooks/useDropZone";
 import { Header, type HeaderRef } from "../../layout/Header/Header";
 import { ChatMessages } from "../ChatMessages/ChatMessages";
 import { ChatInput, type ChatInputRef } from "../ChatInput/ChatInput";
@@ -18,9 +19,10 @@ import { AlertDialog } from "../../ui/AlertDialog/AlertDialog";
 import { ConfirmDialog } from "../../ui/ConfirmDialog/ConfirmDialog";
 import { KeyboardShortcutsModal } from "../../ui/KeyboardShortcutsModal/KeyboardShortcutsModal";
 import { FileChipsDisplay } from "../FileChipsDisplay/FileChipsDisplay";
+import { DropZoneOverlay } from "../../ui/DropZoneOverlay/DropZoneOverlay";
 import { Spinner } from "../../ui/Spinner/Spinner";
 import { getStorageEstimate } from "../../../utils/fileUtils";
-import { MAX_CONVERSATIONS, MAX_DAILY_CHATS, MAX_STORAGE_BYTES } from "../../../constants";
+import { MAX_CONVERSATIONS, MAX_DAILY_CHATS, MAX_STORAGE_BYTES, MAX_FILES_PER_MESSAGE, MAX_TOTAL_FILES, ACCEPTED_EXTENSIONS, ACCEPTED_MIME_TYPES } from "../../../constants";
 import { getDailyCreationCount } from "../../../utils/dailyChatLimit";
 
 // Timing constants for animations and delays
@@ -35,7 +37,7 @@ export function ChatContent(): React.JSX.Element {
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] =
     useState<boolean>(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
-  const [limitError, setLimitError] = useState<{ title: string; message: string } | null>(null);
+  const [limitError, setLimitError] = useState<{ title: string; message: React.ReactNode } | null>(null);
   const [storageUsage, setStorageUsage] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -199,6 +201,80 @@ export function ChatContent(): React.JSX.Element {
     }
   };
 
+  // Drag-and-drop file handling
+  const handleFileDrop = useCallback(async (droppedFiles: File[]) => {
+    // Validate file types
+    const validFiles: File[] = [];
+    const rejectedNames: string[] = [];
+
+    for (const file of droppedFiles) {
+      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (ACCEPTED_MIME_TYPES.has(file.type) || ACCEPTED_EXTENSIONS.has(ext)) {
+        validFiles.push(file);
+      } else {
+        rejectedNames.push(file.name);
+      }
+    }
+
+    if (rejectedNames.length > 0) {
+      setLimitError({
+        title: 'Unsupported file type',
+        message: (
+          <>
+            <p>{rejectedNames.length === 1 ? 'This file is not supported:' : 'These files are not supported:'}</p>
+            <ul style={{ margin: '0.5rem 0', paddingLeft: '1.25rem' }}>
+              {rejectedNames.map((name) => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
+            <p style={{ marginTop: '0.75rem' }}>
+              <strong>Supported types: </strong>
+              <span style={{ color: 'var(--success-color)', fontWeight: 500 }}>
+                {[...ACCEPTED_EXTENSIONS].map(ext => ext.replace('.', '').toUpperCase()).join(', ')}
+              </span>
+            </p>
+          </>
+        ),
+      });
+      if (validFiles.length === 0) return;
+    }
+
+    // Check per-message limit
+    if (fileManager.selectedFileIds.length + validFiles.length > MAX_FILES_PER_MESSAGE) {
+      setLimitError({
+        title: 'Too many files',
+        message: `You can attach up to ${MAX_FILES_PER_MESSAGE} files per message. You already have ${fileManager.selectedFileIds.length} selected.`,
+      });
+      return;
+    }
+
+    // Check total storage limit
+    if (fileManager.files.length + validFiles.length > MAX_TOTAL_FILES) {
+      setLimitError({
+        title: 'Storage limit reached',
+        message: `Maximum ${MAX_TOTAL_FILES} files can be stored. You currently have ${fileManager.files.length}.`,
+      });
+      return;
+    }
+
+    const newFiles = await fileManager.uploadFiles(validFiles);
+    if (newFiles.length > 0) {
+      const newIds = newFiles.map(f => f.id);
+      fileManager.commitPendingSelection([...fileManager.selectedFileIds, ...newIds]);
+      announce(ANNOUNCEMENTS.FILE_UPLOADED(newFiles.length));
+    } else if (fileManager.uploadError) {
+      setLimitError({
+        title: 'Upload failed',
+        message: fileManager.uploadError,
+      });
+    }
+  }, [fileManager, announce]);
+
+  const { isDragging, dropZoneProps } = useDropZone({
+    onDrop: handleFileDrop,
+    disabled: fileManager.isModalOpen || chat.isLoading || fileManager.isUploading,
+  });
+
   const handleDeleteAllConversations = async (): Promise<void> => {
     await conversations.deleteAllConversations();
     setIsDeleteAllModalOpen(false);
@@ -302,7 +378,8 @@ export function ChatContent(): React.JSX.Element {
         onNavigateDown={handleNavigateToInput}
       />
 
-      <main className={styles.mainContent}>
+      <main className={styles.mainContent} {...dropZoneProps}>
+        <DropZoneOverlay isDragging={isDragging} />
         <ChatContainer
           isEmpty={isEmpty}
           emptyContent={

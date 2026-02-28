@@ -7,7 +7,7 @@ export interface AlertDialogProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  message: string;
+  message: React.ReactNode;
 }
 
 export function AlertDialog({
@@ -90,7 +90,7 @@ export function AlertDialog({
         tabIndex={-1}
       >
         <h3 id="alert-dialog-title">{title}</h3>
-        <p id="alert-dialog-message">{message}</p>
+        <div id="alert-dialog-message" className={styles.message}>{message}</div>
         <div className={styles.alertActions}>
           <Button
             ref={okButtonRef}
