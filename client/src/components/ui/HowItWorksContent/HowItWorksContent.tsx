@@ -22,9 +22,15 @@ export function HowItWorksContent(): React.JSX.Element {
         to <strong>{MAX_FILES_PER_MESSAGE}</strong> files per message.
       </p>
       <p>
-        <strong>File Handling:</strong> Files are sent with one message only,
-        then auto-removed from selection. The chatbot remembers your conversation
-        history, so it can still reference previous file discussions.
+        <strong>Web Tools:</strong> The chatbot can search the web and fetch
+        content from URLs to answer questions with up-to-date information.
+      </p>
+      <p>
+        <strong>File Handling:</strong> Drag and drop files onto the chat area,
+        or use the attach button to browse. Files are sent with one message
+        only, then auto-removed from selection. The chatbot remembers your
+        conversation history, so it can still reference previous file
+        discussions.
       </p>
       <p className={styles.fileTypes}>
         <strong>Supported Files:</strong>{" "}
@@ -39,8 +45,8 @@ export function HowItWorksContent(): React.JSX.Element {
         .
       </p>
       <p>
-        <strong>Storage & Privacy:</strong> Files are stored locally on your
-        computer. Contents are only sent to Anthropic when you submit messages
+        <strong>Storage & Privacy:</strong> Files are stored locally in your
+        browser. Contents are only sent to Anthropic when you submit messages
         (retained 30 days for safety monitoring, then deleted). Your data is not
         used for training.
       </p>
