@@ -17,15 +17,13 @@ export function useTheme(): UseThemeReturn {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
 
-    // Update theme-color meta tag so mobile browser chrome matches
+    // Update all theme-color meta tags so mobile browser chrome matches.
+    // The static media-query tags in index.html handle the initial load;
+    // once React mounts we override them all to match the active theme
+    // (which may differ from the OS preference via localStorage).
     const color = theme === 'dark' ? '#1f1f1f' : '#ddd7c5';
-    let meta = document.querySelector('meta[name="theme-color"]:not([media])') as HTMLMetaElement | null;
-    if (!meta) {
-      meta = document.createElement('meta');
-      meta.name = 'theme-color';
-      document.head.appendChild(meta);
-    }
-    meta.content = color;
+    const metas = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]');
+    metas.forEach((m) => { m.content = color; });
   }, [theme]);
 
   const toggleTheme = (): void => {
