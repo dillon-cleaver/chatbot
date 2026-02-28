@@ -3,6 +3,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
   border-bottom: 4px solid var(--border-color);
   background-color: var(--header-bg);
 }
@@ -108,7 +109,7 @@
 @media (max-width: 768px) {
   .header {
     padding: 0.75rem 1rem;
-    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
     flex-shrink: 0;
   }
 
