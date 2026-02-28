@@ -6,10 +6,11 @@ Claude-powered chatbot with a React frontend and Express backend. Features a Gen
 
 ```
 ├── client/    # React 19 + Vite frontend
-├── server/    # Express 5 API server
+├── server/    # Express 5 API server (also serves client in production)
 ```
 
 See `client/CLAUDE.md` and `server/CLAUDE.md` for package-specific details.
+See `DEPLOYMENT.md` for Railway deployment details.
 
 ## Commands
 

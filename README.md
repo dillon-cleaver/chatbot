@@ -50,21 +50,22 @@ A modern, context-aware chatbot powered by Claude with file upload and analysis 
 │         React Frontend           │
 │        (Vite + TypeScript)       │
 │                                  │
-│  ┌────────────┐  ┌────────────┐  │         ┌──────────────────┐
-│  │  IndexedDB  │  │    File    │  │         │  Express Backend  │
-│  │             │  │ Processor  │  │ ──────► │  (Stateless Proxy) │
-│  │ - files     │  │ (client)   │  │  HTTP   │                    │
-│  │ - messages  │  │            │  │ ◄────── │  POST /chat only   │
-│  │ - convos    │  └────────────┘  │         └────────┬───────────┘
-│  └────────────┘                   │                  │
-└──────────────────────────────────┘                  ▼
-                                               ┌─────────────┐
-                                               │  Anthropic   │
-                                               │  Claude API  │
-                                               └─────────────┘
+│  ┌────────────┐  ┌────────────┐  │         ┌────────────────────────┐
+│  │  IndexedDB  │  │    File    │  │         │   Express Backend      │
+│  │             │  │ Processor  │  │ ──────► │   (Stateless Proxy)    │
+│  │ - files     │  │ (client)   │  │  HTTP   │                        │
+│  │ - messages  │  │            │  │ ◄────── │  POST /chat (SSE)      │
+│  │ - convos    │  └────────────┘  │         │  Static file serving   │
+│  └────────────┘                   │         └───────────┬────────────┘
+└──────────────────────────────────┘                     │
+                                                         ▼
+                                                  ┌─────────────┐
+                                                  │  Anthropic   │
+                                                  │  Claude API  │
+                                                  └─────────────┘
 ```
 
-The server is a stateless proxy — no database, no file storage. All persistence (files, conversations, messages) is handled client-side via IndexedDB.
+The server is a stateless proxy — no database, no file storage. All persistence (files, conversations, messages) is handled client-side via IndexedDB. In production, the Express server also serves the built client static files.
 
 ## How It Works
 
@@ -171,12 +172,15 @@ chatbot/
 │   └── vite.config.ts
 │
 ├── server/                  # Express 5 backend (stateless proxy)
-│   ├── index.js             # Single-file server with POST /chat
+│   ├── index.js             # Server with POST /chat SSE + static file serving
+│   ├── tools/               # Custom tool definitions and executors
+│   ├── railway.json         # Railway deployment config
 │   ├── package.json
 │   └── .env                 # Environment variables (create this)
 │
 ├── package.json             # Root workspace config
 ├── pnpm-workspace.yaml      # pnpm workspace definition
+├── DEPLOYMENT.md            # Railway deployment guide and learnings
 └── README.md
 ```
 
@@ -220,13 +224,7 @@ Send a message to Claude.
 
 The `content` field can be a plain string or a JSON-stringified array of content blocks (text, image, document) when files are attached.
 
-**Response:**
-```json
-{
-  "content": "This document discusses...",
-  "conversation_id": "uuid"
-}
-```
+**Response** is a Server-Sent Events stream. See `server/CLAUDE.md` for event types.
 
 ## Configuration
 
@@ -245,7 +243,7 @@ The `content` field can be a plain string or a JSON-stringified array of content
 ### Model Configuration
 - Default model: `claude-haiku-4-5-20251001`
 - Configurable via `ANTHROPIC_MODEL` environment variable in `server/.env`
-- Max tokens: 2048
+- Max tokens: 4096
 
 ## Git Conventions
 
@@ -259,12 +257,17 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 
 **Types:** `feat`, `fix`, `chore`, `refactor`, `docs`, `style`, `test`, `perf`, `ci`, `build`
 
+## Deployment
+
+Deployed on [Railway](https://railway.com) as a single service. The Express server builds and serves the client static files alongside the API. See `DEPLOYMENT.md` for full details.
+
 ## Development Notes
 
 - All data is stored client-side in IndexedDB (conversations, messages, and file blobs)
 - The server is completely stateless — it only proxies requests to the Claude API
 - File processing (text extraction, base64 encoding) happens in the browser before sending
 - File selections persist per-conversation via localStorage and survive page reloads
+- In production, Express serves the built client from `client/dist/` (same origin, no CORS needed)
 
 ## License
 

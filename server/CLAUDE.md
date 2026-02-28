@@ -17,11 +17,18 @@ pnpm start    # Start server on port 3000
 
 ## Structure
 
-- `index.js` - Express server with `/chat` SSE endpoint, streaming Anthropic API, and tool execution loop
+- `index.js` - Express server with `/chat` SSE endpoint, streaming Anthropic API, tool execution loop, and static file serving for the client in production
+- `railway.json` - Railway deployment config (build + deploy settings)
 - `tools/index.js` - Custom tool registry (exports `toolDefinitions` and `toolExecutors`)
 - `tools/fetchUrl.js` - URL content fetcher
 
 The server is stateless: no database, no file storage. All persistence is handled client-side via IndexedDB.
+
+## Production / Deployment
+
+In production (Railway), the server also serves the built client from `client/dist/`. See `DEPLOYMENT.md` in the project root for details.
+
+Express 5 uses `path-to-regexp` v8 — wildcard routes require named parameters: `"/{*path}"` not `"*"`.
 
 ## API
 

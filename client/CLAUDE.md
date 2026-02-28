@@ -27,7 +27,9 @@ pnpm preview  # Preview production build
 
 ## Notes
 
-- Connects to backend at `http://localhost:3000/chat`
+- In development, connects to backend at `http://localhost:3000/chat`
+- In production, uses same-origin requests (Express serves both API and client static files)
+- API base URL is configured in `src/utils/api.ts` — override with `VITE_API_URL` env var at build time if needed
 - Theme toggle sets `data-theme` attribute on `document.documentElement`
 - Messages array is sent with each request to maintain conversation context
 
