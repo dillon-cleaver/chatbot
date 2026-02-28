@@ -18,6 +18,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  .message {
+    max-width: 92%;
+  }
+}
+
 .userMessage {
   align-self: flex-end;
   margin-left: auto;

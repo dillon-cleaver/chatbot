@@ -57,6 +57,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.separator {
+  margin: 0 0.1rem;
+}
+
+.tools {
+  font-variant-numeric: normal;
+}
+
 .pair {
   display: flex;
   gap: 0.25rem;

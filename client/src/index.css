@@ -93,6 +93,7 @@ input, textarea, select, button {
 
 html {
   overflow: hidden;
+  background-color: var(--header-bg);
 }
 
 ::selection {

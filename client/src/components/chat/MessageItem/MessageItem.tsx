@@ -33,7 +33,7 @@ export function MessageItem({ message, onViewFile }: MessageItemProps): React.JS
       </div>
 
       {message.role === 'assistant' && message.usage && (
-        <TokenBadge usage={message.usage} />
+        <TokenBadge usage={message.usage} toolsUsed={message.toolsUsed} />
       )}
 
       {message.files && message.files.length > 0 && (
