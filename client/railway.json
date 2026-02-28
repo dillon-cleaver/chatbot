@@ -11,6 +11,14 @@
     "runtime": "V2",
     "numReplicas": 1,
     "startCommand": "pnpm --filter client serve",
+    "sleepApplication": false,
+    "useLegacyStacker": false,
+    "ipv6EgressEnabled": false,
+    "multiRegionConfig": {
+      "us-west2": {
+        "numReplicas": 1
+      }
+    },
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
