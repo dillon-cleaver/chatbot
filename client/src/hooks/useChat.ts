@@ -151,17 +151,25 @@ export function useChat({
         };
       }
 
+      const collectedTools = new Set<string>();
+
       await sendChatMessageStream(finalMessages, activeConversationId, {
         onToolUse: (event) => {
           setActiveToolUse(event.tool);
+          collectedTools.add(event.tool);
           onToolUse?.(event.tool);
         },
         onToolResult: () => {
           setActiveToolUse(null);
         },
         onDone: async (event) => {
+          // Merge client-observed tools with server-reported tools
+          const serverTools = event.tools_used ?? [];
+          for (const t of serverTools) collectedTools.add(t);
+          const toolsUsed = collectedTools.size > 0 ? [...collectedTools] : undefined;
+
           // Save assistant message to IndexedDB
-          await indexedDB.addMessage(activeConversationId!, 'assistant', event.content, undefined, event.usage);
+          await indexedDB.addMessage(activeConversationId!, 'assistant', event.content, undefined, event.usage, toolsUsed);
 
           if (import.meta.env.DEV && event.usage) {
             console.group('[Token Usage]');
@@ -178,6 +186,7 @@ export function useChat({
             role: 'assistant',
             content: event.content,
             usage: event.usage,
+            toolsUsed,
           }]);
           setIsLoading(false);
           setActiveToolUse(null);

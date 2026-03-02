@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useCallback } from "react";
-import { Paperclip } from "lucide-react";
+import { Paperclip, ArrowUp } from "lucide-react";
 import type { UploadedFile } from "../../../types";
 import { useAutoResizeTextarea } from "../../../hooks/useAutoResizeTextarea";
 import { FileChipsDisplay } from "../FileChipsDisplay/FileChipsDisplay";
@@ -171,7 +171,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
             disabled={isLoading || !value.trim()}
             aria-label="Send message"
           >
-            Send
+            <ArrowUp size={20} />
           </button>
         </div>
       </div>

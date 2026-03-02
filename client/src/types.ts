@@ -9,6 +9,7 @@ export interface Message {
   content: string | ContentBlock[];
   files?: UploadedFile[];
   usage?: TokenUsage;
+  toolsUsed?: string[];
 }
 
 export interface UploadedFile {
@@ -66,6 +67,7 @@ export interface ChatDoneEvent {
   content: string;
   conversation_id: string;
   usage?: TokenUsage;
+  tools_used?: string[];
 }
 
 export interface ChatErrorEvent {

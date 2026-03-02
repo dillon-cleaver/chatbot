@@ -97,6 +97,7 @@ app.post("/chat", async (req, res) => {
   try {
     const apiMessages = messages.map(parseMessageContent);
     const totalUsage = { input_tokens: 0, output_tokens: 0 };
+    const toolsUsed = new Set();
 
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
       if (clientDisconnected) return;
@@ -117,6 +118,7 @@ app.post("/chat", async (req, res) => {
         if (event.type !== "content_block_start") return;
         const block = event.content_block;
         if (block.type === "server_tool_use") {
+          toolsUsed.add(block.name);
           sendSSE(res, "tool_use", {
             tool: block.name,
             input: block.input ?? {},
@@ -151,6 +153,7 @@ app.post("/chat", async (req, res) => {
           if (block.type !== "tool_use") continue;
           if (clientDisconnected) return;
 
+          toolsUsed.add(block.name);
           sendSSE(res, "tool_use", { tool: block.name, input: block.input });
 
           const executor = toolExecutors[block.name];
@@ -192,6 +195,7 @@ app.post("/chat", async (req, res) => {
         content: text,
         conversation_id: convId,
         usage: totalUsage,
+        ...(toolsUsed.size > 0 ? { tools_used: [...toolsUsed] } : {}),
       });
       res.end();
       return;

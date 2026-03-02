@@ -19,6 +19,7 @@ interface MessageDB {
   timestamp: number;
   file_ids?: string[];
   usage?: TokenUsage;
+  tools_used?: string[];
 }
 
 interface FileDB {
@@ -102,6 +103,7 @@ export async function addMessage(
   content: string,
   fileIds?: string[],
   usage?: TokenUsage,
+  toolsUsed?: string[],
 ): Promise<Message> {
   const db = await getDB();
   const now = Date.now();
@@ -113,6 +115,7 @@ export async function addMessage(
     timestamp: now,
     ...(fileIds && fileIds.length > 0 ? { file_ids: fileIds } : {}),
     ...(usage ? { usage } : {}),
+    ...(toolsUsed && toolsUsed.length > 0 ? { tools_used: toolsUsed } : {}),
   };
   const tx = db.transaction(['messages', 'conversations'], 'readwrite');
   await tx.objectStore('messages').put(msg);
@@ -170,6 +173,7 @@ export async function loadConversation(conversationId: string): Promise<Conversa
       content: m.content,
       ...(files ? { files } : {}),
       ...(m.usage ? { usage: m.usage } : {}),
+      ...(m.tools_used ? { toolsUsed: m.tools_used } : {}),
     });
   }
 

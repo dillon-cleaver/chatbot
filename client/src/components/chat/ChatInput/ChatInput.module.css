@@ -106,7 +106,11 @@
 
 .sendButton {
   height: 50px;
-  padding: 0 1.5rem;
+  width: 50px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: var(--border-width) solid var(--border-color);
   background-color: var(--button-bg);
   color: var(--button-text);
@@ -114,8 +118,6 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 1px;
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
@@ -151,7 +153,9 @@
   }
 
   .inputContainer.withBorder {
-    padding-top: 0.3125rem; /* Match container top padding */
+    padding: 0.625rem 0.75rem;
+    border-bottom: var(--border-width-thick) solid var(--border-color);
+    background-color: var(--header-bg);
   }
 
   .inputRow {
@@ -172,8 +176,7 @@
   }
 
   .sendButton {
-    height: 40px; /* Compact size */
-    padding: 0 0.875rem;
-    font-size: 0.8rem;
+    height: 40px;
+    width: 40px;
   }
 }

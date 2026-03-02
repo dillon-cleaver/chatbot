@@ -93,6 +93,7 @@ input, textarea, select, button {
 
 html {
   overflow: hidden;
+  background-color: var(--bg-primary);
 }
 
 ::selection {
@@ -105,9 +106,7 @@ body {
   font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(
-    --header-bg
-  ); /* Changed from --bg-primary to match header in safe area */
+  background-color: var(--bg-primary);
   color: var(--text-primary);
   position: relative;
 }

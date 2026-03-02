@@ -113,6 +113,7 @@ export function useConversations({
             content: content,
             files: msg.files && msg.files.length > 0 ? msg.files : undefined,
             usage: msg.usage,
+            toolsUsed: msg.toolsUsed,
           };
         });
 
